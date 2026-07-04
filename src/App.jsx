@@ -111,10 +111,10 @@ function App() {
         <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-sans">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
                 Balance Total
               </p>
-              <p className="text-4xl md:text-5xl font-display font-bold text-zinc-900 dark:text-zinc-50">
+              <p className="text-4xl md:text-5xl font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
                 ${totalBalance.toLocaleString("es-CO")}
               </p>
             </div>
@@ -124,7 +124,7 @@ function App() {
           </div>
 
           <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-sans">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
               Ingresos del mes
             </p>
             <p className="text-2xl md:text-3xl font-display font-bold text-emerald-500">
@@ -133,7 +133,7 @@ function App() {
           </div>
 
           <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-sans">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
               Egresos del mes
             </p>
             <p className="text-2xl md:text-3xl font-display font-bold text-rose-500">
@@ -143,19 +143,19 @@ function App() {
 
           <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-4 flex justify-around text-center">
             <div>
-              <p className="text-xs font-sans text-zinc-400 dark:text-zinc-500 uppercase">Día</p>
+              <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Día</p>
               <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
                 ${todaySum.toLocaleString("es-CO")}
               </p>
             </div>
             <div>
-              <p className="text-xs font-sans text-zinc-400 dark:text-zinc-500 uppercase">Semana</p>
+              <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Semana</p>
               <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
                 ${weekSum.toLocaleString("es-CO")}
               </p>
             </div>
             <div>
-              <p className="text-xs font-sans text-zinc-400 dark:text-zinc-500 uppercase">Mes</p>
+              <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Mes</p>
               <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
                 ${monthSum.toLocaleString("es-CO")}
               </p>
