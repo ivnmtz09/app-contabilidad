@@ -1,16 +1,16 @@
-# React + Vite
+# App Contabilidad Personal (Beta)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Una Progressive Web App (PWA) moderna e intuitiva diseñada para llevar el control absoluto de tus finanzas personales. Permite registrar ingresos, egresos, visualizar estadísticas detalladas y establecer límites de gastos de forma ágil y autónoma.
 
-Currently, two official plugins are available:
+## Características Principales
+* **Interfaz Bento Grid:** Diseño moderno, modular y completamente responsivo, optimizado para uso en dispositivos móviles.
+* **Soporte Light/Dark Mode:** Paleta de colores adaptable para reducir la fatiga visual y mejorar la experiencia de usuario.
+* **Gestión de Transacciones:** Registro rápido de ingresos y gastos diarios.
+* **Análisis Visual:** Gráficos integrados para visualizar balances, estadísticas y categorías de gasto.
+* **Escalabilidad IA (Próximamente):** Preparada para integrar reconocimiento de lenguaje natural para el registro automatizado de finanzas.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Tecnologías Utilizadas
+* **Frontend:** React + Vite + Tailwind CSS
+* **Diseño:** UI/UX Bento Grid (Space Grotesk & Inter)
+* **Base de Datos y Autenticación:** Firebase / Firestore (Próximamente)
+* **Despliegue:** Vercel (Próximamente)
