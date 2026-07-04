@@ -1,4 +1,4 @@
-# App Contabilidad Personal (Beta)
+# MisCuentaZ
 
 Una Progressive Web App (PWA) moderna e intuitiva diseñada para llevar el control absoluto de tus finanzas personales. Permite registrar ingresos, egresos, visualizar estadísticas detalladas y establecer límites de gastos de forma ágil y autónoma.
 

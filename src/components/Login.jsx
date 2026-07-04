@@ -22,7 +22,7 @@ function Login() {
           <Logo className="w-10 h-10" />
         </div>
 
-        <h1 className="text-xl font-display font-bold">FinanGrid</h1>
+        <h1 className="text-xl font-display font-bold">MisCuentaZ</h1>
 
         <label className="flex items-start gap-3 text-sm font-sans text-zinc-600 dark:text-zinc-400">
           <input
@@ -59,7 +59,7 @@ function Login() {
               Términos y Condiciones de Uso
             </h2>
             <p className="text-sm font-sans text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Al utilizar FinanGrid, aceptas que esta es una herramienta
+              Al utilizar MisCuentaZ, aceptas que esta es una herramienta
               personal de gestión financiera. Los datos se almacenan de forma
               segura en Firebase y no se comparten con terceros. Eres
               responsable de la veracidad de la información registrada. Esta

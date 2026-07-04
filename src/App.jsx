@@ -108,7 +108,7 @@ function App() {
           </button>
           <Logo className="w-8 h-8" />
           <span className="font-display font-bold text-zinc-900 dark:text-zinc-50">
-            FinanGrid
+            MisCuentaZ
           </span>
         </div>
       </header>
