@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { X, Home, PieChart, Settings, User, Moon, Sun, ExternalLink, Code, LogOut } from "lucide-react";
+import { X, Home, PieChart, Settings, User, Moon, Sun, ExternalLink, Code, LogOut, Download } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
+import { exportToExcel } from "../utils/exportExcel";
 
-function Drawer({ isOpen, onClose, onOpenProfile }) {
+function Drawer({ isOpen, onClose, onOpenProfile, transactions = [], accounts = [] }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
@@ -83,6 +84,17 @@ function Drawer({ isOpen, onClose, onOpenProfile }) {
                 <Settings size={18} />
                 Configuración
               </a>
+
+              <button
+                onClick={() => {
+                  exportToExcel(transactions, accounts);
+                  onClose();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <Download size={18} />
+                Exportar a Excel
+              </button>
 
               <hr className="my-3 border-zinc-200 dark:border-zinc-700" />
 

@@ -9,7 +9,7 @@ import AddAccountModal from "./components/AddAccountModal";
 import SplashScreen from "./components/SplashScreen";
 import TransactionModal from "./components/TransactionModal";
 import ProfileModal from "./components/ProfileModal";
-import Logo from "./components/Logo";
+import BalanceChart from "./components/BalanceChart";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -96,6 +96,8 @@ function App() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onOpenProfile={() => setIsProfileOpen(true)}
+        transactions={transactions}
+        accounts={accounts}
       />
 
       <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-zinc-50/80 dark:bg-zinc-900/80 border-b border-zinc-200 dark:border-zinc-800 p-4 flex justify-between items-center">
@@ -171,13 +173,8 @@ function App() {
             </div>
           </div>
 
-          <div
-            className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6 flex items-center justify-center"
-            style={{ minHeight: "200px" }}
-          >
-            <p className="text-zinc-400 dark:text-zinc-500 font-sans text-sm">
-              Gráfico de Balance (Próximamente)
-            </p>
+          <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6 flex items-center justify-center" style={{ minHeight: "200px" }}>
+            <BalanceChart transactions={transactions} />
           </div>
 
           <div className="md:col-span-2 flex gap-4">
