@@ -1,16 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, LogOut, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "./firebase";
 import Login from "./components/Login";
 import Drawer from "./components/Drawer";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const handleLogin = () => setIsAuthenticated(true);
-  const handleLogout = () => setIsAuthenticated(false);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return unsubscribe;
+  }, []);
 
-  if (!isAuthenticated) return <Login onLogin={handleLogin} />;
+  const handleLogout = () => signOut(auth);
+
+  if (!user) return <Login />;
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">

@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { Wallet } from "lucide-react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../firebase";
+import Logo from "./Logo";
 
-function Login({ onLogin }) {
+function Login() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   const handleGoogleLogin = async () => {
     try {
       await signInWithPopup(auth, provider);
-      onLogin();
     } catch {
       // keep on login screen
     }
@@ -20,10 +19,10 @@ function Login({ onLogin }) {
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 p-4">
       <div className="p-8 bg-white dark:bg-zinc-800 rounded-3xl shadow-md max-w-md w-full flex flex-col items-center gap-6">
         <div className="p-3 bg-violet-100 dark:bg-violet-900/30 rounded-2xl">
-          <Wallet size={32} className="text-violet-600 dark:text-violet-400" />
+          <Logo className="w-10 h-10" />
         </div>
 
-        <h1 className="text-xl font-display font-bold">misCuentaZ</h1>
+        <h1 className="text-xl font-display font-bold">FinanGrid</h1>
 
         <label className="flex items-start gap-3 text-sm font-sans text-zinc-600 dark:text-zinc-400">
           <input
@@ -60,7 +59,7 @@ function Login({ onLogin }) {
               Términos y Condiciones de Uso
             </h2>
             <p className="text-sm font-sans text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Al utilizar misCuentaZ, aceptas que esta es una herramienta
+              Al utilizar FinanGrid, aceptas que esta es una herramienta
               personal de gestión financiera. Los datos se almacenan de forma
               segura en Firebase y no se comparten con terceros. Eres
               responsable de la veracidad de la información registrada. Esta
