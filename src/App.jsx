@@ -6,18 +6,25 @@ import Login from "./components/Login";
 import Drawer from "./components/Drawer";
 import AccountsCard from "./components/AccountsCard";
 import AddAccountModal from "./components/AddAccountModal";
+import SplashScreen from "./components/SplashScreen";
+import TransactionModal from "./components/TransactionModal";
 
 function App() {
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [accounts, setAccounts] = useState([
     { id: "efectivo", name: "Efectivo", balance: 0 },
   ]);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [transactionModalOpen, setTransactionModalOpen] = useState(false);
+  const [transactionType, setTransactionType] = useState("ingreso");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setIsLoading(false);
     });
     return unsubscribe;
   }, []);
@@ -30,6 +37,50 @@ function App() {
     setIsAddAccountOpen(false);
   };
 
+  const handleSaveTransaction = (data) => {
+    setTransactions((prev) => [...prev, data]);
+    setAccounts((prev) =>
+      prev.map((acc) =>
+        acc.name === data.accountId
+          ? {
+              ...acc,
+              balance:
+                acc.balance + (data.type === "ingreso" ? data.amount : -data.amount),
+            }
+          : acc
+      )
+    );
+  };
+
+  const abrirModal = (tipo) => {
+    setTransactionType(tipo);
+    setTransactionModalOpen(true);
+  };
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekStart = new Date(todayStart);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const calcSum = (filterFn) =>
+    transactions
+      .filter(filterFn)
+      .reduce((acc, t) => acc + (t.type === "ingreso" ? t.amount : -t.amount), 0);
+
+  const todaySum = calcSum((t) => new Date(t.date) >= todayStart);
+  const weekSum = calcSum((t) => new Date(t.date) >= weekStart);
+  const monthSum = calcSum((t) => new Date(t.date) >= monthStart);
+
+  const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+  const monthIncome = transactions
+    .filter((t) => t.type === "ingreso" && new Date(t.date) >= monthStart)
+    .reduce((sum, t) => sum + t.amount, 0);
+  const monthExpense = transactions
+    .filter((t) => t.type === "egreso" && new Date(t.date) >= monthStart)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  if (isLoading) return <SplashScreen />;
   if (!user) return <Login />;
 
   return (
@@ -64,7 +115,7 @@ function App() {
                 Balance Total
               </p>
               <p className="text-4xl md:text-5xl font-display font-bold text-zinc-900 dark:text-zinc-50">
-                $0.00
+                ${totalBalance.toLocaleString("es-CO")}
               </p>
             </div>
             <button className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-sans font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer">
@@ -77,7 +128,7 @@ function App() {
               Ingresos del mes
             </p>
             <p className="text-2xl md:text-3xl font-display font-bold text-emerald-500">
-              $0.00
+              ${monthIncome.toLocaleString("es-CO")}
             </p>
           </div>
 
@@ -86,8 +137,29 @@ function App() {
               Egresos del mes
             </p>
             <p className="text-2xl md:text-3xl font-display font-bold text-rose-500">
-              $0.00
+              ${monthExpense.toLocaleString("es-CO")}
             </p>
+          </div>
+
+          <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-4 flex justify-around text-center">
+            <div>
+              <p className="text-xs font-sans text-zinc-400 dark:text-zinc-500 uppercase">Día</p>
+              <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
+                ${todaySum.toLocaleString("es-CO")}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-sans text-zinc-400 dark:text-zinc-500 uppercase">Semana</p>
+              <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
+                ${weekSum.toLocaleString("es-CO")}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-sans text-zinc-400 dark:text-zinc-500 uppercase">Mes</p>
+              <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
+                ${monthSum.toLocaleString("es-CO")}
+              </p>
+            </div>
           </div>
 
           <div
@@ -100,11 +172,17 @@ function App() {
           </div>
 
           <div className="md:col-span-2 flex gap-4">
-            <button className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer">
+            <button
+              onClick={() => abrirModal("ingreso")}
+              className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
+            >
               <ArrowUpCircle size={22} />
               Registrar Ingreso
             </button>
-            <button className="flex-1 flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer">
+            <button
+              onClick={() => abrirModal("egreso")}
+              className="flex-1 flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
+            >
               <ArrowDownCircle size={22} />
               Registrar Egreso
             </button>
@@ -114,9 +192,35 @@ function App() {
             <h3 className="text-lg font-display font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
               Últimos Movimientos
             </h3>
-            <p className="text-sm font-sans text-zinc-400 dark:text-zinc-500 text-center py-8">
-              Sin transacciones recientes
-            </p>
+            {transactions.length === 0 ? (
+              <p className="text-sm font-sans text-zinc-400 dark:text-zinc-500 text-center py-8">
+                Sin transacciones recientes
+              </p>
+            ) : (
+              <ul className="space-y-3">
+                {[...transactions].reverse().slice(0, 10).map((t, i) => (
+                  <li
+                    key={i}
+                    className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0"
+                  >
+                    <div>
+                      <p className="font-sans text-sm text-zinc-700 dark:text-zinc-300">
+                        {t.description}
+                      </p>
+                      <p className="font-sans text-xs text-zinc-400">
+                        {t.accountId}
+                      </p>
+                    </div>
+                    <span
+                      className={`font-display font-semibold text-sm ${t.type === "ingreso" ? "text-emerald-500" : "text-rose-500"}`}
+                    >
+                      {t.type === "ingreso" ? "+" : "-"}$
+                      {t.amount.toLocaleString("es-CO")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="md:col-span-2">
@@ -132,6 +236,14 @@ function App() {
         isOpen={isAddAccountOpen}
         onClose={() => setIsAddAccountOpen(false)}
         onAddAccount={handleAddAccount}
+      />
+
+      <TransactionModal
+        isOpen={transactionModalOpen}
+        onClose={() => setTransactionModalOpen(false)}
+        onSave={handleSaveTransaction}
+        type={transactionType}
+        accounts={accounts}
       />
     </div>
   );

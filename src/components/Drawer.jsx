@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Home, PieChart, Settings, User, Moon, Sun } from "lucide-react";
+import { X, Home, PieChart, Settings, User, Moon, Sun, ExternalLink, Code } from "lucide-react";
 
 function Drawer({ isOpen, onClose }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -36,55 +36,73 @@ function Drawer({ isOpen, onClose }) {
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-end p-4">
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
-          >
-            <X size={20} />
-          </button>
+        <div className="flex flex-col h-full justify-between">
+          <div>
+            <div className="flex items-center justify-end p-4">
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <nav className="px-4 space-y-1">
+              <a
+                href="#"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <Home size={18} />
+                Inicio
+              </a>
+              <a
+                href="#"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <PieChart size={18} />
+                Estadísticas
+              </a>
+              <a
+                href="#"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <User size={18} />
+                Perfil
+              </a>
+              <a
+                href="#"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <Settings size={18} />
+                Configuración
+              </a>
+
+              <hr className="my-3 border-zinc-200 dark:border-zinc-700" />
+
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                {isDarkMode ? "Modo Claro" : "Modo Oscuro"}
+              </button>
+            </nav>
+          </div>
+
+          <div className="border-t-4 border-black dark:border-white p-4 bg-gray-200 dark:bg-gray-800 mt-auto">
+            <span className="block font-black uppercase text-sm text-black dark:text-white mb-1">
+              Creado por:{" "}
+              <a href="https://www.instagram.com/ivjmm.0109/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-black dark:text-white hover:underline underline-offset-2">
+                <ExternalLink size={14} strokeWidth={2.5} />
+                Ivn Mtz
+              </a>
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-gray-600 dark:text-gray-400 uppercase tracking-widest">
+              <Code size={12} strokeWidth={2.5} />
+              Version 1.0.0
+            </span>
+          </div>
         </div>
-
-        <nav className="px-4 space-y-1">
-          <a
-            href="#"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-          >
-            <Home size={18} />
-            Inicio
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-          >
-            <PieChart size={18} />
-            Estadísticas
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-          >
-            <User size={18} />
-            Perfil
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-          >
-            <Settings size={18} />
-            Configuración
-          </a>
-
-          <hr className="my-3 border-zinc-200 dark:border-zinc-700" />
-
-          <button
-            onClick={toggleTheme}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-          >
-            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-            {isDarkMode ? "Modo Claro" : "Modo Oscuro"}
-          </button>
-        </nav>
       </aside>
     </>
   );
