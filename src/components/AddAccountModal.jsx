@@ -43,7 +43,7 @@ function AddAccountModal({ isOpen, onClose, onAddAccount }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
       <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl w-full max-w-md mx-4 flex flex-col gap-4 shadow-xl">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">

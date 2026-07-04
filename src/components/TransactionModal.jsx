@@ -27,7 +27,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
       <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl w-full max-w-sm mx-4 shadow-xl flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2

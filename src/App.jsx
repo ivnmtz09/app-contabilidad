@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, LogOut, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { Menu, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
 import Login from "./components/Login";
@@ -8,18 +8,27 @@ import AccountsCard from "./components/AccountsCard";
 import AddAccountModal from "./components/AddAccountModal";
 import SplashScreen from "./components/SplashScreen";
 import TransactionModal from "./components/TransactionModal";
+import ProfileModal from "./components/ProfileModal";
+import Logo from "./components/Logo";
 
 function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [accounts, setAccounts] = useState([
-    { id: "efectivo", name: "Efectivo", balance: 0 },
-  ]);
+  const [accounts, setAccounts] = useState(() => JSON.parse(localStorage.getItem("accounts")) || [{ id: "efectivo", name: "Efectivo", balance: 0 }]);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState(() => JSON.parse(localStorage.getItem("transactions")) || []);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState("ingreso");
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+  }, [accounts]);
+
+  useEffect(() => {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+  }, [transactions]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -28,8 +37,6 @@ function App() {
     });
     return unsubscribe;
   }, []);
-
-  const handleLogout = () => signOut(auth);
 
   const handleAddAccount = (name) => {
     const id = name.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now();
@@ -85,26 +92,25 @@ function App() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
+      <Drawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onOpenProfile={() => setIsProfileOpen(true)}
+      />
 
-      <header className="flex items-center justify-between px-4 py-3 md:px-8 border-b border-zinc-200 dark:border-zinc-700">
-        <button
-          onClick={() => setIsDrawerOpen(true)}
-          className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-        >
-          <Menu size={22} />
-        </button>
-
-        <h1 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">
-          misCuentaZ
-        </h1>
-
-        <button
-          onClick={handleLogout}
-          className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-        >
-          <LogOut size={20} />
-        </button>
+      <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-zinc-50/80 dark:bg-zinc-900/80 border-b border-zinc-200 dark:border-zinc-800 p-4 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsDrawerOpen(true)}
+            className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          >
+            <Menu size={22} />
+          </button>
+          <Logo className="w-8 h-8" />
+          <span className="font-display font-bold text-zinc-900 dark:text-zinc-50">
+            FinanGrid
+          </span>
+        </div>
       </header>
 
       <main className="p-4 md:p-8">
@@ -118,7 +124,10 @@ function App() {
                 ${totalBalance.toLocaleString("es-CO")}
               </p>
             </div>
-            <button className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-sans font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer">
+            <button
+              onClick={() => { setTransactionType("egreso"); setTransactionModalOpen(true); }}
+              className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-sans font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer"
+            >
               + Añadir movimiento
             </button>
           </div>
@@ -244,6 +253,12 @@ function App() {
         onSave={handleSaveTransaction}
         type={transactionType}
         accounts={accounts}
+      />
+
+      <ProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        user={user}
       />
     </div>
   );

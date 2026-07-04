@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { X, Home, PieChart, Settings, User, Moon, Sun, ExternalLink, Code } from "lucide-react";
+import { X, Home, PieChart, Settings, User, Moon, Sun, ExternalLink, Code, LogOut } from "lucide-react";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
 
-function Drawer({ isOpen, onClose }) {
+function Drawer({ isOpen, onClose, onOpenProfile }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
@@ -20,6 +22,11 @@ function Drawer({ isOpen, onClose }) {
     const isDark = document.documentElement.classList.toggle("dark");
     localStorage.setItem("theme", isDark ? "dark" : "light");
     setIsDarkMode(isDark);
+  };
+
+  const handleProfile = () => {
+    onOpenProfile();
+    onClose();
   };
 
   return (
@@ -62,13 +69,13 @@ function Drawer({ isOpen, onClose }) {
                 <PieChart size={18} />
                 Estadísticas
               </a>
-              <a
-                href="#"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+              <button
+                onClick={handleProfile}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <User size={18} />
                 Perfil
-              </a>
+              </button>
               <a
                 href="#"
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
@@ -85,6 +92,14 @@ function Drawer({ isOpen, onClose }) {
               >
                 {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
                 {isDarkMode ? "Modo Claro" : "Modo Oscuro"}
+              </button>
+
+              <button
+                onClick={() => signOut(auth)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors cursor-pointer"
+              >
+                <LogOut size={18} />
+                Cerrar Sesión
               </button>
             </nav>
           </div>
