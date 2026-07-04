@@ -89,16 +89,16 @@ function Drawer({ isOpen, onClose }) {
             </nav>
           </div>
 
-          <div className="border-t-4 border-black dark:border-white p-4 bg-gray-200 dark:bg-gray-800 mt-auto">
-            <span className="block font-black uppercase text-sm text-black dark:text-white mb-1">
+          <div className="border-t border-zinc-200 dark:border-zinc-800 p-6 mt-auto">
+            <span className="block text-sm text-zinc-500 dark:text-zinc-400 mb-2 font-medium">
               Creado por:{" "}
-              <a href="https://www.instagram.com/ivjmm.0109/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-black dark:text-white hover:underline underline-offset-2">
-                <ExternalLink size={14} strokeWidth={2.5} />
+              <a href="https://www.instagram.com/ivjmm.0109/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
+                <ExternalLink size={14} strokeWidth={2} />
                 Ivn Mtz
               </a>
             </span>
-            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-gray-600 dark:text-gray-400 uppercase tracking-widest">
-              <Code size={12} strokeWidth={2.5} />
+            <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500 font-mono">
+              <Code size={12} strokeWidth={2} />
               Version 1.0.0
             </span>
           </div>
