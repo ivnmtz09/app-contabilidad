@@ -1,6 +1,18 @@
-import { X, Home, PieChart, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Home, PieChart, Settings, User, Moon, Sun } from "lucide-react";
 
 function Drawer({ isOpen, onClose }) {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    setIsDarkMode(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggleTheme = () => {
+    document.documentElement.classList.toggle("dark");
+    setIsDarkMode((prev) => !prev);
+  };
+
   return (
     <>
       {isOpen && (
@@ -43,9 +55,26 @@ function Drawer({ isOpen, onClose }) {
             href="#"
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
           >
+            <User size={18} />
+            Perfil
+          </a>
+          <a
+            href="#"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+          >
             <Settings size={18} />
             Configuración
           </a>
+
+          <hr className="my-3 border-zinc-200 dark:border-zinc-700" />
+
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          >
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            {isDarkMode ? "Modo Claro" : "Modo Oscuro"}
+          </button>
         </nav>
       </aside>
     </>

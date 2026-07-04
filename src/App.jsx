@@ -1,17 +1,11 @@
 import { useState } from "react";
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import Login from "./components/Login";
 import Drawer from "./components/Drawer";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const movimientos = [
-    { descripcion: "Salida con amigos", monto: -45.0, tipo: "egreso" },
-    { descripcion: "Compra de boli", monto: -2.5, tipo: "egreso" },
-    { descripcion: "Transferencia recibida", monto: 1200.0, tipo: "ingreso" },
-  ];
 
   const handleLogin = () => setIsAuthenticated(true);
   const handleLogout = () => setIsAuthenticated(false);
@@ -31,7 +25,7 @@ function App() {
         </button>
 
         <h1 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">
-          App Contabilidad
+          misCuentaZ
         </h1>
 
         <button
@@ -85,28 +79,24 @@ function App() {
             </p>
           </div>
 
+          <div className="md:col-span-2 flex gap-4">
+            <button className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer">
+              <ArrowUpCircle size={22} />
+              Registrar Ingreso
+            </button>
+            <button className="flex-1 flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer">
+              <ArrowDownCircle size={22} />
+              Registrar Egreso
+            </button>
+          </div>
+
           <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
             <h3 className="text-lg font-display font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
               Últimos Movimientos
             </h3>
-            <ul className="space-y-3">
-              {movimientos.map((mov, i) => (
-                <li
-                  key={i}
-                  className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0"
-                >
-                  <span className="font-sans text-zinc-700 dark:text-zinc-300">
-                    {mov.descripcion}
-                  </span>
-                  <span
-                    className={`font-display font-semibold ${mov.tipo === "ingreso" ? "text-emerald-500" : "text-rose-500"}`}
-                  >
-                    {mov.tipo === "ingreso" ? "+" : "-"}$
-                    {Math.abs(mov.monto).toFixed(2)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <p className="text-sm font-sans text-zinc-400 dark:text-zinc-500 text-center py-8">
+              Sin transacciones recientes
+            </p>
           </div>
         </div>
       </main>
