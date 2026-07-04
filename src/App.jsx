@@ -4,10 +4,16 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
 import Login from "./components/Login";
 import Drawer from "./components/Drawer";
+import AccountsCard from "./components/AccountsCard";
+import AddAccountModal from "./components/AddAccountModal";
 
 function App() {
   const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [accounts, setAccounts] = useState([
+    { id: "efectivo", name: "Efectivo", balance: 0 },
+  ]);
+  const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -17,6 +23,12 @@ function App() {
   }, []);
 
   const handleLogout = () => signOut(auth);
+
+  const handleAddAccount = (name) => {
+    const id = name.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now();
+    setAccounts((prev) => [...prev, { id, name, balance: 0 }]);
+    setIsAddAccountOpen(false);
+  };
 
   if (!user) return <Login />;
 
@@ -106,8 +118,21 @@ function App() {
               Sin transacciones recientes
             </p>
           </div>
+
+          <div className="md:col-span-2">
+            <AccountsCard
+              accounts={accounts}
+              onOpenAdd={() => setIsAddAccountOpen(true)}
+            />
+          </div>
         </div>
       </main>
+
+      <AddAccountModal
+        isOpen={isAddAccountOpen}
+        onClose={() => setIsAddAccountOpen(false)}
+        onAddAccount={handleAddAccount}
+      />
     </div>
   );
 }
