@@ -10,6 +10,7 @@ import SplashScreen from "./components/SplashScreen";
 import TransactionModal from "./components/TransactionModal";
 import ProfileModal from "./components/ProfileModal";
 import BalanceChart from "./components/BalanceChart";
+import Logo from "./components/Logo";
 
 function App() {
   const [user, setUser] = useState(null);
