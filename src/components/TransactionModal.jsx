@@ -5,6 +5,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [accountId, setAccountId] = useState(accounts[0]?.name || "");
+  const [applyTax, setApplyTax] = useState(false);
 
   if (!isOpen) return null;
 
@@ -13,8 +14,12 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!amount || !description || !accountId) return;
+    let finalAmount = Number(amount);
+    if (type === "egreso" && accountId !== "efectivo" && applyTax) {
+      finalAmount = finalAmount + finalAmount * 0.004;
+    }
     onSave({
-      amount: Number(amount),
+      amount: finalAmount,
       description,
       accountId,
       type,
@@ -23,6 +28,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
     setAmount("");
     setDescription("");
     setAccountId(accounts[0]?.name || "");
+    setApplyTax(false);
     onClose();
   };
 
@@ -72,6 +78,20 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
               </option>
             ))}
           </select>
+
+          {type === "egreso" && accountId !== "efectivo" && (
+            <label className="flex items-center gap-2 cursor-pointer mt-2 p-3 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700">
+              <input
+                type="checkbox"
+                checked={applyTax}
+                onChange={(e) => setApplyTax(e.target.checked)}
+                className="w-4 h-4 text-violet-600 rounded focus:ring-violet-600 dark:bg-zinc-900 dark:border-zinc-600"
+              />
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Aplicar impuesto 4x1000
+              </span>
+            </label>
+          )}
 
           <button
             type="submit"
