@@ -1,16 +1,29 @@
-# MisCuentaZ
+# MisCuentaZ (Beta)
 
-Una Progressive Web App (PWA) moderna e intuitiva diseñada para llevar el control absoluto de tus finanzas personales. Permite registrar ingresos, egresos, visualizar estadísticas detalladas y establecer límites de gastos de forma ágil y autónoma.
+Una Progressive Web App (PWA) moderna e intuitiva diseñada para llevar el control absoluto de tus finanzas personales, construida con React y Tailwind CSS v4.
 
-## Características Principales
-* **Interfaz Bento Grid:** Diseño moderno, modular y completamente responsivo, optimizado para uso en dispositivos móviles.
-* **Soporte Light/Dark Mode:** Paleta de colores adaptable para reducir la fatiga visual y mejorar la experiencia de usuario.
-* **Gestión de Transacciones:** Registro rápido de ingresos y gastos diarios.
-* **Análisis Visual:** Gráficos integrados para visualizar balances, estadísticas y categorías de gasto.
-* **Escalabilidad IA (Próximamente):** Preparada para integrar reconocimiento de lenguaje natural para el registro automatizado de finanzas.
+## Características Destacadas
+* **Diseño Bento Grid:** Interfaz moderna, modular y completamente responsiva, con soporte nativo para Light/Dark Mode y efectos Glassmorphism.
+* **Gestión Multicuenta:** Registro de ingresos y egresos distribuidos en múltiples billeteras (Bancolombia, Nequi, Nu, Davivienda, etc.) y efectivo.
+* **Cálculo Automático de 4x1000:** Opción para aplicar y sumar automáticamente el impuesto transaccional colombiano en los egresos bancarios.
+* **Análisis Visual (Recharts):** Gráficos interactivos de área para visualizar el historial de balances y estadísticas dinámicas por día, semana y mes.
+* **Exportación Profesional (SheetJS):** Descarga de todos los movimientos generados directamente en un archivo `.xlsx` estructurado.
+* **Seguridad y Persistencia:** Autenticación de usuarios mediante Google Auth (Firebase) y persistencia temporal de datos en localStorage.
 
-## Tecnologías Utilizadas
-* **Frontend:** React + Vite + Tailwind CSS
-* **Diseño:** UI/UX Bento Grid (Space Grotesk & Inter)
-* **Base de Datos y Autenticación:** Firebase / Firestore (Próximamente)
-* **Despliegue:** Vercel (Próximamente)
+## Instalación y Configuración Local
+
+1. Clona este repositorio:
+   ```bash
+   git clone https://github.com/ivnmtz09/app-contabilidad.git
+   ```
+2. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+3. Configura las variables de entorno:
+   - Copia el archivo `.env.example` y renómbralo a `.env`.
+   - Reemplaza los valores con las credenciales de tu propio proyecto de Firebase.
+4. Ejecuta el servidor en tu red local:
+   ```bash
+   npm run dev
+   ```
