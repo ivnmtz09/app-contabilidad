@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Home, PieChart, Settings, User, Moon, Sun, ExternalLink, Code, LogOut, Download } from "lucide-react";
+import { X, Home, PieChart, User, Moon, Sun, ExternalLink, Code, LogOut, Download } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { exportToExcel } from "../utils/exportExcel";
@@ -88,13 +88,6 @@ function Drawer({ isOpen, onClose, onOpenProfile, transactions = [], accounts = 
                 <User size={18} />
                 Perfil
               </button>
-              <a
-                href="#"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <Settings size={18} />
-                Configuración
-              </a>
 
               <button
                 onClick={() => {
