@@ -7,15 +7,25 @@ export function ProgressBar({ isLoading }) {
   );
 }
 
-export function SkeletonPage() {
+export function HomeSkeleton() {
   return (
-    <div className="p-4 space-y-4 animate-pulse">
-      <div className="h-32 bg-zinc-200 dark:bg-zinc-800 rounded-3xl w-full"></div>
-      <div className="flex gap-4">
-        <div className="h-24 bg-zinc-200 dark:bg-zinc-800 rounded-3xl w-1/2"></div>
-        <div className="h-24 bg-zinc-200 dark:bg-zinc-800 rounded-3xl w-1/2"></div>
-      </div>
-      <div className="h-64 bg-zinc-200 dark:bg-zinc-800 rounded-3xl w-full mt-4"></div>
+    <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-pulse">
+      <div className="md:col-span-2 h-32 bg-zinc-200 dark:bg-zinc-800/80 rounded-3xl w-full"></div>
+      <div className="h-28 bg-zinc-200 dark:bg-zinc-800/80 rounded-2xl w-full"></div>
+      <div className="h-28 bg-zinc-200 dark:bg-zinc-800/80 rounded-2xl w-full"></div>
+      <div className="md:col-span-2 h-16 bg-zinc-200 dark:bg-zinc-800/80 rounded-2xl w-full"></div>
+      <div className="md:col-span-2 h-48 bg-zinc-200 dark:bg-zinc-800/80 rounded-2xl w-full"></div>
+    </div>
+  );
+}
+
+export function ListSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      <div className="h-10 w-1/3 bg-zinc-200 dark:bg-zinc-800/80 rounded-lg mb-6"></div>
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="h-16 w-full bg-zinc-200 dark:bg-zinc-800/80 rounded-2xl"></div>
+      ))}
     </div>
   );
 }

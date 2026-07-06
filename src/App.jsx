@@ -11,7 +11,8 @@ import AccountsCard from "./components/AccountsCard";
 import AddAccountModal from "./components/AddAccountModal";
 import TransactionModal from "./components/TransactionModal";
 import MovementsView from "./components/MovementsView";
-import { ProgressBar, SkeletonPage } from "./components/Loaders";
+import { ProgressBar, HomeSkeleton, ListSkeleton } from "./components/Loaders";
+import SplashScreen from "./components/SplashScreen";
 import ProfileModal from "./components/ProfileModal";
 import BalanceChart from "./components/BalanceChart";
 import Logo from "./components/Logo";
@@ -30,6 +31,7 @@ function App() {
   const [transactionType, setTransactionType] = useState("ingreso");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -67,6 +69,7 @@ function App() {
     const unsubTransactions = onSnapshot(transactionsQuery, (snapshot) => {
       const transactionsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setTransactions(transactionsData);
+      setIsDataLoaded(true);
     });
 
     return () => {
@@ -305,13 +308,7 @@ function App() {
     </div>
   );
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 pt-16">
-        <SkeletonPage />
-      </div>
-    );
-  }
+  if (isLoading) return <SplashScreen />;
   if (!user) return <Login />;
 
   return (
@@ -344,8 +341,8 @@ function App() {
 
       <main className="p-4 md:p-8">
         <Routes>
-          <Route path="/" element={renderHomeDashboard()} />
-          <Route path="/movimientos" element={<MovementsView transactions={transactions} accounts={accounts} />} />
+          <Route path="/" element={!isDataLoaded ? <HomeSkeleton /> : renderHomeDashboard()} />
+          <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} />} />
           <Route path="/recurrentes" element={<RecurrentesView />} />
           <Route path="/metas" element={<MetasView />} />
         </Routes>
