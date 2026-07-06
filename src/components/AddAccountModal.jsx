@@ -40,6 +40,7 @@ function AddAccountModal({ isOpen, onClose, onAddAccount }) {
   const handleSelect = (bank) => {
     onAddAccount(bank);
     setSearchTerm("");
+    onClose();
   };
 
   return (

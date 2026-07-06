@@ -13,6 +13,7 @@ import ProfileModal from "./components/ProfileModal";
 import BalanceChart from "./components/BalanceChart";
 import Logo from "./components/Logo";
 import BottomNav from "./components/BottomNav";
+import TransactionMenuModal from "./components/TransactionMenuModal";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -24,6 +25,7 @@ function App() {
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState("ingreso");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -46,17 +48,17 @@ function App() {
       orderBy("date", "desc")
     );
 
-    const unsubAccounts = onSnapshot(accountsQuery, (snapshot) => {
-      const accountsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      if (accountsData.length === 0) {
-        setDoc(doc(db, `users/${user.uid}/accounts`, "efectivo"), {
+    const unsubAccounts = onSnapshot(accountsQuery, async (snapshot) => {
+      if (snapshot.empty) {
+        await setDoc(doc(db, "users", user.uid, "accounts", "efectivo"), {
           name: "Efectivo",
           balance: 0,
         });
       }
+      const accountsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setAccounts(accountsData);
     });
 
@@ -101,8 +103,20 @@ function App() {
         const accountRef = doc(db, "users", user.uid, "accounts", data.accountId);
         await updateDoc(accountRef, { balance: nuevoBalance });
       }
+      setTransactionModalOpen(false);
     } catch (err) {
       console.error("Error saving transaction:", err);
+    }
+  };
+
+  const handleSelectAction = (type) => {
+    if (type === "ingreso" || type === "egreso") {
+      setTransactionType(type);
+      setTransactionModalOpen(true);
+      setIsMenuOpen(false);
+    } else {
+      alert("Próximamente");
+      setIsMenuOpen(false);
     }
   };
 
@@ -174,7 +188,7 @@ function App() {
               </p>
             </div>
             <button
-              onClick={() => { setTransactionType("egreso"); setTransactionModalOpen(true); }}
+              onClick={() => setIsMenuOpen(true)}
               className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-sans font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer"
             >
               + Añadir movimiento
@@ -303,6 +317,12 @@ function App() {
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
         user={user}
+      />
+
+      <TransactionMenuModal
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onSelectOption={handleSelectAction}
       />
 
       <BottomNav />
