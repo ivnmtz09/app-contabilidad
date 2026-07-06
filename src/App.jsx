@@ -7,8 +7,9 @@ import Login from "./components/Login";
 import Drawer from "./components/Drawer";
 import AccountsCard from "./components/AccountsCard";
 import AddAccountModal from "./components/AddAccountModal";
-import SplashScreen from "./components/SplashScreen";
 import TransactionModal from "./components/TransactionModal";
+import MovementsView from "./components/MovementsView";
+import { ProgressBar, SkeletonPage } from "./components/Loaders";
 import ProfileModal from "./components/ProfileModal";
 import BalanceChart from "./components/BalanceChart";
 import Logo from "./components/Logo";
@@ -26,6 +27,7 @@ function App() {
   const [transactionType, setTransactionType] = useState("ingreso");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentView, setCurrentView] = useState("home");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -55,18 +57,12 @@ function App() {
           balance: 0,
         });
       }
-      const accountsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const accountsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setAccounts(accountsData);
     });
 
     const unsubTransactions = onSnapshot(transactionsQuery, (snapshot) => {
-      const transactionsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const transactionsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setTransactions(transactionsData);
     });
 
@@ -79,7 +75,7 @@ function App() {
   const handleAddAccount = async (name) => {
     if (!user) return;
     try {
-      await addDoc(collection(db, `users/${user.uid}/accounts`), {
+      await addDoc(collection(db, "users", user.uid, "accounts"), {
         name,
         balance: 0,
       });
@@ -148,7 +144,6 @@ function App() {
     .filter((t) => t.type === "egreso" && new Date(t.date) >= monthStart)
     .reduce((sum, t) => sum + t.amount, 0);
 
-  if (isLoading) return <SplashScreen />;
   if (!user) return <Login />;
 
   return (
@@ -161,142 +156,151 @@ function App() {
         accounts={accounts}
       />
 
-      <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-zinc-50/80 dark:bg-zinc-900/80 border-b border-zinc-200 dark:border-zinc-800 p-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsDrawerOpen(true)}
-            className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-          >
-            <Menu size={22} />
-          </button>
-          <Logo className="w-8 h-8" />
-          <span className="font-display font-bold text-zinc-900 dark:text-zinc-50">
-            MisCuentaZ
-          </span>
+      <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-zinc-50/80 dark:bg-zinc-900/80 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="p-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsDrawerOpen(true)}
+              className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            >
+              <Menu size={22} />
+            </button>
+            <Logo className="w-8 h-8" />
+            <span className="font-display font-bold text-zinc-900 dark:text-zinc-50">
+              MisCuentaZ
+            </span>
+          </div>
         </div>
+        <ProgressBar isLoading={isLoading} />
       </header>
 
       <main className="p-4 md:p-8">
-        <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
+        {isLoading ? (
+          <SkeletonPage />
+        ) : currentView === "home" ? (
+          <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
+                  Balance Total
+                </p>
+                <p className="text-4xl md:text-5xl font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+                  ${totalBalance.toLocaleString("es-CO")}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-sans font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer"
+              >
+                + Añadir movimiento
+              </button>
+            </div>
+
+            <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
-                Balance Total
+                Ingresos del mes
               </p>
-              <p className="text-4xl md:text-5xl font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-                ${totalBalance.toLocaleString("es-CO")}
-              </p>
-            </div>
-            <button
-              onClick={() => setIsMenuOpen(true)}
-              className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-sans font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer"
-            >
-              + Añadir movimiento
-            </button>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
-              Ingresos del mes
-            </p>
-            <p className="text-2xl md:text-3xl font-display font-bold text-emerald-500">
-              ${monthIncome.toLocaleString("es-CO")}
-            </p>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
-              Egresos del mes
-            </p>
-            <p className="text-2xl md:text-3xl font-display font-bold text-rose-500">
-              ${monthExpense.toLocaleString("es-CO")}
-            </p>
-          </div>
-
-          <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-4 flex justify-around text-center">
-            <div>
-              <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Día</p>
-              <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
-                ${todaySum.toLocaleString("es-CO")}
+              <p className="text-2xl md:text-3xl font-display font-bold text-emerald-500">
+                ${monthIncome.toLocaleString("es-CO")}
               </p>
             </div>
-            <div>
-              <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Semana</p>
-              <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
-                ${weekSum.toLocaleString("es-CO")}
+
+            <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
+                Egresos del mes
+              </p>
+              <p className="text-2xl md:text-3xl font-display font-bold text-rose-500">
+                ${monthExpense.toLocaleString("es-CO")}
               </p>
             </div>
-            <div>
-              <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Mes</p>
-              <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
-                ${monthSum.toLocaleString("es-CO")}
-              </p>
+
+            <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-4 flex justify-around text-center">
+              <div>
+                <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Día</p>
+                <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
+                  ${todaySum.toLocaleString("es-CO")}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Semana</p>
+                <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
+                  ${weekSum.toLocaleString("es-CO")}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Mes</p>
+                <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
+                  ${monthSum.toLocaleString("es-CO")}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6 flex items-center justify-center" style={{ minHeight: "200px" }}>
-            <BalanceChart transactions={transactions} />
-          </div>
+            <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6 flex items-center justify-center" style={{ minHeight: "200px" }}>
+              <BalanceChart transactions={transactions} />
+            </div>
 
-          <div className="md:col-span-2 flex gap-4">
-            <button
-              onClick={() => abrirModal("ingreso")}
-              className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
-            >
-              <ArrowUpCircle size={22} />
-              Registrar Ingreso
-            </button>
-            <button
-              onClick={() => abrirModal("egreso")}
-              className="flex-1 flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
-            >
-              <ArrowDownCircle size={22} />
-              Registrar Egreso
-            </button>
-          </div>
+            <div className="md:col-span-2 flex gap-4">
+              <button
+                onClick={() => abrirModal("ingreso")}
+                className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
+              >
+                <ArrowUpCircle size={22} />
+                Registrar Ingreso
+              </button>
+              <button
+                onClick={() => abrirModal("egreso")}
+                className="flex-1 flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
+              >
+                <ArrowDownCircle size={22} />
+                Registrar Egreso
+              </button>
+            </div>
 
-          <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
-            <h3 className="text-lg font-display font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
-              Últimos Movimientos
-            </h3>
-            {transactions.length === 0 ? (
-              <p className="text-sm font-sans text-zinc-400 dark:text-zinc-500 text-center py-8">
-                Sin transacciones recientes
-              </p>
-            ) : (
-              <ul className="space-y-3">
-                {transactions.slice(0, 10).map((t) => (
-                  <li
-                    key={t.id}
-                    className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0"
-                  >
-                    <div>
-                      <p className="font-sans text-sm text-zinc-700 dark:text-zinc-300">
-                        {t.description}
-                      </p>
-                      <p className="font-sans text-xs text-zinc-400">
-                        {t.accountId}
-                      </p>
-                    </div>
-                    <span
-                      className={`font-display font-semibold text-sm ${t.type === "ingreso" ? "text-emerald-500" : "text-rose-500"}`}
+            <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
+              <h3 className="text-lg font-display font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
+                Últimos Movimientos
+              </h3>
+              {transactions.length === 0 ? (
+                <p className="text-sm font-sans text-zinc-400 dark:text-zinc-500 text-center py-8">
+                  Sin transacciones recientes
+                </p>
+              ) : (
+                <ul className="space-y-3">
+                  {transactions.slice(0, 5).map((t) => (
+                    <li
+                      key={t.id}
+                      className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0"
                     >
-                      {t.type === "ingreso" ? "+" : "-"}$
-                      {t.amount.toLocaleString("es-CO")}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+                      <div>
+                        <p className="font-sans text-sm text-zinc-700 dark:text-zinc-300">
+                          {t.description}
+                        </p>
+                        <p className="font-sans text-xs text-zinc-400">
+                          {t.accountId}
+                        </p>
+                      </div>
+                      <span
+                        className={`font-display font-semibold text-sm ${t.type === "ingreso" ? "text-emerald-500" : "text-rose-500"}`}
+                      >
+                        {t.type === "ingreso" ? "+" : "-"}$
+                        {t.amount.toLocaleString("es-CO")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-          <div className="md:col-span-2">
-            <AccountsCard
-              accounts={accounts}
-              onOpenAdd={() => setIsAddAccountOpen(true)}
-            />
+            <div className="md:col-span-2">
+              <AccountsCard
+                accounts={accounts}
+                onOpenAdd={() => setIsAddAccountOpen(true)}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <MovementsView transactions={transactions} accounts={accounts} />
+        )}
       </main>
 
       <AddAccountModal
@@ -325,7 +329,7 @@ function App() {
         onSelectOption={handleSelectAction}
       />
 
-      <BottomNav />
+      <BottomNav currentView={currentView} setCurrentView={setCurrentView} />
     </div>
   );
 }
