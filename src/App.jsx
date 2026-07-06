@@ -17,6 +17,7 @@ import BalanceChart from "./components/BalanceChart";
 import Logo from "./components/Logo";
 import BottomNav from "./components/BottomNav";
 import TransactionMenuModal from "./components/TransactionMenuModal";
+import { RecurrentesView, MetasView } from "./components/PlaceholderViews";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -345,6 +346,8 @@ function App() {
         <Routes>
           <Route path="/" element={renderHomeDashboard()} />
           <Route path="/movimientos" element={<MovementsView transactions={transactions} accounts={accounts} />} />
+          <Route path="/recurrentes" element={<RecurrentesView />} />
+          <Route path="/metas" element={<MetasView />} />
         </Routes>
       </main>
 
