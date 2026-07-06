@@ -4,8 +4,15 @@ import { X } from "lucide-react";
 function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
-  const [accountId, setAccountId] = useState(accounts[0]?.name || "");
+  const [accountId, setAccountId] = useState(accounts[0]?.id || "");
   const [applyTax, setApplyTax] = useState(false);
+
+  const handleClose = () => {
+    setAmount('');
+    setDescription('');
+    setApplyTax(false);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -25,16 +32,13 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
       type,
       date: new Date().toISOString(),
     });
-    setAmount("");
-    setDescription("");
     setAccountId(accounts[0]?.name || "");
-    setApplyTax(false);
-    onClose();
+    handleClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl w-full max-w-sm mx-4 shadow-xl flex flex-col gap-4">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center" onClick={handleClose}>
+      <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl w-full max-w-sm mx-4 shadow-xl flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h2
             className={`text-lg font-display font-bold ${isIngreso ? "text-emerald-500" : "text-rose-500"}`}
@@ -42,7 +46,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
             {isIngreso ? "Registrar Ingreso" : "Registrar Egreso"}
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           >
             <X size={18} />
@@ -73,7 +77,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
             className="w-full px-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-sans text-sm outline-none focus:ring-2 focus:ring-violet-500 transition-all"
           >
             {accounts.map((acc) => (
-              <option key={acc.id} value={acc.name}>
+              <option key={acc.id} value={acc.id}>
                 {acc.name}
               </option>
             ))}

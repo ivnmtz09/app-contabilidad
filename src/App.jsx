@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Menu, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "./firebase";
+import { collection, doc, setDoc, addDoc, onSnapshot, query, orderBy, increment } from "firebase/firestore";
 import Login from "./components/Login";
 import Drawer from "./components/Drawer";
 import AccountsCard from "./components/AccountsCard";
@@ -11,25 +12,18 @@ import TransactionModal from "./components/TransactionModal";
 import ProfileModal from "./components/ProfileModal";
 import BalanceChart from "./components/BalanceChart";
 import Logo from "./components/Logo";
+import BottomNav from "./components/BottomNav";
 
 function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [accounts, setAccounts] = useState(() => JSON.parse(localStorage.getItem("accounts")) || [{ id: "efectivo", name: "Efectivo", balance: 0 }]);
+  const [accounts, setAccounts] = useState([]);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
-  const [transactions, setTransactions] = useState(() => JSON.parse(localStorage.getItem("transactions")) || []);
+  const [transactions, setTransactions] = useState([]);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState("ingreso");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-  }, [accounts]);
-
-  useEffect(() => {
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-  }, [transactions]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -39,25 +33,73 @@ function App() {
     return unsubscribe;
   }, []);
 
-  const handleAddAccount = (name) => {
-    const id = name.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now();
-    setAccounts((prev) => [...prev, { id, name, balance: 0 }]);
-    setIsAddAccountOpen(false);
+  useEffect(() => {
+    if (!user) return;
+
+    const accountsQuery = query(
+      collection(db, `users/${user.uid}/accounts`),
+      orderBy("name")
+    );
+
+    const transactionsQuery = query(
+      collection(db, `users/${user.uid}/transactions`),
+      orderBy("date", "desc")
+    );
+
+    const unsubAccounts = onSnapshot(accountsQuery, (snapshot) => {
+      const accountsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      if (accountsData.length === 0) {
+        setDoc(doc(db, `users/${user.uid}/accounts`, "efectivo"), {
+          name: "Efectivo",
+          balance: 0,
+        });
+      }
+      setAccounts(accountsData);
+    });
+
+    const unsubTransactions = onSnapshot(transactionsQuery, (snapshot) => {
+      const transactionsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTransactions(transactionsData);
+    });
+
+    return () => {
+      unsubAccounts();
+      unsubTransactions();
+    };
+  }, [user]);
+
+  const handleAddAccount = async (name) => {
+    if (!user) return;
+    try {
+      await addDoc(collection(db, `users/${user.uid}/accounts`), {
+        name,
+        balance: 0,
+      });
+      setIsAddAccountOpen(false);
+    } catch (err) {
+      console.error("Error adding account:", err);
+    }
   };
 
-  const handleSaveTransaction = (data) => {
-    setTransactions((prev) => [...prev, data]);
-    setAccounts((prev) =>
-      prev.map((acc) =>
-        acc.name === data.accountId
-          ? {
-              ...acc,
-              balance:
-                acc.balance + (data.type === "ingreso" ? data.amount : -data.amount),
-            }
-          : acc
-      )
-    );
+  const handleSaveTransaction = async (data) => {
+    if (!user) return;
+    try {
+      await addDoc(collection(db, `users/${user.uid}/transactions`), data);
+      const balanceChange = data.type === "ingreso" ? data.amount : -data.amount;
+      await setDoc(
+        doc(db, `users/${user.uid}/accounts`, data.accountId),
+        { balance: increment(balanceChange) },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error("Error saving transaction:", err);
+    }
   };
 
   const abrirModal = (tipo) => {
@@ -92,7 +134,7 @@ function App() {
   if (!user) return <Login />;
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 pb-24">
       <Drawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
@@ -205,9 +247,9 @@ function App() {
               </p>
             ) : (
               <ul className="space-y-3">
-                {[...transactions].reverse().slice(0, 10).map((t, i) => (
+                {transactions.slice(0, 10).map((t) => (
                   <li
-                    key={i}
+                    key={t.id}
                     className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0"
                   >
                     <div>
@@ -258,6 +300,8 @@ function App() {
         onClose={() => setIsProfileOpen(false)}
         user={user}
       />
+
+      <BottomNav />
     </div>
   );
 }
