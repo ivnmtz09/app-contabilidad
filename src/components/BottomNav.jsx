@@ -13,7 +13,7 @@ function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 pb-safe z-40">
+    <div className="fixed bottom-0 left-0 w-full backdrop-blur-md bg-zinc-50/80 dark:bg-zinc-900/80 border-t border-zinc-200/80 dark:border-zinc-800/80 pb-safe z-40">
       <div className="grid grid-cols-4 gap-2 sm:gap-4 px-4 py-3 max-w-md mx-auto">
         {items.map(({ path, label, icon: Icon }) => {
           const isActive = location.pathname === path;

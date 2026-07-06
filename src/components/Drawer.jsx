@@ -8,6 +8,17 @@ function Drawer({ isOpen, onClose, onOpenProfile, transactions = [], accounts = 
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     const stored = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const shouldBeDark = stored === "dark" || (!stored && prefersDark);
@@ -34,7 +45,7 @@ function Drawer({ isOpen, onClose, onOpenProfile, transactions = [], accounts = 
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
           onClick={onClose}
         />
       )}
@@ -126,7 +137,7 @@ function Drawer({ isOpen, onClose, onOpenProfile, transactions = [], accounts = 
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500 font-mono">
               <Code size={12} strokeWidth={2} />
-              Version 1.0.0
+              v 1.1.0 Beta
             </span>
           </div>
         </div>
