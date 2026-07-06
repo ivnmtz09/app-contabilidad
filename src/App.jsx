@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Menu, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./firebase";
-import { collection, doc, setDoc, addDoc, onSnapshot, query, orderBy, increment } from "firebase/firestore";
+import { collection, doc, setDoc, addDoc, updateDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import Login from "./components/Login";
 import Drawer from "./components/Drawer";
 import AccountsCard from "./components/AccountsCard";
@@ -91,12 +91,16 @@ function App() {
     if (!user) return;
     try {
       await addDoc(collection(db, `users/${user.uid}/transactions`), data);
-      const balanceChange = data.type === "ingreso" ? data.amount : -data.amount;
-      await setDoc(
-        doc(db, `users/${user.uid}/accounts`, data.accountId),
-        { balance: increment(balanceChange) },
-        { merge: true }
-      );
+      const account = accounts.find((a) => a.id === data.accountId);
+      if (account) {
+        const currentBalance = account.balance || 0;
+        const nuevoBalance =
+          data.type === "ingreso"
+            ? currentBalance + data.amount
+            : currentBalance - data.amount;
+        const accountRef = doc(db, "users", user.uid, "accounts", data.accountId);
+        await updateDoc(accountRef, { balance: nuevoBalance });
+      }
     } catch (err) {
       console.error("Error saving transaction:", err);
     }
