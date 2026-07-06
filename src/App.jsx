@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./firebase";
-import { collection, doc, setDoc, addDoc, updateDoc, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import Login from "./components/Login";
 import Drawer from "./components/Drawer";
 import AccountsCard from "./components/AccountsCard";
@@ -119,6 +119,25 @@ function App() {
     } catch (err) {
       console.error("Error fatal al guardar la transacción:", err);
       toast.error("Error al guardar: " + err.message);
+    }
+  };
+
+  const handleDeleteTransaction = async (transaction) => {
+    if (!window.confirm(`¿Eliminar el movimiento "${transaction.description}"?`)) return;
+    try {
+      await deleteDoc(doc(db, `users/${user.uid}/transactions`, transaction.id));
+      const account = accounts.find((a) => a.id === transaction.accountId);
+      if (account) {
+        const currentBalance = Number(account.balance) || 0;
+        const newBalance = transaction.type === "ingreso"
+          ? currentBalance - transaction.amount
+          : currentBalance + transaction.amount;
+        await updateDoc(doc(db, "users", user.uid, "accounts", transaction.accountId), { balance: newBalance });
+      }
+      toast.success("Movimiento eliminado correctamente");
+    } catch (err) {
+      console.error("Error al eliminar:", err);
+      toast.error("Error al eliminar el movimiento");
     }
   };
 
@@ -253,14 +272,15 @@ function App() {
             {transactions.slice(0, 5).map((t) => (
               <li
                 key={t.id}
-                className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0"
+                onClick={() => handleDeleteTransaction(t)}
+                className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded-lg p-2 transition-colors"
               >
                 <div>
                   <p className="font-sans text-sm text-zinc-700 dark:text-zinc-300">
                     {t.description}
                   </p>
                   <p className="font-sans text-xs text-zinc-400">
-                    {t.accountId}
+                    {accounts.find(a => a.id === t.accountId)?.name || 'Desconocida'}
                   </p>
                 </div>
                 <span
@@ -284,6 +304,13 @@ function App() {
     </div>
   );
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 pt-16">
+        <SkeletonPage />
+      </div>
+    );
+  }
   if (!user) return <Login />;
 
   return (
@@ -315,14 +342,10 @@ function App() {
       </header>
 
       <main className="p-4 md:p-8">
-        {isLoading ? (
-          <SkeletonPage />
-        ) : (
-          <Routes>
-            <Route path="/" element={renderHomeDashboard()} />
-            <Route path="/movimientos" element={<MovementsView transactions={transactions} accounts={accounts} />} />
-          </Routes>
-        )}
+        <Routes>
+          <Route path="/" element={renderHomeDashboard()} />
+          <Route path="/movimientos" element={<MovementsView transactions={transactions} accounts={accounts} />} />
+        </Routes>
       </main>
 
       <AddAccountModal
