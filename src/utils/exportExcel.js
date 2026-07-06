@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx-js-style";
+import XLSX from "xlsx-js-style";
 
 const COLOR_HEADER_BG = "1F2937";
 const COLOR_HEADER_TEXT = "FFFFFF";
