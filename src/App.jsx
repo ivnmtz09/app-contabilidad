@@ -51,14 +51,13 @@ function App() {
     );
 
     const unsubAccounts = onSnapshot(accountsQuery, async (snapshot) => {
-      if (snapshot.empty) {
-        await setDoc(doc(db, "users", user.uid, "accounts", "efectivo"), {
-          name: "Efectivo",
-          balance: 0,
-        });
-      }
       const accountsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setAccounts(accountsData);
+      if (accountsData.length === 0) {
+        const docRef = doc(db, "users", user.uid, "accounts", "efectivo");
+        await setDoc(docRef, { name: "Efectivo", balance: 0 });
+      } else {
+        setAccounts(accountsData);
+      }
     });
 
     const unsubTransactions = onSnapshot(transactionsQuery, (snapshot) => {
@@ -88,20 +87,34 @@ function App() {
   const handleSaveTransaction = async (data) => {
     if (!user) return;
     try {
-      await addDoc(collection(db, `users/${user.uid}/transactions`), data);
+      const transactionData = {
+        amount: Number(data.amount),
+        description: data.description || "Sin descripción",
+        accountId: data.accountId,
+        type: data.type,
+        date: data.date || new Date().toISOString()
+      };
+
+      console.log("Intentando guardar en Firestore:", transactionData);
+      await addDoc(collection(db, `users/${user.uid}/transactions`), transactionData);
+
       const account = accounts.find((a) => a.id === data.accountId);
       if (account) {
-        const currentBalance = account.balance || 0;
-        const nuevoBalance =
-          data.type === "ingreso"
-            ? currentBalance + data.amount
-            : currentBalance - data.amount;
+        const currentBalance = Number(account.balance) || 0;
+        const newBalance = transactionData.type === "ingreso"
+          ? currentBalance + transactionData.amount
+          : currentBalance - transactionData.amount;
+
         const accountRef = doc(db, "users", user.uid, "accounts", data.accountId);
-        await updateDoc(accountRef, { balance: nuevoBalance });
+        await updateDoc(accountRef, { balance: newBalance });
+      } else {
+        console.warn("No se actualizó el saldo: ID de cuenta no encontrado en el estado local", data.accountId);
       }
+
       setTransactionModalOpen(false);
     } catch (err) {
-      console.error("Error saving transaction:", err);
+      console.error("Error fatal al guardar la transacción:", err);
+      alert("Hubo un problema al guardar: " + err.message);
     }
   };
 

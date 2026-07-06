@@ -31,13 +31,14 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
   const selectedAccount = accounts.find((a) => a.id === accountId);
 
   const handleConfirm = () => {
-    if (!amount || !description || !accountId) return;
+    if (!amount || !accountId) return;
+    console.log("Datos enviados desde el Modal:", { amount, description, accountId, type });
     onSave({
-      amount: finalAmount,
-      description,
-      accountId,
-      type,
-      date: new Date().toISOString(),
+      amount: Number(amount),
+      description: (description || "").trim() || "Sin descripción",
+      accountId: accountId,
+      type: type,
+      date: new Date().toISOString()
     });
     setAccountId(accounts[0]?.id || "");
     handleClose();
