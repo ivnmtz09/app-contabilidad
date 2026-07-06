@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
 function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
@@ -7,6 +7,12 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
   const [accountId, setAccountId] = useState(accounts[0]?.id || "");
   const [applyTax, setApplyTax] = useState(false);
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    if (isOpen && accounts.length > 0 && !accountId) {
+      setAccountId(accounts[0].id);
+    }
+  }, [isOpen, accounts]);
 
   const handleClose = () => {
     setAmount('');

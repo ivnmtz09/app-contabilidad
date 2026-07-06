@@ -1,26 +1,30 @@
 import { Home, List, CalendarClock, Target } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
-function BottomNav({ currentView, setCurrentView }) {
+function BottomNav() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const items = [
-    { view: "home", label: "Inicio", icon: Home },
-    { view: "movimientos", label: "Movimientos", icon: List },
-    { view: "recurrentes", label: "Recurrentes", icon: CalendarClock },
-    { view: "metas", label: "Metas", icon: Target },
+    { path: "/", label: "Inicio", icon: Home },
+    { path: "/movimientos", label: "Movimientos", icon: List },
+    { path: "/recurrentes", label: "Recurrentes", icon: CalendarClock },
+    { path: "/metas", label: "Metas", icon: Target },
   ];
 
   return (
     <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 pb-safe z-40">
-      <div className="flex justify-between items-center px-6 py-3 max-w-md mx-auto">
-        {items.map(({ view, label, icon: Icon }) => {
-          const isActive = currentView === view;
+      <div className="grid grid-cols-4 gap-3 px-4 py-3 max-w-md mx-auto">
+        {items.map(({ path, label, icon: Icon }) => {
+          const isActive = location.pathname === path;
           return (
             <button
-              key={view}
-              onClick={() => setCurrentView(view)}
-              className={`flex flex-col items-center transition-colors ${
+              key={path}
+              onClick={() => navigate(path)}
+              className={`flex flex-col items-center justify-center aspect-square rounded-2xl transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? "text-violet-600 dark:text-violet-400"
-                  : "text-zinc-400 hover:text-violet-600"
+                  ? "bg-white dark:bg-zinc-800 shadow-sm border border-zinc-200 dark:border-zinc-700 text-violet-600 dark:text-violet-400"
+                  : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 border border-transparent"
               }`}
             >
               <Icon size={24} />

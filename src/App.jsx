@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { Routes, Route } from "react-router-dom";
+import { Toaster, toast } from "react-hot-toast";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { collection, doc, setDoc, addDoc, updateDoc, onSnapshot, query, orderBy } from "firebase/firestore";
@@ -27,7 +29,6 @@ function App() {
   const [transactionType, setTransactionType] = useState("ingreso");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentView, setCurrentView] = useState("home");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -52,9 +53,11 @@ function App() {
 
     const unsubAccounts = onSnapshot(accountsQuery, async (snapshot) => {
       const accountsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      if (accountsData.length === 0) {
-        const docRef = doc(db, "users", user.uid, "accounts", "efectivo");
-        await setDoc(docRef, { name: "Efectivo", balance: 0 });
+      const hasEfectivo = accountsData.some(acc => acc.id === "efectivo");
+      if (!hasEfectivo && accountsData.length === 0) {
+        try {
+          await setDoc(doc(db, "users", user.uid, "accounts", "efectivo"), { name: "Efectivo", balance: 0 });
+        } catch (e) { console.error("Error creando efectivo:", e); }
       } else {
         setAccounts(accountsData);
       }
@@ -111,10 +114,11 @@ function App() {
         console.warn("No se actualizó el saldo: ID de cuenta no encontrado en el estado local", data.accountId);
       }
 
+      toast.success("Movimiento registrado");
       setTransactionModalOpen(false);
     } catch (err) {
       console.error("Error fatal al guardar la transacción:", err);
-      alert("Hubo un problema al guardar: " + err.message);
+      toast.error("Error al guardar: " + err.message);
     }
   };
 
@@ -124,7 +128,7 @@ function App() {
       setTransactionModalOpen(true);
       setIsMenuOpen(false);
     } else {
-      alert("Próximamente");
+      toast("Próximamente disponible");
       setIsMenuOpen(false);
     }
   };
@@ -156,6 +160,129 @@ function App() {
   const monthExpense = transactions
     .filter((t) => t.type === "egreso" && new Date(t.date) >= monthStart)
     .reduce((sum, t) => sum + t.amount, 0);
+
+  const renderHomeDashboard = () => (
+    <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
+            Balance Total
+          </p>
+          <p className="text-4xl md:text-5xl font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+            ${totalBalance.toLocaleString("es-CO")}
+          </p>
+        </div>
+        <button
+          onClick={() => setIsMenuOpen(true)}
+          className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-sans font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer"
+        >
+          + Añadir movimiento
+        </button>
+      </div>
+
+      <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
+          Ingresos del mes
+        </p>
+        <p className="text-2xl md:text-3xl font-display font-bold text-emerald-500">
+          ${monthIncome.toLocaleString("es-CO")}
+        </p>
+      </div>
+
+      <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
+          Egresos del mes
+        </p>
+        <p className="text-2xl md:text-3xl font-display font-bold text-rose-500">
+          ${monthExpense.toLocaleString("es-CO")}
+        </p>
+      </div>
+
+      <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-4 flex justify-around text-center">
+        <div>
+          <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Día</p>
+          <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
+            ${todaySum.toLocaleString("es-CO")}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Semana</p>
+          <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
+            ${weekSum.toLocaleString("es-CO")}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Mes</p>
+          <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
+            ${monthSum.toLocaleString("es-CO")}
+          </p>
+        </div>
+      </div>
+
+      <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6 flex items-center justify-center" style={{ minHeight: "200px" }}>
+        <BalanceChart transactions={transactions} />
+      </div>
+
+      <div className="md:col-span-2 flex gap-4">
+        <button
+          onClick={() => abrirModal("ingreso")}
+          className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
+        >
+          <ArrowUpCircle size={22} />
+          Registrar Ingreso
+        </button>
+        <button
+          onClick={() => abrirModal("egreso")}
+          className="flex-1 flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
+        >
+          <ArrowDownCircle size={22} />
+          Registrar Egreso
+        </button>
+      </div>
+
+      <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
+        <h3 className="text-lg font-display font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
+          Últimos Movimientos
+        </h3>
+        {transactions.length === 0 ? (
+          <p className="text-sm font-sans text-zinc-400 dark:text-zinc-500 text-center py-8">
+            Sin transacciones recientes
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {transactions.slice(0, 5).map((t) => (
+              <li
+                key={t.id}
+                className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0"
+              >
+                <div>
+                  <p className="font-sans text-sm text-zinc-700 dark:text-zinc-300">
+                    {t.description}
+                  </p>
+                  <p className="font-sans text-xs text-zinc-400">
+                    {t.accountId}
+                  </p>
+                </div>
+                <span
+                  className={`font-display font-semibold text-sm ${t.type === "ingreso" ? "text-emerald-500" : "text-rose-500"}`}
+                >
+                  {t.type === "ingreso" ? "+" : "-"}$
+                  {t.amount.toLocaleString("es-CO")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="md:col-span-2">
+        <AccountsCard
+          accounts={accounts}
+          onOpenAdd={() => setIsAddAccountOpen(true)}
+        />
+      </div>
+    </div>
+  );
 
   if (!user) return <Login />;
 
@@ -190,129 +317,11 @@ function App() {
       <main className="p-4 md:p-8">
         {isLoading ? (
           <SkeletonPage />
-        ) : currentView === "home" ? (
-          <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
-                  Balance Total
-                </p>
-                <p className="text-4xl md:text-5xl font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-                  ${totalBalance.toLocaleString("es-CO")}
-                </p>
-              </div>
-              <button
-                onClick={() => setIsMenuOpen(true)}
-                className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-sans font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer"
-              >
-                + Añadir movimiento
-              </button>
-            </div>
-
-            <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
-                Ingresos del mes
-              </p>
-              <p className="text-2xl md:text-3xl font-display font-bold text-emerald-500">
-                ${monthIncome.toLocaleString("es-CO")}
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
-                Egresos del mes
-              </p>
-              <p className="text-2xl md:text-3xl font-display font-bold text-rose-500">
-                ${monthExpense.toLocaleString("es-CO")}
-              </p>
-            </div>
-
-            <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-4 flex justify-around text-center">
-              <div>
-                <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Día</p>
-                <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
-                  ${todaySum.toLocaleString("es-CO")}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Semana</p>
-                <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
-                  ${weekSum.toLocaleString("es-CO")}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Mes</p>
-                <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
-                  ${monthSum.toLocaleString("es-CO")}
-                </p>
-              </div>
-            </div>
-
-            <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6 flex items-center justify-center" style={{ minHeight: "200px" }}>
-              <BalanceChart transactions={transactions} />
-            </div>
-
-            <div className="md:col-span-2 flex gap-4">
-              <button
-                onClick={() => abrirModal("ingreso")}
-                className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
-              >
-                <ArrowUpCircle size={22} />
-                Registrar Ingreso
-              </button>
-              <button
-                onClick={() => abrirModal("egreso")}
-                className="flex-1 flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
-              >
-                <ArrowDownCircle size={22} />
-                Registrar Egreso
-              </button>
-            </div>
-
-            <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
-              <h3 className="text-lg font-display font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
-                Últimos Movimientos
-              </h3>
-              {transactions.length === 0 ? (
-                <p className="text-sm font-sans text-zinc-400 dark:text-zinc-500 text-center py-8">
-                  Sin transacciones recientes
-                </p>
-              ) : (
-                <ul className="space-y-3">
-                  {transactions.slice(0, 5).map((t) => (
-                    <li
-                      key={t.id}
-                      className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0"
-                    >
-                      <div>
-                        <p className="font-sans text-sm text-zinc-700 dark:text-zinc-300">
-                          {t.description}
-                        </p>
-                        <p className="font-sans text-xs text-zinc-400">
-                          {t.accountId}
-                        </p>
-                      </div>
-                      <span
-                        className={`font-display font-semibold text-sm ${t.type === "ingreso" ? "text-emerald-500" : "text-rose-500"}`}
-                      >
-                        {t.type === "ingreso" ? "+" : "-"}$
-                        {t.amount.toLocaleString("es-CO")}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div className="md:col-span-2">
-              <AccountsCard
-                accounts={accounts}
-                onOpenAdd={() => setIsAddAccountOpen(true)}
-              />
-            </div>
-          </div>
         ) : (
-          <MovementsView transactions={transactions} accounts={accounts} />
+          <Routes>
+            <Route path="/" element={renderHomeDashboard()} />
+            <Route path="/movimientos" element={<MovementsView transactions={transactions} accounts={accounts} />} />
+          </Routes>
         )}
       </main>
 
@@ -342,7 +351,8 @@ function App() {
         onSelectOption={handleSelectAction}
       />
 
-      <BottomNav currentView={currentView} setCurrentView={setCurrentView} />
+      <Toaster position="top-center" />
+      <BottomNav />
     </div>
   );
 }

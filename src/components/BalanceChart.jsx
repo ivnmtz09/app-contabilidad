@@ -44,7 +44,7 @@ function BalanceChart({ transactions }) {
               <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
+          <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#52525b" opacity={0.2} />
           <XAxis
             dataKey="date"
             tick={{ fontSize: 11, fill: "#a1a1aa" }}
