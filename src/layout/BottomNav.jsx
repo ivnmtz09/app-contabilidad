@@ -10,7 +10,7 @@ function BottomNav() {
   const items = [
     { path: "/", label: t("nav.home"), icon: Home },
     { path: "/movimientos", label: t("nav.movements"), icon: List },
-    { path: "/recurrentes", label: t("nav.recurring"), icon: CalendarClock },
+    { path: "/recurrentes", label: t("nav.recurrent"), icon: CalendarClock },
     { path: "/metas", label: t("nav.goals"), icon: Target },
   ];
 

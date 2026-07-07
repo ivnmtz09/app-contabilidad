@@ -39,7 +39,19 @@ const resources = {
       "recurrent.title": "Gastos Recurrentes",
       "recurrent.desc": "Próximamente: Gestiona tus suscripciones y recibos aquí.",
       "goals.title": "Metas de Ahorro",
-      "goals.desc": "Próximamente: Establece objetivos y ahorra para ellos."
+      "goals.desc": "Próximamente: Establece objetivos y ahorra para ellos.",
+      "modal.income": "Registrar Ingreso",
+      "modal.expense": "Registrar Egreso",
+      "modal.amount": "Monto",
+      "modal.desc": "Descripción",
+      "modal.account": "Cuenta",
+      "modal.tax": "Aplicar 4x1000",
+      "modal.next": "Continuar",
+      "modal.confirmTitle": "¿Estás seguro de registrar este movimiento?",
+      "modal.confirm": "Confirmar",
+      "modal.back": "Volver",
+      "modal.type": "Tipo",
+      "modal.finalAmount": "Monto final"
     }
   },
   en: {
@@ -79,7 +91,19 @@ const resources = {
       "recurrent.title": "Recurring Expenses",
       "recurrent.desc": "Coming soon: Manage your subscriptions and bills here.",
       "goals.title": "Savings Goals",
-      "goals.desc": "Coming soon: Set objectives and save for them."
+      "goals.desc": "Coming soon: Set objectives and save for them.",
+      "modal.income": "Register Income",
+      "modal.expense": "Register Expense",
+      "modal.amount": "Amount",
+      "modal.desc": "Description",
+      "modal.account": "Account",
+      "modal.tax": "Apply 4x1000 tax",
+      "modal.next": "Continue",
+      "modal.confirmTitle": "Are you sure you want to save this transaction?",
+      "modal.confirm": "Confirm",
+      "modal.back": "Back",
+      "modal.type": "Type",
+      "modal.finalAmount": "Final amount"
     }
   }
 };

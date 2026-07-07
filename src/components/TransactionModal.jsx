@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../utils/format";
 
 function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
+  const { t } = useTranslation();
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [accountId, setAccountId] = useState(accounts[0]?.id || "");
@@ -58,7 +60,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
           <h2
             className={`text-lg font-display font-bold ${isIngreso ? "text-emerald-500" : "text-rose-500"}`}
           >
-            {isIngreso ? "Registrar Ingreso" : "Registrar Egreso"}
+            {isIngreso ? t("modal.income") : t("modal.expense")}
           </h2>
           <button
             onClick={handleClose}
@@ -82,7 +84,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
               step="0.01"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Monto"
+              placeholder={t("modal.amount")}
               className="w-full px-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-sans text-sm outline-none focus:ring-2 focus:ring-violet-500 transition-all"
             />
 
@@ -90,7 +92,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descripción"
+              placeholder={t("modal.desc")}
               className="w-full px-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-sans text-sm outline-none focus:ring-2 focus:ring-violet-500 transition-all"
             />
 
@@ -115,7 +117,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
                   className="w-4 h-4 text-violet-600 rounded focus:ring-violet-600 dark:bg-zinc-900 dark:border-zinc-600"
                 />
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Aplicar impuesto 4x1000
+                  {t("modal.tax")}
                 </span>
               </label>
             )}
@@ -124,7 +126,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
               type="submit"
               className="w-full font-sans font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer text-white bg-violet-600 hover:bg-violet-700"
             >
-              Continuar
+              {t("modal.next")}
             </button>
           </form>
         )}
@@ -132,30 +134,30 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
         {step === 2 && (
           <div className="flex flex-col gap-4">
             <p className="text-sm font-sans text-zinc-500 dark:text-zinc-400">
-              ¿Estás seguro de registrar este movimiento?
+              {t("modal.confirmTitle")}
             </p>
 
             <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4 flex flex-col gap-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400">Tipo</span>
+                <span className="text-zinc-500 dark:text-zinc-400">{t("modal.type")}</span>
                 <span className={`font-semibold ${isIngreso ? "text-emerald-500" : "text-rose-500"}`}>
-                  {isIngreso ? "Ingreso" : "Egreso"}
+                  {isIngreso ? t("menu.income") : t("menu.expense")}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400">Monto final</span>
+                <span className="text-zinc-500 dark:text-zinc-400">{t("modal.finalAmount")}</span>
                 <span className={`font-semibold ${isIngreso ? "text-emerald-500" : "text-rose-500"}`}>
                   ${formatCurrency(finalAmount)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400">Cuenta</span>
+                <span className="text-zinc-500 dark:text-zinc-400">{t("modal.account")}</span>
                 <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                   {selectedAccount?.name || accountId}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400">Descripción</span>
+                <span className="text-zinc-500 dark:text-zinc-400">{t("modal.desc")}</span>
                 <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-right max-w-[60%]">
                   {description}
                 </span>
@@ -167,13 +169,13 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
                 onClick={() => setStep(1)}
                 className="flex-1 font-sans font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600"
               >
-                Volver
+                {t("modal.back")}
               </button>
               <button
                 onClick={handleConfirm}
                 className={`flex-1 font-sans font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer text-white ${isIngreso ? "bg-emerald-500 hover:bg-emerald-600" : "bg-rose-500 hover:bg-rose-600"}`}
               >
-                Confirmar
+                {t("modal.confirm")}
               </button>
             </div>
           </div>
