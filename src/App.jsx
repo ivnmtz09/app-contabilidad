@@ -257,14 +257,14 @@ function App() {
           className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
         >
           <ArrowUpCircle size={22} />
-          Registrar Ingreso
+          {t('home.registerIncome')}
         </button>
         <button
           onClick={() => abrirModal("egreso")}
           className="flex-1 flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-sans font-semibold px-4 py-4 rounded-2xl transition-colors cursor-pointer"
         >
           <ArrowDownCircle size={22} />
-          Registrar Egreso
+          {t('home.registerExpense')}
         </button>
       </div>
 

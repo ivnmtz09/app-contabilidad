@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, Home, PieChart, User, ExternalLink, Code, LogOut, Download } from "lucide-react";
+import { X, User, ExternalLink, Code, LogOut, Download } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -52,20 +52,6 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
             </div>
 
             <nav className="px-4 space-y-1">
-              <a
-                href="#"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <Home size={18} />
-                {t("nav.home")}
-              </a>
-              <a
-                href="#"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <PieChart size={18} />
-                Estadísticas
-              </a>
               <button
                 onClick={handleProfile}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
@@ -105,7 +91,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500 font-mono">
               <Code size={12} strokeWidth={2} />
-              v 1.1.0 Beta
+              v 1.2.0
             </span>
           </div>
         </div>
