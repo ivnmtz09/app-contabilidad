@@ -6,17 +6,17 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import Login from "./components/Login";
-import Drawer from "./components/Drawer";
+import Drawer from "./layout/Drawer";
 import AccountsCard from "./components/AccountsCard";
 import AddAccountModal from "./components/AddAccountModal";
 import TransactionModal from "./components/TransactionModal";
 import MovementsView from "./components/MovementsView";
 import { ProgressBar, HomeSkeleton, ListSkeleton } from "./components/Loaders";
-import SplashScreen from "./components/SplashScreen";
-import ProfileModal from "./components/ProfileModal";
+import SplashScreen from "./layout/SplashScreen";
+import ProfilePage from "./pages/ProfilePage";
 import BalanceChart from "./components/BalanceChart";
 import Logo from "./components/Logo";
-import BottomNav from "./components/BottomNav";
+import BottomNav from "./layout/BottomNav";
 import TransactionMenuModal from "./components/TransactionMenuModal";
 import { RecurrentesView, MetasView } from "./components/PlaceholderViews";
 
@@ -29,7 +29,7 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState("ingreso");
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
@@ -316,7 +316,6 @@ function App() {
       <Drawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        onOpenProfile={() => setIsProfileOpen(true)}
         transactions={transactions}
         accounts={accounts}
       />
@@ -345,6 +344,7 @@ function App() {
           <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} />} />
           <Route path="/recurrentes" element={<RecurrentesView />} />
           <Route path="/metas" element={<MetasView />} />
+          <Route path="/perfil" element={<ProfilePage user={user} />} />
         </Routes>
       </main>
 
@@ -360,12 +360,6 @@ function App() {
         onSave={handleSaveTransaction}
         type={transactionType}
         accounts={accounts}
-      />
-
-      <ProfileModal
-        isOpen={isProfileOpen}
-        onClose={() => setIsProfileOpen(false)}
-        user={user}
       />
 
       <TransactionMenuModal

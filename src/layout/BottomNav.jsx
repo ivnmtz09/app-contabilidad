@@ -1,15 +1,17 @@
 import { Home, List, CalendarClock, Target } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const items = [
-    { path: "/", label: "Inicio", icon: Home },
-    { path: "/movimientos", label: "Movimientos", icon: List },
-    { path: "/recurrentes", label: "Recurrentes", icon: CalendarClock },
-    { path: "/metas", label: "Metas", icon: Target },
+    { path: "/", label: t("nav.home"), icon: Home },
+    { path: "/movimientos", label: t("nav.movements"), icon: List },
+    { path: "/recurrentes", label: t("nav.recurring"), icon: CalendarClock },
+    { path: "/metas", label: t("nav.goals"), icon: Target },
   ];
 
   return (
