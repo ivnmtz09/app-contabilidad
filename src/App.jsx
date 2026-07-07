@@ -17,6 +17,7 @@ import ProfilePage from "./pages/ProfilePage";
 import BalanceChart from "./components/BalanceChart";
 import Logo from "./components/Logo";
 import BottomNav from "./layout/BottomNav";
+import { formatCurrency } from "./utils/format";
 import TransactionMenuModal from "./components/TransactionMenuModal";
 import { RecurrentesView, MetasView } from "./components/PlaceholderViews";
 
@@ -192,7 +193,7 @@ function App() {
             Balance Total
           </p>
           <p className="text-4xl md:text-5xl font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            ${totalBalance.toLocaleString("es-CO")}
+            ${formatCurrency(totalBalance)}
           </p>
         </div>
         <button
@@ -208,7 +209,7 @@ function App() {
           Ingresos del mes
         </p>
         <p className="text-2xl md:text-3xl font-display font-bold text-emerald-500">
-          ${monthIncome.toLocaleString("es-CO")}
+          ${formatCurrency(monthIncome)}
         </p>
       </div>
 
@@ -217,7 +218,7 @@ function App() {
           Egresos del mes
         </p>
         <p className="text-2xl md:text-3xl font-display font-bold text-rose-500">
-          ${monthExpense.toLocaleString("es-CO")}
+          ${formatCurrency(monthExpense)}
         </p>
       </div>
 
@@ -225,19 +226,19 @@ function App() {
         <div>
           <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Día</p>
           <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
-            ${todaySum.toLocaleString("es-CO")}
+            ${formatCurrency(todaySum)}
           </p>
         </div>
         <div>
           <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Semana</p>
           <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
-            ${weekSum.toLocaleString("es-CO")}
+            ${formatCurrency(weekSum)}
           </p>
         </div>
         <div>
           <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Mes</p>
           <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
-            ${monthSum.toLocaleString("es-CO")}
+            ${formatCurrency(monthSum)}
           </p>
         </div>
       </div>
@@ -291,7 +292,7 @@ function App() {
                   className={`font-display font-semibold text-sm ${t.type === "ingreso" ? "text-emerald-500" : "text-rose-500"}`}
                 >
                   {t.type === "ingreso" ? "+" : "-"}$
-                  {t.amount.toLocaleString("es-CO")}
+                  {formatCurrency(t.amount)}
                 </span>
               </li>
             ))}

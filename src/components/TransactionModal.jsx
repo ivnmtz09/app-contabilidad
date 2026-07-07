@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { formatCurrency } from "../utils/format";
 
 function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
   const [amount, setAmount] = useState("");
@@ -144,7 +145,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts }) {
               <div className="flex justify-between">
                 <span className="text-zinc-500 dark:text-zinc-400">Monto final</span>
                 <span className={`font-semibold ${isIngreso ? "text-emerald-500" : "text-rose-500"}`}>
-                  ${finalAmount.toLocaleString("es-CO")}
+                  ${formatCurrency(finalAmount)}
                 </span>
               </div>
               <div className="flex justify-between">

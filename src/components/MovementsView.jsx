@@ -1,3 +1,5 @@
+import { formatCurrency } from "../utils/format";
+
 function MovementsView({ transactions, accounts }) {
   const grouped = transactions.reduce((acc, t) => {
     const dateKey = new Date(t.date).toLocaleDateString("es-CO", {
@@ -70,7 +72,7 @@ function MovementsView({ transactions, accounts }) {
                     }`}
                   >
                     {t.type === "ingreso" ? "+" : "-"}$
-                    {t.amount.toLocaleString("es-CO")}
+                    {formatCurrency(t.amount)}
                   </span>
                 </div>
               ))}
