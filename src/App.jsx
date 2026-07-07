@@ -35,6 +35,8 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -187,7 +189,6 @@ function App() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const renderHomeDashboard = () => {
-    const { t } = useTranslation();
     return (
     <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
