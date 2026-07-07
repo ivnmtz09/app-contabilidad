@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, Home, PieChart, User, Moon, Sun, ExternalLink, Code, LogOut, Download } from "lucide-react";
+import { X, Home, PieChart, User, ExternalLink, Code, LogOut, Download } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { exportToExcel } from "../utils/exportExcel";
 
 function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -21,24 +20,6 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const shouldBeDark = stored === "dark" || (!stored && prefersDark);
-    if (shouldBeDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    setIsDarkMode(shouldBeDark);
-  }, []);
-
-  const toggleTheme = () => {
-    const isDark = document.documentElement.classList.toggle("dark");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-    setIsDarkMode(isDark);
-  };
 
   const handleProfile = () => {
     navigate('/perfil');
@@ -83,7 +64,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
               >
                 <PieChart size={18} />
-                {t("profile.stats")}
+                Estadísticas
               </a>
               <button
                 onClick={handleProfile}
@@ -101,17 +82,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <Download size={18} />
-                {t("profile.export")}
-              </button>
-
-              <hr className="my-3 border-zinc-200 dark:border-zinc-700" />
-
-              <button
-                onClick={toggleTheme}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-              >
-                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-                {isDarkMode ? t("profile.lightMode") : t("profile.darkMode")}
+                Exportar a Excel
               </button>
 
               <button
@@ -126,7 +97,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
 
           <div className="border-t border-zinc-200 dark:border-zinc-800 p-6 mt-auto">
             <span className="block text-sm text-zinc-500 dark:text-zinc-400 mb-2 font-medium">
-              {t("profile.createdBy")}{" "}
+              Creado por:{" "}
               <a href="https://www.instagram.com/ivjmm.0109/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
                 <ExternalLink size={14} strokeWidth={2} />
                 Ivn Mtz

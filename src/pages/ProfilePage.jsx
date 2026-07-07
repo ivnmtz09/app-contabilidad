@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Globe } from "lucide-react";
+import { ArrowLeft, Save, LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -9,18 +9,33 @@ import { toast } from "react-hot-toast";
 function ProfilePage({ user }) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const [currency, setCurrency] = useState("COP");
+
   const [language, setLanguage] = useState(i18n.language);
+  const [theme, setTheme] = useState(
+    document.documentElement.classList.contains("dark") ? "dark" : "light"
+  );
+
+  const hasChanges =
+    language !== i18n.language ||
+    theme !==
+      (document.documentElement.classList.contains("dark") ? "dark" : "light");
 
   const handleSavePreferences = () => {
-    toast.success(t("profile.preferences") + " " + t("profile.saveChanges").toLowerCase());
-  };
+    if (language !== i18n.language) {
+      i18n.changeLanguage(language);
+      localStorage.setItem("lang", language);
+    }
 
-  const handleLanguageChange = (e) => {
-    const lang = e.target.value;
-    setLanguage(lang);
-    i18n.changeLanguage(lang);
-    localStorage.setItem("lang", lang);
+    const currentIsDark = document.documentElement.classList.contains("dark");
+    if (theme === "dark" && !currentIsDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else if (theme === "light" && currentIsDark) {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+
+    toast.success(t("profile.success"));
   };
 
   return (
@@ -69,40 +84,43 @@ function ProfilePage({ user }) {
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-sans font-medium text-zinc-500 dark:text-zinc-400">
-                {t("profile.currency")}
-              </label>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-900 dark:text-zinc-50 focus:ring-2 focus:ring-violet-500 outline-none transition-all"
-              >
-                <option value="COP">COP - Peso Colombiano</option>
-                <option value="USD">USD - Dólar Estadounidense</option>
-                <option value="EUR">EUR - Euro</option>
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-sans font-medium text-zinc-500 dark:text-zinc-400">
-                <Globe size={14} className="inline mr-1" />
                 {t("profile.language")}
               </label>
               <select
                 value={language}
-                onChange={handleLanguageChange}
+                onChange={(e) => setLanguage(e.target.value)}
                 className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-900 dark:text-zinc-50 focus:ring-2 focus:ring-violet-500 outline-none transition-all"
               >
                 <option value="es">Español</option>
                 <option value="en">English</option>
               </select>
             </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-sans font-medium text-zinc-500 dark:text-zinc-400">
+                {t("profile.theme")}
+              </label>
+              <select
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-900 dark:text-zinc-50 focus:ring-2 focus:ring-violet-500 outline-none transition-all"
+              >
+                <option value="light">{t("profile.light")}</option>
+                <option value="dark">{t("profile.dark")}</option>
+              </select>
+            </div>
           </div>
 
           <button
             onClick={handleSavePreferences}
-            className="w-full font-sans font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer text-white bg-violet-600 hover:bg-violet-700 mt-4"
+            disabled={!hasChanges}
+            className={`flex items-center justify-center gap-2 w-full p-3 rounded-xl font-semibold transition-colors mt-4 ${
+              hasChanges
+                ? "bg-violet-600 hover:bg-violet-700 text-white cursor-pointer"
+                : "bg-zinc-300 dark:bg-zinc-800 text-zinc-500 cursor-not-allowed"
+            }`}
           >
-            {t("profile.saveChanges")}
+            <Save size={18} /> {t("profile.save")}
           </button>
         </div>
 
@@ -110,7 +128,7 @@ function ProfilePage({ user }) {
           onClick={() => signOut(auth)}
           className="w-full flex items-center justify-center gap-2 font-sans font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer text-white bg-rose-500 hover:bg-rose-600"
         >
-          {t("profile.logout")}
+          <LogOut size={18} /> {t("profile.logout")}
         </button>
       </main>
     </div>

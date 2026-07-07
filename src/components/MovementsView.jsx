@@ -1,8 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../utils/format";
 
 function MovementsView({ transactions, accounts }) {
+  const { t, i18n } = useTranslation();
+
   const grouped = transactions.reduce((acc, t) => {
-    const dateKey = new Date(t.date).toLocaleDateString("es-CO", {
+    const dateKey = new Date(t.date).toLocaleDateString(i18n.language, {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -17,29 +20,29 @@ function MovementsView({ transactions, accounts }) {
     return acc ? acc.name : id;
   };
 
-  const todayStr = new Date().toLocaleDateString("es-CO", {
+  const todayStr = new Date().toLocaleDateString(i18n.language, {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toLocaleDateString("es-CO", {
+  const yesterdayStr = yesterday.toLocaleDateString(i18n.language, {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
   const formatLabel = (key) => {
-    if (key === todayStr) return "Hoy";
-    if (key === yesterdayStr) return "Ayer";
+    if (key === todayStr) return t("movements.today");
+    if (key === yesterdayStr) return t("movements.yesterday");
     return key;
   };
 
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">
-        Todos los Movimientos
+        {t("movements.title")}
       </h2>
 
       {transactions.length === 0 ? (

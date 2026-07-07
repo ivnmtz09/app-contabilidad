@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Routes, Route } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { onAuthStateChanged } from "firebase/auth";
@@ -185,12 +186,14 @@ function App() {
     .filter((t) => t.type === "egreso" && new Date(t.date) >= monthStart)
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const renderHomeDashboard = () => (
+  const renderHomeDashboard = () => {
+    const { t } = useTranslation();
+    return (
     <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
-            Balance Total
+            {t('home.totalBalance')}
           </p>
           <p className="text-4xl md:text-5xl font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
             ${formatCurrency(totalBalance)}
@@ -200,13 +203,13 @@ function App() {
           onClick={() => setIsMenuOpen(true)}
           className="w-full md:w-auto bg-violet-600 hover:bg-violet-700 text-white font-sans font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer"
         >
-          + Añadir movimiento
+          {t('home.addMovement')}
         </button>
       </div>
 
       <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
         <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
-          Ingresos del mes
+          {t('home.monthIncome')}
         </p>
         <p className="text-2xl md:text-3xl font-display font-bold text-emerald-500">
           ${formatCurrency(monthIncome)}
@@ -215,7 +218,7 @@ function App() {
 
       <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
         <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
-          Egresos del mes
+          {t('home.monthExpense')}
         </p>
         <p className="text-2xl md:text-3xl font-display font-bold text-rose-500">
           ${formatCurrency(monthExpense)}
@@ -224,19 +227,19 @@ function App() {
 
       <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-4 flex justify-around text-center">
         <div>
-          <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Día</p>
+            <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">{t('home.day')}</p>
           <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
             ${formatCurrency(todaySum)}
           </p>
         </div>
         <div>
-          <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Semana</p>
+            <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">{t('home.week')}</p>
           <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
             ${formatCurrency(weekSum)}
           </p>
         </div>
         <div>
-          <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">Mes</p>
+            <p className="text-xs font-display font-semibold text-zinc-400 dark:text-zinc-500 uppercase">{t('home.month')}</p>
           <p className="text-sm font-display font-bold text-zinc-800 dark:text-zinc-200">
             ${formatCurrency(monthSum)}
           </p>
@@ -266,11 +269,11 @@ function App() {
 
       <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm p-6">
         <h3 className="text-lg font-display font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
-          Últimos Movimientos
+          {t('home.recent')}
         </h3>
         {transactions.length === 0 ? (
           <p className="text-sm font-sans text-zinc-400 dark:text-zinc-500 text-center py-8">
-            Sin transacciones recientes
+            {t('home.noRecent')}
           </p>
         ) : (
           <ul className="space-y-3">
@@ -308,6 +311,7 @@ function App() {
       </div>
     </div>
   );
+  };
 
   if (isLoading) return <SplashScreen />;
   if (!user) return <Login />;
