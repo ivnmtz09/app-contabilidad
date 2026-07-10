@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { X, User, ExternalLink, Code, Info, LogOut, Download } from "lucide-react";
+import { X, ExternalLink, Code, Info, LogOut, Download } from "lucide-react";
 import AboutModal from "../components/AboutModal";
 import { useTranslation } from "react-i18next";
 import { signOut } from "firebase/auth";
@@ -25,11 +24,6 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
-
-  const handleProfile = () => {
-    navigate('/perfil');
-    onClose();
-  };
 
   const handleExport = () => setShowExportConfirm(true);
 
@@ -74,17 +68,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
               </button>
             </div>
 
-            <nav className="px-4 grid grid-cols-2 gap-2">
-              <button
-                onClick={handleProfile}
-                className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
-              >
-                <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-xl text-violet-600 dark:text-violet-400">
-                  <User size={20} />
-                </div>
-                <span className="text-xs font-sans font-medium text-zinc-700 dark:text-zinc-300">{t("profile.title")}</span>
-              </button>
-
+            <nav className="px-4 grid grid-cols-1 gap-2">
               <button
                 onClick={handleExport}
                 className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"

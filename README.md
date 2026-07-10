@@ -1,29 +1,27 @@
-# MisCuentaZ (Beta)
+# MisCuentaZ
 
-Una Progressive Web App (PWA) moderna e intuitiva diseñada para llevar el control absoluto de tus finanzas personales, construida con React y Tailwind CSS v4.
+Un centro de comando financiero personal diseñado para ser rápido, seguro y altamente responsivo. Gestiona tus ingresos, egresos, y visualiza tu balance en tiempo real con una interfaz moderna basada en Glassmorphism y Bento Grid.
 
-## Características Destacadas
-* **Diseño Bento Grid:** Interfaz moderna, modular y completamente responsiva, con soporte nativo para Light/Dark Mode y efectos Glassmorphism.
-* **Gestión Multicuenta:** Registro de ingresos y egresos distribuidos en múltiples billeteras (Bancolombia, Nequi, Nu, Davivienda, etc.) y efectivo.
-* **Cálculo Automático de 4x1000:** Opción para aplicar y sumar automáticamente el impuesto transaccional colombiano en los egresos bancarios.
-* **Análisis Visual (Recharts):** Gráficos interactivos de área para visualizar el historial de balances y estadísticas dinámicas por día, semana y mes.
-* **Exportación Profesional (SheetJS):** Descarga de todos los movimientos generados directamente en un archivo `.xlsx` estructurado.
-* **Seguridad y Persistencia:** Autenticación de usuarios mediante Google Auth (Firebase) y persistencia temporal de datos en localStorage.
+## Características Principales (Features)
+- **Gestión Diaria**: Registro rápido de ingresos y egresos.
+- **Multilenguaje (i18n)**: Soporte completo para Español e Inglés.
+- **Temas**: Soporte adaptativo para Modo Claro y Modo Oscuro con persistencia local.
+- **Nube Segura**: Sincronización en tiempo real utilizando Firebase y Firestore.
+- **Exportación**: Generación de reportes financieros avanzados en Excel.
+- **Próximamente**: Gestión de Suscripciones Recurrentes, Metas de Ahorro y Control de Deudas.
 
-## Instalación y Configuración Local
+## Stack Tecnológico
+- **Frontend**: React + Vite
+- **Estilos**: Tailwind CSS v4
+- **Iconografía**: Lucide React
+- **Base de Datos & Auth**: Google Firebase
+- **Internacionalización**: i18next
 
-1. Clona este repositorio:
-   ```bash
-   git clone https://github.com/ivnmtz09/app-contabilidad.git
-   ```
-2. Instala las dependencias:
-   ```bash
-   npm install
-   ```
-3. Configura las variables de entorno:
-   - Copia el archivo `.env.example` y renómbralo a `.env`.
-   - Reemplaza los valores con las credenciales de tu propio proyecto de Firebase.
-4. Ejecuta el servidor en tu red local:
-   ```bash
-   npm run dev
-   ```
+## Instalación y Desarrollo
+1. Clona este repositorio.
+2. Instala las dependencias con `npm install`.
+3. Configura tus variables de entorno de Firebase en `.env`.
+4. Inicia el servidor de desarrollo con `npm run dev`.
+
+---
+*Diseñado y desarrollado para el control total de tus finanzas.*

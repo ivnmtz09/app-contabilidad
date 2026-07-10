@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, ArrowUpCircle, ArrowDownCircle, Pencil, Trash2, Ban } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Routes, Route } from "react-router-dom";
+import { useNavigate, Routes, Route } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./firebase";
@@ -20,7 +20,7 @@ import Logo from "./components/Logo";
 import BottomNav from "./layout/BottomNav";
 import { formatCurrency } from "./utils/format";
 import TransactionMenuModal from "./components/TransactionMenuModal";
-import { RecurrentesView, MetasView } from "./components/PlaceholderViews";
+import { RecurrentesView, MetasView, DeudasView } from "./components/PlaceholderViews";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -37,6 +37,7 @@ function App() {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -239,6 +240,25 @@ function App() {
   const renderHomeDashboard = () => {
     return (
     <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <div className="md:col-span-2">
+        <header className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-display font-bold text-zinc-900 dark:text-zinc-50">MisCuentaZ</h1>
+          </div>
+          <button
+            onClick={() => navigate('/perfil')}
+            className="w-10 h-10 rounded-full overflow-hidden border-2 border-zinc-200 dark:border-zinc-700 hover:border-violet-500 transition-colors cursor-pointer"
+          >
+            {user?.photoURL ? (
+              <img src={user.photoURL} alt="Perfil" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-violet-600 flex items-center justify-center text-white font-bold">
+                {user?.displayName?.charAt(0) || 'U'}
+              </div>
+            )}
+          </button>
+        </header>
+      </div>
       <div className="md:col-span-2 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 font-display font-semibold">
@@ -415,6 +435,7 @@ function App() {
           <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} handleDeleteTransaction={handleDeleteTransaction} onEdit={openEditModal} onAnnul={handleAnnulTransaction} />} />
           <Route path="/recurrentes" element={<RecurrentesView />} />
           <Route path="/metas" element={<MetasView />} />
+          <Route path="/deudas" element={<DeudasView />} />
           <Route path="/perfil" element={<ProfilePage user={user} />} />
         </Routes>
       </main>

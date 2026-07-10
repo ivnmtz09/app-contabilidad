@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Wallet, TrendingUp, CalendarClock, Target, X } from 'lucide-react';
+import { Wallet, TrendingUp, CalendarClock, Target, CreditCard, X } from 'lucide-react';
 
 export default function AboutModal({ isOpen, onClose }) {
   const { t } = useTranslation();
@@ -45,6 +45,13 @@ export default function AboutModal({ isOpen, onClose }) {
               <div>
                 <h4 className="font-bold text-zinc-900 dark:text-zinc-50">{t('about.f4.title')}</h4>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{t('about.f4.desc')}</p>
+              </div>
+            </div>
+            <div className="flex gap-4 opacity-75">
+              <div className="mt-1 bg-amber-100 dark:bg-amber-900/30 p-2.5 rounded-2xl h-fit text-amber-600 dark:text-amber-400"><CreditCard size={22} /></div>
+              <div>
+                <h4 className="font-bold text-zinc-900 dark:text-zinc-50">{t('about.f5.title')}</h4>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{t('about.f5.desc')}</p>
               </div>
             </div>
           </div>

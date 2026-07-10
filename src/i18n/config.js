@@ -66,7 +66,11 @@ const resources = {
       "about.close": "Entendido",
       "crud.edit": "Editar",
       "crud.delete": "Eliminar",
-      "crud.annul": "Anular"
+      "crud.annul": "Anular",
+      "debts.title": "Gestión de Deudas",
+      "debts.desc": "Próximamente: Registra a quién le debes y quién te debe dinero.",
+      "about.f5.title": "Gestión de Deudas (Próximamente)",
+      "about.f5.desc": "Lleva un registro claro de tus préstamos y deudas pendientes."
     }
   },
   en: {
@@ -133,7 +137,11 @@ const resources = {
       "about.close": "Got it",
       "crud.edit": "Edit",
       "crud.delete": "Delete",
-      "crud.annul": "Annul"
+      "crud.annul": "Annul",
+      "debts.title": "Debt Management",
+      "debts.desc": "Coming soon: Keep track of who you owe and who owes you.",
+      "about.f5.title": "Debt Management (Soon)",
+      "about.f5.desc": "Keep a clear record of your loans and pending debts."
     }
   }
 };
