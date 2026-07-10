@@ -53,13 +53,15 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
               </button>
             </div>
 
-            <nav className="px-4 space-y-1">
+            <nav className="px-4 grid grid-cols-2 gap-2">
               <button
                 onClick={handleProfile}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
               >
-                <User size={18} />
-                {t("profile.title")}
+                <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-xl text-violet-600 dark:text-violet-400">
+                  <User size={20} />
+                </div>
+                <span className="text-xs font-sans font-medium text-zinc-700 dark:text-zinc-300">{t("profile.title")}</span>
               </button>
 
               <button
@@ -67,32 +69,41 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
                   exportToExcel(transactions, accounts);
                   onClose();
                 }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
               >
-                <Download size={18} />
-                Exportar a Excel
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
+                  <Download size={20} />
+                </div>
+                <span className="text-xs font-sans font-medium text-zinc-700 dark:text-zinc-300">Exportar</span>
               </button>
 
+            </nav>
+          </div>
+
+          <div className="border-t border-zinc-200 dark:border-zinc-800 p-4 mt-auto">
+            <div className="grid grid-cols-2 gap-2 mb-3">
               <button
                 onClick={() => setIsAboutOpen(true)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors font-medium"
+                className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
               >
-                <Info size={22} />
-                {t('drawer.about')}
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                  <Info size={20} />
+                </div>
+                <span className="text-xs font-sans font-medium text-zinc-600 dark:text-zinc-400">{t('drawer.about')}</span>
               </button>
 
               <button
                 onClick={() => signOut(auth)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors cursor-pointer"
+                className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
               >
-                <LogOut size={18} />
-                {t("profile.logout")}
+                <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-xl text-rose-600 dark:text-rose-400">
+                  <LogOut size={20} />
+                </div>
+                <span className="text-xs font-sans font-medium text-rose-600 dark:text-rose-400">{t("profile.logout")}</span>
               </button>
-            </nav>
-          </div>
+            </div>
 
-          <div className="border-t border-zinc-200 dark:border-zinc-800 p-6 mt-auto">
-            <span className="block text-sm text-zinc-500 dark:text-zinc-400 mb-2 font-medium">
+            <span className="block text-sm text-zinc-500 dark:text-zinc-400 font-medium">
               Creado por:{" "}
               <a href="https://www.instagram.com/ivjmm.0109/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
                 <ExternalLink size={14} strokeWidth={2} />
