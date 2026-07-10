@@ -12,6 +12,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [showExportConfirm, setShowExportConfirm] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -29,9 +30,10 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
     onClose();
   };
 
-  const handleExport = async () => {
-    const confirmed = window.confirm('¿Exportar todos los movimientos a Excel?');
-    if (!confirmed) return;
+  const handleExport = () => setShowExportConfirm(true);
+
+  const handleExportConfirm = async () => {
+    setShowExportConfirm(false);
     try {
       await exportToExcel(transactions, accounts);
       toast.success('Reporte exportado correctamente');
@@ -129,6 +131,33 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
       </aside>
 
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+
+      {showExportConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setShowExportConfirm(false)}>
+          <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <h3 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50 mb-2">Exportar movimientos</h3>
+              <p className="text-sm font-sans text-zinc-500 dark:text-zinc-400">
+                ¿Estás seguro de que deseas exportar todos tus movimientos a un archivo Excel?
+              </p>
+            </div>
+            <div className="flex gap-3 px-6 pb-6">
+              <button
+                onClick={() => setShowExportConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-sans font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleExportConfirm}
+                className="flex-1 py-2.5 rounded-xl text-sm font-sans font-medium bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
+              >
+                Exportar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
