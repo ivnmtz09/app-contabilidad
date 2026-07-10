@@ -278,17 +278,17 @@ function App() {
           </p>
         ) : (
           <ul className="space-y-3">
-            {transactions.slice(0, 5).map((t) => (
-              <li key={t.id} className="group flex items-center justify-between p-3 bg-white dark:bg-zinc-800/50 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700">
+            {transactions.slice(0, 5).map((tx) => (
+              <li key={tx.id} className="group flex items-center justify-between p-3 bg-white dark:bg-zinc-800/50 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700">
                 <div className="flex-1">
                   <div className="flex justify-between items-start mb-1">
-                    <span className="font-medium text-zinc-900 dark:text-zinc-50">{t.description}</span>
-                    <span className={`font-bold ${t.type === 'ingreso' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                      {t.type === 'ingreso' ? '+' : '-'}${Number(t.amount).toLocaleString('es-CO')}
+                    <span className="font-medium text-zinc-900 dark:text-zinc-50">{tx.description}</span>
+                    <span className={`font-bold ${tx.type === 'ingreso' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      {tx.type === 'ingreso' ? '+' : '-'}${Number(tx.amount).toLocaleString('es-CO')}
                     </span>
                   </div>
                   <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                    {accounts.find(a => a.id === t.accountId)?.name || 'Desconocida'} • {new Date(t.date).toLocaleDateString()}
+                    {accounts.find(a => a.id === tx.accountId)?.name || 'Desconocida'} • {new Date(tx.date).toLocaleDateString()}
                   </div>
                 </div>
 
@@ -301,7 +301,7 @@ function App() {
                     <Pencil size={16} />
                   </button>
                   <button
-                    onClick={() => handleDeleteTransaction(t)}
+                    onClick={() => handleDeleteTransaction(tx)}
                     className="p-2 rounded-lg text-zinc-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 transition-colors"
                     title={t('crud.delete')}
                   >

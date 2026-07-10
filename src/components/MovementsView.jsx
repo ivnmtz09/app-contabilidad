@@ -58,25 +58,25 @@ function MovementsView({ transactions, accounts, handleDeleteTransaction }) {
               {formatLabel(dateKey)}
             </p>
             <div className="flex flex-col gap-2">
-              {items.map((t) => (
+              {items.map((tx) => (
                 <div
-                  key={t.id}
+                  key={tx.id}
                   className="group flex items-center justify-between bg-white dark:bg-zinc-800 rounded-2xl p-4 shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
                 >
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-1">
                       <p className="font-medium text-zinc-900 dark:text-zinc-50">
-                        {t.description}
+                        {tx.description}
                       </p>
                       <span
-                        className={`font-bold ${t.type === "ingreso" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}
+                        className={`font-bold ${tx.type === "ingreso" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}
                       >
-                        {t.type === "ingreso" ? "+" : "-"}$
-                        {Number(t.amount).toLocaleString("es-CO")}
+                        {tx.type === "ingreso" ? "+" : "-"}$
+                        {Number(tx.amount).toLocaleString("es-CO")}
                       </span>
                     </div>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      {getAccountName(t.accountId)} • {new Date(t.date).toLocaleDateString()}
+                      {getAccountName(tx.accountId)} • {new Date(tx.date).toLocaleDateString()}
                     </p>
                   </div>
 
@@ -89,7 +89,7 @@ function MovementsView({ transactions, accounts, handleDeleteTransaction }) {
                       <Pencil size={16} />
                     </button>
                     <button
-                      onClick={() => handleDeleteTransaction(t)}
+                      onClick={() => handleDeleteTransaction(tx)}
                       className="p-2 rounded-lg text-zinc-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 transition-colors"
                       title={t("crud.delete")}
                     >
