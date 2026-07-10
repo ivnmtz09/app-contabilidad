@@ -13,6 +13,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
   const { t } = useTranslation();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [showExportConfirm, setShowExportConfirm] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -41,6 +42,11 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
     } catch {
       toast.error('Error al exportar el reporte');
     }
+  };
+
+  const handleLogoutConfirm = () => {
+    setShowLogoutConfirm(false);
+    signOut(auth);
   };
 
   return (
@@ -105,7 +111,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
               </button>
 
               <button
-                onClick={() => signOut(auth)}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
               >
                 <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-xl text-rose-600 dark:text-rose-400">
@@ -153,6 +159,33 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
                 className="flex-1 py-2.5 rounded-xl text-sm font-sans font-medium bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
               >
                 Exportar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setShowLogoutConfirm(false)}>
+          <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <h3 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50 mb-2">{t('profile.logout')}</h3>
+              <p className="text-sm font-sans text-zinc-500 dark:text-zinc-400">
+                ¿Estás seguro de que deseas cerrar sesión? Deberás volver a iniciar sesión con Google para acceder a tus datos.
+              </p>
+            </div>
+            <div className="flex gap-3 px-6 pb-6">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-sans font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleLogoutConfirm}
+                className="flex-1 py-2.5 rounded-xl text-sm font-sans font-medium bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer"
+              >
+                Cerrar sesión
               </button>
             </div>
           </div>
