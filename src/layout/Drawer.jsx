@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, User, ExternalLink, Code, LogOut, Download } from "lucide-react";
+import { X, User, ExternalLink, Code, Info, LogOut, Download } from "lucide-react";
+import AboutModal from "../components/AboutModal";
 import { useTranslation } from "react-i18next";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -9,6 +10,7 @@ import { exportToExcel } from "../utils/exportExcel";
 function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -72,6 +74,14 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
               </button>
 
               <button
+                onClick={() => setIsAboutOpen(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors font-medium"
+              >
+                <Info size={22} />
+                {t('drawer.about')}
+              </button>
+
+              <button
                 onClick={() => signOut(auth)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors cursor-pointer"
               >
@@ -96,6 +106,8 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
           </div>
         </div>
       </aside>
+
+      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </>
   );
 }

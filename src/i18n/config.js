@@ -51,7 +51,19 @@ const resources = {
       "modal.confirm": "Confirmar",
       "modal.back": "Volver",
       "modal.type": "Tipo",
-      "modal.finalAmount": "Monto final"
+      "modal.finalAmount": "Monto final",
+      "drawer.about": "Acerca de MisCuentaZ",
+      "about.title": "Bienvenido a MisCuentaZ",
+      "about.subtitle": "Tu centro de comando financiero personal. Aquí tienes un resumen de lo que puedes hacer:",
+      "about.f1.title": "Control Diario",
+      "about.f1.desc": "Registra ingresos y egresos al instante. El sistema calcula tu balance total en tiempo real.",
+      "about.f2.title": "Análisis Detallado",
+      "about.f2.desc": "Visualiza tus movimientos filtrados por día, semana o mes mediante gráficos interactivos.",
+      "about.f3.title": "Gastos Recurrentes (Próximamente)",
+      "about.f3.desc": "Controla tus suscripciones y pagos fijos para que nunca te tome por sorpresa el fin de mes.",
+      "about.f4.title": "Metas de Ahorro (Próximamente)",
+      "about.f4.desc": "Establece objetivos financieros y aparta dinero virtualmente para cumplirlos.",
+      "about.close": "Entendido"
     }
   },
   en: {
@@ -103,7 +115,19 @@ const resources = {
       "modal.confirm": "Confirm",
       "modal.back": "Back",
       "modal.type": "Type",
-      "modal.finalAmount": "Final amount"
+      "modal.finalAmount": "Final amount",
+      "drawer.about": "About MisCuentaZ",
+      "about.title": "Welcome to MisCuentaZ",
+      "about.subtitle": "Your personal financial command center. Here is a summary of what you can do:",
+      "about.f1.title": "Daily Control",
+      "about.f1.desc": "Record incomes and expenses instantly. The system calculates your total balance in real time.",
+      "about.f2.title": "Detailed Analysis",
+      "about.f2.desc": "Visualize your filtered movements by day, week, or month using interactive charts.",
+      "about.f3.title": "Recurring Expenses (Soon)",
+      "about.f3.desc": "Track your subscriptions and fixed payments so you are never surprised at the end of the month.",
+      "about.f4.title": "Savings Goals (Soon)",
+      "about.f4.desc": "Set financial objectives and set aside money virtually to achieve them.",
+      "about.close": "Got it"
     }
   }
 };
