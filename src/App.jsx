@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, ArrowUpCircle, ArrowDownCircle, Pencil, Trash2 } from "lucide-react";
+import { Menu, ArrowUpCircle, ArrowDownCircle, Pencil, Trash2, Ban } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Routes, Route } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
@@ -31,6 +31,7 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState("ingreso");
+  const [editTransaction, setEditTransaction] = useState(null);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -98,31 +99,53 @@ function App() {
   const handleSaveTransaction = async (data) => {
     if (!user) return;
     try {
+      const finalAmount = Number(data.amount);
+      const isEditing = !!data.id;
+
       const transactionData = {
-        amount: Number(data.amount),
+        amount: finalAmount,
         description: data.description || "Sin descripción",
         accountId: data.accountId,
         type: data.type,
-        date: data.date || new Date().toISOString()
+        date: data.date || new Date().toISOString(),
       };
 
-      console.log("Intentando guardar en Firestore:", transactionData);
-      await addDoc(collection(db, `users/${user.uid}/transactions`), transactionData);
+      if (isEditing) {
+        const oldTx = data.oldTransaction;
+        const oldAccount = accounts.find((a) => a.id === oldTx.accountId);
 
-      const account = accounts.find((a) => a.id === data.accountId);
-      if (account) {
-        const currentBalance = Number(account.balance) || 0;
-        const newBalance = transactionData.type === "ingreso"
-          ? currentBalance + transactionData.amount
-          : currentBalance - transactionData.amount;
+        if (oldAccount) {
+          const oldBal = Number(oldAccount.balance) || 0;
+          const revBal = oldTx.type === "ingreso" ? oldBal - oldTx.amount : oldBal + oldTx.amount;
+          await updateDoc(doc(db, "users", user.uid, "accounts", oldTx.accountId), { balance: revBal });
+        }
 
-        const accountRef = doc(db, "users", user.uid, "accounts", data.accountId);
-        await updateDoc(accountRef, { balance: newBalance });
+        const newAccount = accounts.find((a) => a.id === data.accountId);
+        if (newAccount) {
+          const baseBal = oldAccount && oldAccount.id === newAccount.id
+            ? (oldTx.type === "ingreso" ? Number(oldAccount.balance) - oldTx.amount : Number(oldAccount.balance) + oldTx.amount)
+            : Number(newAccount.balance) || 0;
+          const newBal = data.type === "ingreso" ? baseBal + finalAmount : baseBal - finalAmount;
+          await updateDoc(doc(db, "users", user.uid, "accounts", data.accountId), { balance: newBal });
+        }
+
+        await updateDoc(doc(db, `users/${user.uid}/transactions`, data.id), transactionData);
+        toast.success("Movimiento actualizado");
       } else {
-        console.warn("No se actualizó el saldo: ID de cuenta no encontrado en el estado local", data.accountId);
+        await addDoc(collection(db, `users/${user.uid}/transactions`), transactionData);
+
+        const account = accounts.find((a) => a.id === data.accountId);
+        if (account) {
+          const currentBalance = Number(account.balance) || 0;
+          const newBalance = transactionData.type === "ingreso"
+            ? currentBalance + transactionData.amount
+            : currentBalance - transactionData.amount;
+          await updateDoc(doc(db, "users", user.uid, "accounts", data.accountId), { balance: newBalance });
+        }
+        toast.success("Movimiento registrado");
       }
 
-      toast.success("Movimiento registrado");
+      setEditTransaction(null);
       setTransactionModalOpen(false);
     } catch (err) {
       console.error("Error fatal al guardar la transacción:", err);
@@ -147,6 +170,31 @@ function App() {
       console.error("Error al eliminar:", err);
       toast.error("Error al eliminar el movimiento");
     }
+  };
+
+  const handleAnnulTransaction = async (transaction) => {
+    if (!window.confirm(`¿Anular el movimiento "${transaction.description}"?`)) return;
+    try {
+      await deleteDoc(doc(db, `users/${user.uid}/transactions`, transaction.id));
+      const account = accounts.find((a) => a.id === transaction.accountId);
+      if (account) {
+        const currentBalance = Number(account.balance) || 0;
+        const newBalance = transaction.type === "ingreso"
+          ? currentBalance - transaction.amount
+          : currentBalance + transaction.amount;
+        await updateDoc(doc(db, "users", user.uid, "accounts", transaction.accountId), { balance: newBalance });
+      }
+      toast.success("Movimiento anulado correctamente");
+    } catch (err) {
+      console.error("Error al anular:", err);
+      toast.error("Error al anular el movimiento");
+    }
+  };
+
+  const openEditModal = (transaction) => {
+    setEditTransaction(transaction);
+    setTransactionType(transaction.type);
+    setTransactionModalOpen(true);
   };
 
   const handleSelectAction = (type) => {
@@ -294,7 +342,7 @@ function App() {
 
                 <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-3">
                   <button
-                    onClick={() => toast.error("Edición en desarrollo")}
+                    onClick={() => openEditModal(tx)}
                     className="p-2 rounded-lg text-zinc-400 hover:bg-violet-100 hover:text-violet-600 dark:hover:bg-violet-900/30 dark:hover:text-violet-400 transition-colors"
                     title={t('crud.edit')}
                   >
@@ -306,6 +354,13 @@ function App() {
                     title={t('crud.delete')}
                   >
                     <Trash2 size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleAnnulTransaction(tx)}
+                    className="p-2 rounded-lg text-zinc-400 hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/30 dark:hover:text-amber-400 transition-colors"
+                    title={t('crud.annul')}
+                  >
+                    <Ban size={16} />
                   </button>
                 </div>
               </li>
@@ -357,7 +412,7 @@ function App() {
       <main className="p-4 md:p-8">
         <Routes>
           <Route path="/" element={!isDataLoaded ? <HomeSkeleton /> : renderHomeDashboard()} />
-          <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} handleDeleteTransaction={handleDeleteTransaction} />} />
+          <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} handleDeleteTransaction={handleDeleteTransaction} onEdit={openEditModal} onAnnul={handleAnnulTransaction} />} />
           <Route path="/recurrentes" element={<RecurrentesView />} />
           <Route path="/metas" element={<MetasView />} />
           <Route path="/perfil" element={<ProfilePage user={user} />} />
@@ -372,10 +427,14 @@ function App() {
 
       <TransactionModal
         isOpen={transactionModalOpen}
-        onClose={() => setTransactionModalOpen(false)}
+        onClose={() => {
+          setTransactionModalOpen(false);
+          setEditTransaction(null);
+        }}
         onSave={handleSaveTransaction}
         type={transactionType}
         accounts={accounts}
+        editTransaction={editTransaction}
       />
 
       <TransactionMenuModal

@@ -1,19 +1,17 @@
-import { Pencil, Trash2 } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { Pencil, Trash2, Ban } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { formatCurrency } from "../utils/format";
 
-function MovementsView({ transactions, accounts, handleDeleteTransaction }) {
+function MovementsView({ transactions, accounts, handleDeleteTransaction, onEdit, onAnnul }) {
   const { t, i18n } = useTranslation();
 
-  const grouped = transactions.reduce((acc, t) => {
-    const dateKey = new Date(t.date).toLocaleDateString(i18n.language, {
+  const grouped = transactions.reduce((acc, tx) => {
+    const dateKey = new Date(tx.date).toLocaleDateString(i18n.language, {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
     if (!acc[dateKey]) acc[dateKey] = [];
-    acc[dateKey].push(t);
+    acc[dateKey].push(tx);
     return acc;
   }, {});
 
@@ -82,7 +80,7 @@ function MovementsView({ transactions, accounts, handleDeleteTransaction }) {
 
                   <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-3">
                     <button
-                      onClick={() => toast.error("Edición en desarrollo")}
+                      onClick={() => onEdit(tx)}
                       className="p-2 rounded-lg text-zinc-400 hover:bg-violet-100 hover:text-violet-600 dark:hover:bg-violet-900/30 dark:hover:text-violet-400 transition-colors"
                       title={t("crud.edit")}
                     >
@@ -94,6 +92,13 @@ function MovementsView({ transactions, accounts, handleDeleteTransaction }) {
                       title={t("crud.delete")}
                     >
                       <Trash2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => onAnnul(tx)}
+                      className="p-2 rounded-lg text-zinc-400 hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/30 dark:hover:text-amber-400 transition-colors"
+                      title={t("crud.annul")}
+                    >
+                      <Ban size={16} />
                     </button>
                   </div>
                 </div>
