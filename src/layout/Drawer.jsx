@@ -5,6 +5,7 @@ import AboutModal from "../components/AboutModal";
 import { useTranslation } from "react-i18next";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
+import { toast } from "react-hot-toast";
 import { exportToExcel } from "../utils/exportExcel";
 
 function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
@@ -26,6 +27,18 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
   const handleProfile = () => {
     navigate('/perfil');
     onClose();
+  };
+
+  const handleExport = async () => {
+    const confirmed = window.confirm('¿Exportar todos los movimientos a Excel?');
+    if (!confirmed) return;
+    try {
+      await exportToExcel(transactions, accounts);
+      toast.success('Reporte exportado correctamente');
+      onClose();
+    } catch {
+      toast.error('Error al exportar el reporte');
+    }
   };
 
   return (
@@ -65,10 +78,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
               </button>
 
               <button
-                onClick={() => {
-                  exportToExcel(transactions, accounts);
-                  onClose();
-                }}
+                onClick={handleExport}
                 className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
               >
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
