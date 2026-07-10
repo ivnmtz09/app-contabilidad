@@ -8,7 +8,6 @@ import { toast } from "react-hot-toast";
 import { exportToExcel } from "../utils/exportExcel";
 
 function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [showExportConfirm, setShowExportConfirm] = useState(false);
