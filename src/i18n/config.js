@@ -63,7 +63,10 @@ const resources = {
       "about.f3.desc": "Controla tus suscripciones y pagos fijos para que nunca te tome por sorpresa el fin de mes.",
       "about.f4.title": "Metas de Ahorro (Próximamente)",
       "about.f4.desc": "Establece objetivos financieros y aparta dinero virtualmente para cumplirlos.",
-      "about.close": "Entendido"
+      "about.close": "Entendido",
+      "crud.edit": "Editar",
+      "crud.delete": "Eliminar",
+      "crud.annul": "Anular"
     }
   },
   en: {
@@ -127,7 +130,10 @@ const resources = {
       "about.f3.desc": "Track your subscriptions and fixed payments so you are never surprised at the end of the month.",
       "about.f4.title": "Savings Goals (Soon)",
       "about.f4.desc": "Set financial objectives and set aside money virtually to achieve them.",
-      "about.close": "Got it"
+      "about.close": "Got it",
+      "crud.edit": "Edit",
+      "crud.delete": "Delete",
+      "crud.annul": "Annul"
     }
   }
 };

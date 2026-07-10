@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { Menu, ArrowUpCircle, ArrowDownCircle, Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Routes, Route } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
@@ -279,25 +279,35 @@ function App() {
         ) : (
           <ul className="space-y-3">
             {transactions.slice(0, 5).map((t) => (
-              <li
-                key={t.id}
-                onClick={() => handleDeleteTransaction(t)}
-                className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-700 last:border-b-0 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded-lg p-2 transition-colors"
-              >
-                <div>
-                  <p className="font-sans text-sm text-zinc-700 dark:text-zinc-300">
-                    {t.description}
-                  </p>
-                  <p className="font-sans text-xs text-zinc-400">
-                    {accounts.find(a => a.id === t.accountId)?.name || 'Desconocida'}
-                  </p>
+              <li key={t.id} className="group flex items-center justify-between p-3 bg-white dark:bg-zinc-800/50 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700">
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-medium text-zinc-900 dark:text-zinc-50">{t.description}</span>
+                    <span className={`font-bold ${t.type === 'ingreso' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      {t.type === 'ingreso' ? '+' : '-'}${Number(t.amount).toLocaleString('es-CO')}
+                    </span>
+                  </div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {accounts.find(a => a.id === t.accountId)?.name || 'Desconocida'} • {new Date(t.date).toLocaleDateString()}
+                  </div>
                 </div>
-                <span
-                  className={`font-display font-semibold text-sm ${t.type === "ingreso" ? "text-emerald-500" : "text-rose-500"}`}
-                >
-                  {t.type === "ingreso" ? "+" : "-"}$
-                  {formatCurrency(t.amount)}
-                </span>
+
+                <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-3">
+                  <button
+                    onClick={() => toast.error("Edición en desarrollo")}
+                    className="p-2 rounded-lg text-zinc-400 hover:bg-violet-100 hover:text-violet-600 dark:hover:bg-violet-900/30 dark:hover:text-violet-400 transition-colors"
+                    title={t('crud.edit')}
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTransaction(t)}
+                    className="p-2 rounded-lg text-zinc-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 transition-colors"
+                    title={t('crud.delete')}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -347,7 +357,7 @@ function App() {
       <main className="p-4 md:p-8">
         <Routes>
           <Route path="/" element={!isDataLoaded ? <HomeSkeleton /> : renderHomeDashboard()} />
-          <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} />} />
+          <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} handleDeleteTransaction={handleDeleteTransaction} />} />
           <Route path="/recurrentes" element={<RecurrentesView />} />
           <Route path="/metas" element={<MetasView />} />
           <Route path="/perfil" element={<ProfilePage user={user} />} />

@@ -1,7 +1,9 @@
+import { Pencil, Trash2 } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../utils/format";
 
-function MovementsView({ transactions, accounts }) {
+function MovementsView({ transactions, accounts, handleDeleteTransaction }) {
   const { t, i18n } = useTranslation();
 
   const grouped = transactions.reduce((acc, t) => {
@@ -59,24 +61,41 @@ function MovementsView({ transactions, accounts }) {
               {items.map((t) => (
                 <div
                   key={t.id}
-                  className="flex items-center justify-between bg-white dark:bg-zinc-800 rounded-2xl p-4 shadow-sm"
+                  className="group flex items-center justify-between bg-white dark:bg-zinc-800 rounded-2xl p-4 shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
                 >
-                  <div className="flex flex-col gap-0.5">
-                    <p className="font-sans text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                      {t.description}
-                    </p>
-                    <p className="font-sans text-xs text-zinc-400">
-                      {getAccountName(t.accountId)}
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-1">
+                      <p className="font-medium text-zinc-900 dark:text-zinc-50">
+                        {t.description}
+                      </p>
+                      <span
+                        className={`font-bold ${t.type === "ingreso" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}
+                      >
+                        {t.type === "ingreso" ? "+" : "-"}$
+                        {Number(t.amount).toLocaleString("es-CO")}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {getAccountName(t.accountId)} • {new Date(t.date).toLocaleDateString()}
                     </p>
                   </div>
-                  <span
-                    className={`font-display font-semibold text-sm ${
-                      t.type === "ingreso" ? "text-emerald-500" : "text-rose-500"
-                    }`}
-                  >
-                    {t.type === "ingreso" ? "+" : "-"}$
-                    {formatCurrency(t.amount)}
-                  </span>
+
+                  <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-3">
+                    <button
+                      onClick={() => toast.error("Edición en desarrollo")}
+                      className="p-2 rounded-lg text-zinc-400 hover:bg-violet-100 hover:text-violet-600 dark:hover:bg-violet-900/30 dark:hover:text-violet-400 transition-colors"
+                      title={t("crud.edit")}
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTransaction(t)}
+                      className="p-2 rounded-lg text-zinc-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 transition-colors"
+                      title={t("crud.delete")}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
