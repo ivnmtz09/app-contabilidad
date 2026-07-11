@@ -70,7 +70,15 @@ const resources = {
       "debts.title": "Gestión de Deudas",
       "debts.desc": "Próximamente: Registra a quién le debes y quién te debe dinero.",
       "about.f5.title": "Gestión de Deudas (Próximamente)",
-      "about.f5.desc": "Lleva un registro claro de tus préstamos y deudas pendientes."
+      "about.f5.desc": "Lleva un registro claro de tus préstamos y deudas pendientes.",
+      "recurrent.freq": "Frecuencia",
+      "recurrent.monthly": "Mensual",
+      "recurrent.yearly": "Anual",
+      "recurrent.nextPayment": "Próximo pago",
+      "goals.target": "Monto Objetivo",
+      "goals.saved": "Ahorrado",
+      "goals.addFunds": "Abonar",
+      "goals.progress": "Progreso"
     }
   },
   en: {
@@ -141,7 +149,15 @@ const resources = {
       "debts.title": "Debt Management",
       "debts.desc": "Coming soon: Keep track of who you owe and who owes you.",
       "about.f5.title": "Debt Management (Soon)",
-      "about.f5.desc": "Keep a clear record of your loans and pending debts."
+      "about.f5.desc": "Keep a clear record of your loans and pending debts.",
+      "recurrent.freq": "Frequency",
+      "recurrent.monthly": "Monthly",
+      "recurrent.yearly": "Yearly",
+      "recurrent.nextPayment": "Next payment",
+      "goals.target": "Target Amount",
+      "goals.saved": "Saved",
+      "goals.addFunds": "Add Funds",
+      "goals.progress": "Progress"
     }
   }
 };

@@ -20,7 +20,9 @@ import Logo from "./components/Logo";
 import BottomNav from "./layout/BottomNav";
 import { formatCurrency } from "./utils/format";
 import TransactionMenuModal from "./components/TransactionMenuModal";
-import { RecurrentesView, MetasView, DeudasView } from "./components/PlaceholderViews";
+import { RecurrentesView } from "./components/RecurrentesView";
+import { MetasView } from "./components/MetasView";
+import { DeudasView } from "./components/PlaceholderViews";
 
 function App() {
   const [user, setUser] = useState(null);
