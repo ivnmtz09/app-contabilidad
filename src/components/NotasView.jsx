@@ -14,6 +14,7 @@ export function NotasView() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [viewingNote, setViewingNote] = useState(null);
 
   const modules = {
     toolbar: [
@@ -87,18 +88,30 @@ export function NotasView() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {notes.length === 0 && <p className="col-span-full text-center text-zinc-500 py-10">{t('notes.empty')}</p>}
         {notes.map(note => (
-          <div key={note.id} className="bg-white dark:bg-zinc-900 p-5 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col max-h-64">
+          <div key={note.id} onClick={() => setViewingNote(note)} className="bg-white dark:bg-zinc-900 p-5 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col max-h-64 cursor-pointer hover:ring-2 hover:ring-violet-500 transition-all">
             <div className="flex justify-between items-start mb-3">
               <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-lg line-clamp-1">{note.title}</h3>
               <div className="flex gap-1 shrink-0">
-                <button onClick={() => handleEdit(note)} className="text-zinc-400 hover:text-amber-500 p-1.5 rounded-lg transition-colors"><Pencil size={18}/></button>
-                <button onClick={() => handleDelete(note.id)} className="text-zinc-400 hover:text-rose-500 p-1.5 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                <button onClick={(e) => { e.stopPropagation(); handleEdit(note); }} className="text-zinc-400 hover:text-amber-500 p-1.5 rounded-lg transition-colors"><Pencil size={18}/></button>
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(note.id); }} className="text-zinc-400 hover:text-rose-500 p-1.5 rounded-lg transition-colors"><Trash2 size={18}/></button>
               </div>
             </div>
             <div className="text-sm text-zinc-600 dark:text-zinc-400 overflow-hidden line-clamp-5 quill-content" dangerouslySetInnerHTML={{ __html: note.content }} />
           </div>
         ))}
       </div>
+
+      {viewingNote && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-xl flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950">
+              <h2 className="font-bold text-xl text-zinc-900 dark:text-zinc-50">{viewingNote.title}</h2>
+              <button onClick={() => setViewingNote(null)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1"><X size={24}/></button>
+            </div>
+            <div className="p-6 overflow-y-auto custom-scrollbar quill-content text-zinc-700 dark:text-zinc-300" dangerouslySetInnerHTML={{ __html: viewingNote.content }} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

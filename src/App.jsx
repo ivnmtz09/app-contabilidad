@@ -23,6 +23,7 @@ import TransactionMenuModal from "./components/TransactionMenuModal";
 import { RecurrentesView } from "./components/RecurrentesView";
 import { NotasView } from "./components/NotasView";
 import { DeudasView } from "./components/PlaceholderViews";
+import HomeMetas from "./components/HomeMetas";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -211,6 +212,12 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    const handleOpenMenu = () => setIsMenuOpen(true);
+    window.addEventListener('openMenuModal', handleOpenMenu);
+    return () => window.removeEventListener('openMenuModal', handleOpenMenu);
+  }, []);
+
   const abrirModal = (tipo) => {
     setTransactionType(tipo);
     setTransactionModalOpen(true);
@@ -389,6 +396,10 @@ function App() {
             ))}
           </ul>
         )}
+      </div>
+
+      <div className="md:col-span-2">
+        <HomeMetas />
       </div>
 
       <div className="md:col-span-2">
