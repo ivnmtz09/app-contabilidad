@@ -59,7 +59,7 @@ export function MetasView() {
           <input type="number" placeholder={t('goals.target')} value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} className="w-full sm:w-40 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-violet-500" required />
         </div>
         <button type="submit" disabled={isSubmitting} className="w-full bg-violet-600 hover:bg-violet-700 text-white rounded-xl px-5 py-3 font-semibold flex items-center justify-center gap-2 transition-colors">
-          <Plus size={20}/> Crear Meta
+          <Plus size={20}/> {t('module.add')}
         </button>
       </form>
 
