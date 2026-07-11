@@ -37,7 +37,7 @@ function BalanceChart({ transactions }) {
   return (
     <div className="h-64 w-full mt-4">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <AreaChart data={chartData} margin={{ top: 35, right: 20, left: 10, bottom: 0 }}>
           <defs>
             <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3} />
@@ -45,8 +45,8 @@ function BalanceChart({ transactions }) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={true} stroke="currentColor" className="text-zinc-200 dark:text-zinc-800" />
-          <XAxis dataKey="date" stroke="currentColor" className="text-zinc-500 text-xs font-medium" tickMargin={10} />
-          <YAxis stroke="currentColor" className="text-zinc-500 text-xs font-medium" tickFormatter={(value) => `$${value}`} width={60} />
+          <XAxis dataKey="date" stroke="currentColor" tick={{ fontSize: 11, fill: 'currentColor' }} tickMargin={10} className="text-zinc-500" />
+          <YAxis stroke="currentColor" width={75} tick={{ fontSize: 11, fill: 'currentColor' }} tickFormatter={(value) => `$${value.toLocaleString()}`} className="text-zinc-500" />
           <Area
             type="monotone"
             dataKey="balance"
@@ -60,9 +60,9 @@ function BalanceChart({ transactions }) {
             <LabelList
               dataKey="balance"
               position="top"
-              offset={10}
+              offset={15}
               formatter={(value) => `$${value.toLocaleString()}`}
-              className="fill-zinc-600 dark:fill-zinc-400 text-[10px] font-bold"
+              className="fill-zinc-700 dark:fill-zinc-300 text-[10px] sm:text-xs font-bold"
             />
           </Area>
         </AreaChart>
