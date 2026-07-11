@@ -1,77 +1,58 @@
-import { X, ArrowUpCircle, ArrowDownCircle, HandCoins, Target } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { TrendingUp, TrendingDown, StickyNote, CalendarClock, X } from 'lucide-react';
 
-function TransactionMenuModal({ isOpen, onClose, onSelectOption }) {
+export default function TransactionMenuModal({ isOpen, onClose, onSelectOption }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
-  const options = [
-    {
-      action: "ingreso",
-      label: t("menu.income"),
-      icon: ArrowUpCircle,
-      color: "text-emerald-500",
-      bg: "bg-emerald-50 dark:bg-emerald-900/20",
-    },
-    {
-      action: "egreso",
-      label: t("menu.expense"),
-      icon: ArrowDownCircle,
-      color: "text-rose-500",
-      bg: "bg-rose-50 dark:bg-rose-900/20",
-    },
-    {
-      action: "deuda",
-      label: t("menu.debt"),
-      icon: HandCoins,
-      color: "text-violet-500",
-      bg: "bg-violet-50 dark:bg-violet-900/20",
-    },
-    {
-      action: "meta",
-      label: t("menu.goal"),
-      icon: Target,
-      color: "text-indigo-500",
-      bg: "bg-indigo-50 dark:bg-indigo-900/20",
-    },
-  ];
+  const handleNavigate = (path) => {
+    onClose();
+    navigate(path);
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center">
-      <div className="bg-white dark:bg-zinc-900 w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-6 pb-8 animate-in slide-in-from-bottom-full">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
-            {t("menu.newMovement")}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-          >
-            <X size={18} />
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="w-full max-w-sm bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/50 dark:border-zinc-800/50 rounded-[2.5rem] p-6 shadow-2xl animate-fade-up pb-10 sm:pb-6">
+        <div className="flex justify-between items-center mb-6 px-2">
+          <h2 className="font-display font-bold text-xl text-zinc-900 dark:text-zinc-50">{t('menu.newMovement')}</h2>
+          <button onClick={onClose} className="p-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-full transition-colors">
+            <X size={20}/>
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-6">
-          {options.map((opt) => {
-            const Icon = opt.icon;
-            return (
-              <button
-                key={opt.action}
-                onClick={() => onSelectOption(opt.action)}
-                className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
-              >
-                <Icon size={28} className={opt.color} />
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  {opt.label}
-                </span>
-              </button>
-            );
-          })}
+        <div className="grid grid-cols-2 gap-4">
+          <button onClick={() => { onSelectOption('ingreso'); onClose(); }} className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-zinc-800/80 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-700/50 transition-all hover:scale-[1.02] hover:border-emerald-200 dark:hover:border-emerald-800 group">
+            <div className="bg-emerald-100 dark:bg-emerald-900/30 p-4 rounded-2xl text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+              <TrendingUp size={28}/>
+            </div>
+            <span className="font-bold text-sm text-zinc-700 dark:text-zinc-300">{t('menu.income')}</span>
+          </button>
+
+          <button onClick={() => { onSelectOption('egreso'); onClose(); }} className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-zinc-800/80 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-700/50 transition-all hover:scale-[1.02] hover:border-rose-200 dark:hover:border-rose-800 group">
+            <div className="bg-rose-100 dark:bg-rose-900/30 p-4 rounded-2xl text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform">
+              <TrendingDown size={28}/>
+            </div>
+            <span className="font-bold text-sm text-zinc-700 dark:text-zinc-300">{t('menu.expense')}</span>
+          </button>
+
+          <button onClick={() => handleNavigate('/recurrentes')} className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-zinc-800/80 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-700/50 transition-all hover:scale-[1.02] hover:border-blue-200 dark:hover:border-blue-800 group">
+            <div className="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-2xl text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+              <CalendarClock size={28}/>
+            </div>
+            <span className="font-bold text-sm text-zinc-700 dark:text-zinc-300">{t('menu.recurrent')}</span>
+          </button>
+
+          <button onClick={() => handleNavigate('/notas')} className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-zinc-800/80 hover:bg-amber-50 dark:hover:bg-amber-900/20 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-700/50 transition-all hover:scale-[1.02] hover:border-amber-200 dark:hover:border-amber-800 group">
+            <div className="bg-amber-100 dark:bg-amber-900/30 p-4 rounded-2xl text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
+              <StickyNote size={28}/>
+            </div>
+            <span className="font-bold text-sm text-zinc-700 dark:text-zinc-300">{t('menu.note')}</span>
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
-export default TransactionMenuModal;
