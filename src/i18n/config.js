@@ -16,7 +16,7 @@ const resources = {
       "nav.home": "Inicio",
       "nav.movements": "Movimientos",
       "nav.recurrent": "Recurrentes",
-      "nav.goals": "Metas",
+      "nav.notes": "Notas",
       "home.totalBalance": "Balance Total",
       "home.addMovement": "+ Añadir movimiento",
       "home.monthIncome": "Ingresos del mes",
@@ -93,7 +93,14 @@ const resources = {
       "goals.target": "Monto Objetivo",
       "goals.saved": "Ahorrado",
       "goals.addFunds": "Abonar",
-      "goals.progress": "Progreso"
+      "goals.progress": "Progreso",
+      "notes.title": "Mis Notas",
+      "notes.desc": "Apunta tus ideas, recordatorios financieros o listas de compras.",
+      "notes.add": "Crear Nota",
+      "notes.update": "Actualizar Nota",
+      "notes.cancel": "Cancelar",
+      "notes.titleInput": "Título de la nota...",
+      "notes.empty": "No tienes notas guardadas."
     }
   },
   en: {
@@ -110,7 +117,7 @@ const resources = {
       "nav.home": "Home",
       "nav.movements": "Movements",
       "nav.recurrent": "Recurrent",
-      "nav.goals": "Goals",
+      "nav.notes": "Notes",
       "home.totalBalance": "Total Balance",
       "home.addMovement": "+ Add movement",
       "home.monthIncome": "Monthly Income",
@@ -187,7 +194,14 @@ const resources = {
       "goals.target": "Target Amount",
       "goals.saved": "Saved",
       "goals.addFunds": "Add Funds",
-      "goals.progress": "Progress"
+      "goals.progress": "Progress",
+      "notes.title": "My Notes",
+      "notes.desc": "Write down your ideas, financial reminders, or shopping lists.",
+      "notes.add": "Create Note",
+      "notes.update": "Update Note",
+      "notes.cancel": "Cancel",
+      "notes.titleInput": "Note title...",
+      "notes.empty": "You have no saved notes."
     }
   }
 };

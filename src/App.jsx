@@ -21,7 +21,7 @@ import BottomNav from "./layout/BottomNav";
 import { formatCurrency } from "./utils/format";
 import TransactionMenuModal from "./components/TransactionMenuModal";
 import { RecurrentesView } from "./components/RecurrentesView";
-import { MetasView } from "./components/MetasView";
+import { NotasView } from "./components/NotasView";
 import { DeudasView } from "./components/PlaceholderViews";
 
 function App() {
@@ -436,7 +436,7 @@ function App() {
           <Route path="/" element={!isDataLoaded ? <HomeSkeleton /> : renderHomeDashboard()} />
           <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} handleDeleteTransaction={handleDeleteTransaction} onEdit={openEditModal} onAnnul={handleAnnulTransaction} />} />
           <Route path="/recurrentes" element={<RecurrentesView />} />
-          <Route path="/metas" element={<MetasView />} />
+          <Route path="/notas" element={<NotasView />} />
           <Route path="/deudas" element={<DeudasView />} />
           <Route path="/perfil" element={<ProfilePage user={user} />} />
         </Routes>

@@ -1,4 +1,4 @@
-import { Home, List, CalendarClock, Target } from "lucide-react";
+import { Home, List, CalendarClock, StickyNote } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -11,7 +11,7 @@ function BottomNav() {
     { path: "/", label: t("nav.home"), icon: Home },
     { path: "/movimientos", label: t("nav.movements"), icon: List },
     { path: "/recurrentes", label: t("nav.recurrent"), icon: CalendarClock },
-    { path: "/metas", label: t("nav.goals"), icon: Target },
+    { path: "/notas", label: t("nav.notes"), icon: StickyNote },
   ];
 
   return (

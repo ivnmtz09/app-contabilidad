@@ -14,3 +14,12 @@
     transform: translateX(400%);
   }
 }
+
+.dark .ql-toolbar { border-color: #27272a !important; background-color: #18181b; }
+.dark .ql-container { border-color: #27272a !important; }
+.dark .ql-stroke { stroke: #a1a1aa !important; }
+.dark .ql-fill { fill: #a1a1aa !important; }
+.dark .ql-picker { color: #a1a1aa !important; }
+.quill-content p { margin-bottom: 0.5rem; }
+.quill-content ul { list-style-type: disc; padding-left: 1.5rem; }
+.quill-content ol { list-style-type: decimal; padding-left: 1.5rem; }
