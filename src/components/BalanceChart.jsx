@@ -5,7 +5,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  LabelList,
 } from "recharts";
 
 function BalanceChart({ transactions }) {
@@ -44,35 +44,27 @@ function BalanceChart({ transactions }) {
               <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#52525b" opacity={0.2} />
-          <XAxis
-            dataKey="date"
-            tick={{ fontSize: 11, fill: "#a1a1aa" }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis
-            tick={{ fontSize: 11, fill: "#a1a1aa" }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "var(--tooltip-bg, #fff)",
-              border: "none",
-              borderRadius: "12px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              fontSize: "13px",
-            }}
-            labelStyle={{ fontWeight: 600 }}
-          />
+          <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={true} stroke="currentColor" className="text-zinc-200 dark:text-zinc-800" />
+          <XAxis dataKey="date" stroke="currentColor" className="text-zinc-500 text-xs font-medium" tickMargin={10} />
+          <YAxis stroke="currentColor" className="text-zinc-500 text-xs font-medium" tickFormatter={(value) => `$${value}`} width={60} />
           <Area
             type="monotone"
             dataKey="balance"
             stroke="#7c3aed"
-            strokeWidth={2}
+            strokeWidth={3}
             fill="url(#balanceGradient)"
-          />
+            isAnimationActive={false}
+            dot={{ fill: "#8b5cf6", stroke: "#fff", strokeWidth: 2, r: 5 }}
+            activeDot={false}
+          >
+            <LabelList
+              dataKey="balance"
+              position="top"
+              offset={10}
+              formatter={(value) => `$${value.toLocaleString()}`}
+              className="fill-zinc-600 dark:fill-zinc-400 text-[10px] font-bold"
+            />
+          </Area>
         </AreaChart>
       </ResponsiveContainer>
     </div>
