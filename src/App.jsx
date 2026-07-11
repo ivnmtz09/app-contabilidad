@@ -436,7 +436,6 @@ function App() {
             <span className="font-display font-bold text-zinc-900 dark:text-zinc-50">
               MisCuentaZ
             </span>
-          </div>
         </div>
         <ProgressBar isLoading={isLoading} />
       </header>
@@ -477,7 +476,7 @@ function App() {
       />
 
       <Toaster position="top-center" />
-      <BottomNav />
+      <BottomNav hidden={isDrawerOpen} />
     </div>
   );
 }

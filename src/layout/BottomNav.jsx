@@ -2,10 +2,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Home, List, Plus, CalendarClock, StickyNote } from 'lucide-react';
 
-export default function BottomNav() {
+export default function BottomNav({ hidden }) {
   const { t } = useTranslation();
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
+
+  if (hidden) return null;
 
   return (
     <div className="fixed bottom-4 sm:bottom-6 left-4 right-4 z-50 flex justify-center pointer-events-none">
