@@ -65,7 +65,7 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts, editTransac
 
   return (
     <div className="fixed inset-0 z-[60] flex justify-center items-start sm:items-center pt-2 sm:pt-0 bg-black/40 backdrop-blur-sm px-2 sm:px-0" onClick={handleClose}>
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-3xl shadow-xl flex flex-col max-h-[90vh] mt-2 sm:mt-0 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] mt-2 sm:mt-0 overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-5 pb-0">
           <div className="flex items-center gap-2">
             {editTransaction && (

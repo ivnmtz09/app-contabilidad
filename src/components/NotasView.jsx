@@ -103,8 +103,8 @@ export function NotasView() {
 
       {viewingNote && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-xl flex flex-col max-h-[90vh] overflow-hidden">
-            <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950">
+          <div className="w-full max-w-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="p-4 border-b border-zinc-200/50 dark:border-zinc-800/50 flex justify-between items-center bg-white/50 dark:bg-zinc-900/50">
               <h2 className="font-bold text-xl text-zinc-900 dark:text-zinc-50">{viewingNote.title}</h2>
               <button onClick={() => setViewingNote(null)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1"><X size={24}/></button>
             </div>

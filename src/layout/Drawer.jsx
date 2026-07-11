@@ -52,7 +52,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-700 shadow-lg z-50 transform transition-transform ${
+        className={`fixed top-0 left-0 h-full w-72 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border-r border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl z-50 transform transition-transform duration-300 flex flex-col ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -113,7 +113,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500 font-mono">
               <Code size={12} strokeWidth={2} />
-              v 1.2.1
+              v 1.3.1
             </span>
           </div>
         </div>

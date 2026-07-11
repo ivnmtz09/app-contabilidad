@@ -424,8 +424,7 @@ function App() {
         accounts={accounts}
       />
 
-      <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-zinc-50/80 dark:bg-zinc-900/80 border-b border-zinc-200 dark:border-zinc-800">
-        <div className="p-4 flex justify-between items-center">
+      <header className="sticky top-0 z-40 bg-zinc-50/70 dark:bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 px-4 sm:px-6 py-4 flex justify-between items-center -mx-4 sm:-mx-6 mb-6">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsDrawerOpen(true)}
