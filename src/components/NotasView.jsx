@@ -15,6 +15,7 @@ export function NotasView() {
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewingNote, setViewingNote] = useState(null);
+  const [showEditor, setShowEditor] = useState(false);
 
   const modules = {
     toolbar: [
@@ -50,11 +51,17 @@ export function NotasView() {
   };
 
   const handleEdit = (note) => {
-    setEditingId(note.id); setTitle(note.title); setContent(note.content);
+    setEditingId(note.id); setTitle(note.title); setContent(note.content); setShowEditor(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const resetForm = () => { setEditingId(null); setTitle(''); setContent(''); };
+  const resetForm = () => { setEditingId(null); setTitle(''); setContent(''); setShowEditor(false); };
+
+  const handleNewNote = () => {
+    resetForm();
+    setShowEditor(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleDelete = async (id) => {
     if(window.confirm("¿Eliminar esta nota?")) {
@@ -72,18 +79,24 @@ export function NotasView() {
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="bg-white dark:bg-zinc-900 p-4 sm:p-5 rounded-3xl shadow-sm border border-zinc-200 dark:border-zinc-800 mb-8">
-        <input type="text" placeholder={t('notes.titleInput')} value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-t-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500 font-bold text-lg text-zinc-900 dark:text-zinc-50" required />
-        <div className="bg-white dark:bg-zinc-900 border-x border-b border-zinc-200 dark:border-zinc-700 rounded-b-xl overflow-hidden mb-4">
-          <ReactQuill className="text-zinc-900 dark:text-zinc-50 min-h-[150px]" modules={modules} onChange={setContent} theme="snow" value={content}/>
-        </div>
-        <div className="flex gap-2 justify-end">
-          {editingId && <button type="button" onClick={resetForm} className="px-5 py-2.5 rounded-xl font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 transition-colors">{t('notes.cancel')}</button>}
-          <button type="submit" disabled={isSubmitting} className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl px-6 py-2.5 font-semibold flex items-center justify-center gap-2 transition-colors">
-            {editingId ? <Pencil size={18}/> : <Plus size={18}/>} {editingId ? t('notes.update') : t('notes.add')}
-          </button>
-        </div>
-      </form>
+      {!showEditor ? (
+        <button onClick={handleNewNote} className="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-2xl px-5 py-4 font-semibold flex items-center justify-center gap-2 transition-colors mb-8 shadow-sm">
+          <Plus size={20}/> {t('notes.add') || 'Nueva Nota'}
+        </button>
+      ) : (
+        <form onSubmit={handleSave} className="bg-white dark:bg-zinc-900 p-4 sm:p-5 rounded-3xl shadow-sm border border-zinc-200 dark:border-zinc-800 mb-8">
+          <input type="text" placeholder={t('notes.titleInput')} value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-t-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-500 font-bold text-lg text-zinc-900 dark:text-zinc-50" required />
+          <div className="bg-white dark:bg-zinc-900 border-x border-b border-zinc-200 dark:border-zinc-700 rounded-b-xl overflow-hidden mb-4">
+            <ReactQuill className="text-zinc-900 dark:text-zinc-50 min-h-[150px]" modules={modules} onChange={setContent} theme="snow" value={content}/>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button type="button" onClick={resetForm} className="px-5 py-2.5 rounded-xl font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 transition-colors">{t('notes.cancel')}</button>
+            <button type="submit" disabled={isSubmitting} className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl px-6 py-2.5 font-semibold flex items-center justify-center gap-2 transition-colors">
+              {editingId ? <Pencil size={18}/> : <Plus size={18}/>} {editingId ? t('notes.update') : t('notes.add')}
+            </button>
+          </div>
+        </form>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {notes.length === 0 && <p className="col-span-full text-center text-zinc-500 py-10">{t('notes.empty')}</p>}
