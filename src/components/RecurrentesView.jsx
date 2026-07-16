@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, addDoc, updateDoc, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { useTranslation } from 'react-i18next';
-import { CalendarClock, Trash2, Plus, Repeat, Pencil, CreditCard, X } from 'lucide-react';
+import { CalendarClock, Trash2, Plus, Repeat, Pencil, CreditCard, X, CalendarDays } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function RecurrentesView() {
@@ -15,6 +15,7 @@ export function RecurrentesView() {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [frequency, setFrequency] = useState('Mensual');
+  const [billingDate, setBillingDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Payment Modal states
@@ -42,17 +43,17 @@ export function RecurrentesView() {
     try {
       if (editingId) {
         await updateDoc(doc(db, `users/${auth.currentUser.uid}/recurrents`, editingId), {
-          name, amount: Number(amount), frequency
+          name, amount: Number(amount), frequency, billingDate
         });
         setEditingId(null);
         toast.success(t('profile.success') || "Actualizado");
       } else {
         await addDoc(collection(db, `users/${auth.currentUser.uid}/recurrents`), {
-          name, amount: Number(amount), frequency, createdAt: new Date().toISOString()
+          name, amount: Number(amount), frequency, billingDate, createdAt: new Date().toISOString()
         });
         toast.success(t('module.saving') || "Guardado");
       }
-      setName(''); setAmount(''); setFrequency('Mensual');
+      setName(''); setAmount(''); setFrequency('Mensual'); setBillingDate('');
     } catch (err) {
       toast.error("Error");
     } finally {
@@ -65,12 +66,13 @@ export function RecurrentesView() {
     setName(item.name);
     setAmount(item.amount);
     setFrequency(item.frequency);
+    setBillingDate(item.billingDate || '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setName(''); setAmount(''); setFrequency('Mensual');
+    setName(''); setAmount(''); setFrequency('Mensual'); setBillingDate('');
   };
 
   const confirmPayment = async () => {
@@ -114,6 +116,12 @@ export function RecurrentesView() {
             <option value="Anual">{t('recurrent.yearly')}</option>
           </select>
         </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1 flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3">
+            <CalendarDays size={16} className="text-zinc-400 shrink-0"/>
+            <input type="date" value={billingDate} onChange={(e) => setBillingDate(e.target.value)} className="flex-1 bg-transparent outline-none text-sm text-zinc-900 dark:text-zinc-50"/>
+          </div>
+        </div>
         <div className="flex gap-2">
           {editingId && (
             <button type="button" onClick={handleCancelEdit} className="w-1/3 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl px-5 py-3 font-semibold transition-colors">
@@ -132,9 +140,16 @@ export function RecurrentesView() {
           <div key={item.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
             <div>
               <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-lg">{item.name}</h3>
-              <span className="text-sm text-zinc-500 flex items-center gap-1 mt-1">
-                <Repeat size={14}/> {item.frequency === 'Mensual' ? t('recurrent.monthly') : t('recurrent.yearly')}
-              </span>
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                <span className="text-sm text-zinc-500 flex items-center gap-1">
+                  <Repeat size={14}/> {item.frequency === 'Mensual' ? t('recurrent.monthly') : t('recurrent.yearly')}
+                </span>
+                {item.billingDate && (
+                  <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <CalendarDays size={12}/> {new Date(item.billingDate + 'T00:00:00').toLocaleDateString()}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
               <span className="font-bold text-zinc-900 dark:text-zinc-50 text-lg">${item.amount.toLocaleString()}</span>

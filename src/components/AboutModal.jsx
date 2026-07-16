@@ -20,11 +20,10 @@ export default function AboutModal({ isOpen, onClose }) {
     { key: 'f3', icon: Target, color: 'amber' },
     { key: 'f4', icon: CreditCard, color: 'rose' },
     { key: 'f5', icon: StickyNote, color: 'blue' },
+    { key: 'f6', icon: CalendarClock, color: 'blue' },
   ];
 
-  const comingSoon = [
-    { key: 'f6', icon: CalendarClock, color: 'zinc' },
-  ];
+  const comingSoon = [];
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
