@@ -3,7 +3,7 @@ import { collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, order
 import { db, auth } from '../firebase';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Target, Trash2, Plus, ArrowUpCircle, ArrowLeft } from 'lucide-react';
+import { Trash2, Plus, ArrowUpCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function MetasView() {
@@ -46,24 +46,20 @@ export function MetasView() {
   };
 
   return (
-    <>
-      <header className="sticky top-0 z-50 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 px-4 sm:px-6 py-4 flex items-center gap-4 -mx-4 sm:-mx-6 mb-6">
-        <button onClick={() => navigate(-1)} className="p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm hover:shadow-md hover:scale-105 transition-all text-zinc-700 dark:text-zinc-300">
+    <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-24">
+      <div className="flex items-center gap-4 mb-8">
+        <button onClick={() => navigate(-1)} className="p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm hover:shadow-md transition-all text-zinc-700 dark:text-zinc-300">
           <ArrowLeft size={20}/>
         </button>
-        <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">{t('goals.title') || 'Metas de Ahorro'}</h1>
-      </header>
-
-      <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-24">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-2xl text-amber-600 dark:text-amber-400">
-            <Target size={28}/>
-          </div>
-          <div>
-            <h2 className="text-2xl font-display font-bold text-zinc-900 dark:text-zinc-50">{t('goals.title') || 'Metas de Ahorro'}</h2>
-            <p className="text-sm text-zinc-500">{t('goals.desc') || 'Establece objetivos y ahorra para ellos.'}</p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-display font-bold text-zinc-900 dark:text-zinc-50">
+            {t('goals.title') || 'Metas de Ahorro'}
+          </h1>
+          <p className="text-sm text-zinc-500">
+            {t('goals.desc') || 'Establece objetivos y ahorra para ellos.'}
+          </p>
         </div>
+      </div>
 
         <form onSubmit={handleAdd} className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-4 sm:p-5 rounded-3xl shadow-sm border border-zinc-200/50 dark:border-zinc-800/50 flex flex-col gap-4 mb-8">
           <div className="flex flex-col sm:flex-row gap-3">
@@ -103,6 +99,6 @@ export function MetasView() {
           })}
         </div>
       </div>
-    </>
+    </div>
   );
 }
