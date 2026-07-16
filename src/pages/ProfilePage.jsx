@@ -40,16 +40,16 @@ function ProfilePage({ user }) {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      <header className="sticky top-0 z-50 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 px-4 sm:px-6 py-4 flex items-center gap-4 -mx-4 sm:-mx-6 mb-6">
-        <button onClick={() => navigate(-1)} className="p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm hover:shadow-md hover:scale-105 transition-all text-zinc-700 dark:text-zinc-300">
-          <ArrowLeft size={20}/>
-        </button>
-        <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-          {t("profile.title")}
-        </h1>
-      </header>
+      <main className="p-4 sm:p-6 max-w-md mx-auto space-y-6 pb-24">
+        <div className="flex items-center gap-4 mb-8">
+          <button onClick={() => navigate(-1)} className="p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm hover:shadow-md transition-all text-zinc-700 dark:text-zinc-300">
+            <ArrowLeft size={20}/>
+          </button>
+          <h1 className="text-2xl font-display font-bold text-zinc-900 dark:text-zinc-50">
+            {t('drawer.profile') || 'Tu Perfil'}
+          </h1>
+        </div>
 
-      <main className="p-4 max-w-md mx-auto space-y-6">
         <div className="bg-white dark:bg-zinc-800 rounded-3xl p-6 shadow-sm flex flex-col items-center gap-3">
           {user?.photoURL ? (
             <img
