@@ -20,6 +20,7 @@ import Logo from "./components/Logo";
 import BottomNav from "./layout/BottomNav";
 import { formatCurrency } from "./utils/format";
 import TransactionMenuModal from "./components/TransactionMenuModal";
+import ConfirmModal from "./components/ConfirmModal";
 import { RecurrentesView } from "./components/RecurrentesView";
 import { NotasView } from "./components/NotasView";
 import { DeudasView } from "./components/DeudasView";
@@ -38,6 +39,7 @@ function App() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, type: 'danger' });
 
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -157,42 +159,56 @@ function App() {
     }
   };
 
-  const handleDeleteTransaction = async (transaction) => {
-    if (!window.confirm(`¿Eliminar el movimiento "${transaction.description}"?`)) return;
-    try {
-      await deleteDoc(doc(db, `users/${user.uid}/transactions`, transaction.id));
-      const account = accounts.find((a) => a.id === transaction.accountId);
-      if (account) {
-        const currentBalance = Number(account.balance) || 0;
-        const newBalance = transaction.type === "ingreso"
-          ? currentBalance - transaction.amount
-          : currentBalance + transaction.amount;
-        await updateDoc(doc(db, "users", user.uid, "accounts", transaction.accountId), { balance: newBalance });
+  const handleDeleteTransaction = (transaction) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Eliminar movimiento',
+      message: `¿Eliminar el movimiento "${transaction.description}"?`,
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, `users/${user.uid}/transactions`, transaction.id));
+          const account = accounts.find((a) => a.id === transaction.accountId);
+          if (account) {
+            const currentBalance = Number(account.balance) || 0;
+            const newBalance = transaction.type === "ingreso"
+              ? currentBalance - transaction.amount
+              : currentBalance + transaction.amount;
+            await updateDoc(doc(db, "users", user.uid, "accounts", transaction.accountId), { balance: newBalance });
+          }
+          toast.success("Movimiento eliminado correctamente");
+        } catch (err) {
+          console.error("Error al eliminar:", err);
+          toast.error("Error al eliminar el movimiento");
+        }
       }
-      toast.success("Movimiento eliminado correctamente");
-    } catch (err) {
-      console.error("Error al eliminar:", err);
-      toast.error("Error al eliminar el movimiento");
-    }
+    });
   };
 
-  const handleAnnulTransaction = async (transaction) => {
-    if (!window.confirm(`¿Anular el movimiento "${transaction.description}"?`)) return;
-    try {
-      await deleteDoc(doc(db, `users/${user.uid}/transactions`, transaction.id));
-      const account = accounts.find((a) => a.id === transaction.accountId);
-      if (account) {
-        const currentBalance = Number(account.balance) || 0;
-        const newBalance = transaction.type === "ingreso"
-          ? currentBalance - transaction.amount
-          : currentBalance + transaction.amount;
-        await updateDoc(doc(db, "users", user.uid, "accounts", transaction.accountId), { balance: newBalance });
+  const handleAnnulTransaction = (transaction) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Anular movimiento',
+      message: `¿Anular el movimiento "${transaction.description}"?`,
+      type: 'warning',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, `users/${user.uid}/transactions`, transaction.id));
+          const account = accounts.find((a) => a.id === transaction.accountId);
+          if (account) {
+            const currentBalance = Number(account.balance) || 0;
+            const newBalance = transaction.type === "ingreso"
+              ? currentBalance - transaction.amount
+              : currentBalance + transaction.amount;
+            await updateDoc(doc(db, "users", user.uid, "accounts", transaction.accountId), { balance: newBalance });
+          }
+          toast.success("Movimiento anulado correctamente");
+        } catch (err) {
+          console.error("Error al anular:", err);
+          toast.error("Error al anular el movimiento");
+        }
       }
-      toast.success("Movimiento anulado correctamente");
-    } catch (err) {
-      console.error("Error al anular:", err);
-      toast.error("Error al anular el movimiento");
-    }
+    });
   };
 
   const openEditModal = (transaction) => {
@@ -474,6 +490,15 @@ function App() {
 
       <Toaster position="top-center" />
       <BottomNav hidden={isDrawerOpen} />
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        confirmText="Confirmar"
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, ArrowUpCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmModal from './ConfirmModal';
 
 export function MetasView() {
   const { t } = useTranslation();
@@ -13,6 +14,7 @@ export function MetasView() {
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, item: null });
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -86,7 +88,7 @@ export function MetasView() {
                   <button onClick={() => handleAddFunds(item)} className="text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-xl transition-colors" title={t('goals.addFunds') || 'Abonar'}>
                     <ArrowUpCircle size={22}/>
                   </button>
-                  <button onClick={() => { if(window.confirm("¿Eliminar esta meta?")) deleteDoc(doc(db, `users/${auth.currentUser.uid}/goals`, item.id)) }} className="text-zinc-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 p-2 rounded-xl transition-colors">
+                  <button onClick={() => setConfirmModal({ isOpen: true, item })} className="text-zinc-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 p-2 rounded-xl transition-colors">
                     <Trash2 size={20}/>
                   </button>
                 </div>
@@ -99,6 +101,15 @@ export function MetasView() {
           );
         })}
       </div>
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, item: null })}
+        onConfirm={() => deleteDoc(doc(db, `users/${auth.currentUser.uid}/goals`, confirmModal.item.id))}
+        title="Eliminar meta"
+        message={`¿Eliminar la meta "${confirmModal.item?.name}"?`}
+        confirmText="Eliminar"
+      />
     </div>
   );
 }

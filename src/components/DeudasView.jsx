@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Trash2, Plus, ArrowLeft, CheckCircle2, CircleDollarSign, HandCoins } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmModal from './ConfirmModal';
 
 export function DeudasView() {
   const { t } = useTranslation();
@@ -15,6 +16,7 @@ export function DeudasView() {
   const [description, setDescription] = useState('');
   const [type, setType] = useState('debo');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -50,10 +52,8 @@ export function DeudasView() {
     } catch (err) { toast.error("Error al actualizar"); }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm(t('debts.confirmDelete') || "¿Eliminar esta deuda?")) {
-      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/debts`, id));
-    }
+  const handleDelete = (id) => {
+    setConfirmModal({ isOpen: true, id });
   };
 
   const pending = items.filter(i => !i.paid);
@@ -174,6 +174,15 @@ export function DeudasView() {
           <p className="text-sm text-zinc-400">{t('debts.empty') || 'No tienes deudas registradas.'}</p>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={() => deleteDoc(doc(db, `users/${auth.currentUser.uid}/debts`, confirmModal.id))}
+        title={t('debts.confirmDelete') || 'Eliminar deuda'}
+        message="¿Estás seguro de que deseas eliminar esta deuda?"
+        confirmText="Eliminar"
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { db, auth } from '../firebase';
 import { useTranslation } from 'react-i18next';
 import { CalendarClock, Trash2, Plus, Repeat, Pencil, CreditCard, X, CalendarDays } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmModal from './ConfirmModal';
 
 export function RecurrentesView() {
   const { t } = useTranslation();
@@ -17,6 +18,7 @@ export function RecurrentesView() {
   const [frequency, setFrequency] = useState('Mensual');
   const [billingDate, setBillingDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
 
   // Payment Modal states
   const [paymentModal, setPaymentModal] = useState({ isOpen: false, item: null, accountId: '' });
@@ -162,7 +164,7 @@ export function RecurrentesView() {
                 <button onClick={() => handleEdit(item)} className="text-zinc-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 p-2 rounded-lg transition-colors">
                   <Pencil size={18}/>
                 </button>
-                <button onClick={() => { if(window.confirm("¿Eliminar?")) deleteDoc(doc(db, `users/${auth.currentUser.uid}/recurrents`, item.id)) }} className="text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-lg transition-colors">
+                <button onClick={() => setConfirmModal({ isOpen: true, id: item.id })} className="text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-lg transition-colors">
                   <Trash2 size={18}/>
                 </button>
               </div>
@@ -208,6 +210,15 @@ export function RecurrentesView() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={() => deleteDoc(doc(db, `users/${auth.currentUser.uid}/recurrents`, confirmModal.id))}
+        title="Eliminar suscripción"
+        message="¿Estás seguro de que deseas eliminar esta suscripción?"
+        confirmText="Eliminar"
+      />
     </div>
   );
 }

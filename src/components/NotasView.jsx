@@ -6,6 +6,7 @@ import { StickyNote, Trash2, Plus, Pencil, X } from 'lucide-react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import toast from 'react-hot-toast';
+import ConfirmModal from './ConfirmModal';
 
 export function NotasView() {
   const { t } = useTranslation();
@@ -16,6 +17,7 @@ export function NotasView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewingNote, setViewingNote] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
 
   const modules = {
     toolbar: [
@@ -64,10 +66,8 @@ export function NotasView() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = async (id) => {
-    if(window.confirm("¿Eliminar esta nota?")) {
-      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/notes`, id));
-    }
+  const handleDelete = (id) => {
+    setConfirmModal({ isOpen: true, id });
   };
 
   return (
@@ -126,6 +126,15 @@ export function NotasView() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={() => deleteDoc(doc(db, `users/${auth.currentUser.uid}/notes`, confirmModal.id))}
+        title="Eliminar nota"
+        message="¿Estás seguro de que deseas eliminar esta nota?"
+        confirmText="Eliminar"
+      />
     </div>
   );
 }
