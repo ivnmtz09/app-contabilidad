@@ -130,7 +130,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500 font-mono">
               <Code size={12} strokeWidth={2} />
-              v 1.3.1
+              v 1.4.0
             </span>
           </div>
         </div>
