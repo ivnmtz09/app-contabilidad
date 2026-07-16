@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { useTranslation } from 'react-i18next';
-import { Target, Trash2, Plus, ArrowUpCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Target, Trash2, Plus, ArrowUpCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function MetasView() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
@@ -44,54 +46,63 @@ export function MetasView() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-24">
-      <div className="flex items-center gap-4 mb-6">
-        <div className="bg-rose-100 dark:bg-rose-900/30 p-3 rounded-2xl text-rose-600 dark:text-rose-400">
-          <Target size={28}/>
-        </div>
-        <div>
-          <h2 className="text-2xl font-display font-bold text-zinc-900 dark:text-zinc-50">{t('goals.title') || 'Metas de Ahorro'}</h2>
-          <p className="text-sm text-zinc-500">{t('goals.desc') || 'Establece objetivos y ahorra para ellos.'}</p>
-        </div>
-      </div>
-
-      <form onSubmit={handleAdd} className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-4 sm:p-5 rounded-3xl shadow-sm border border-zinc-200/50 dark:border-zinc-800/50 flex flex-col gap-4 mb-8">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input type="text" placeholder={t('module.name') || 'Nombre de la meta'} value={name} onChange={(e) => setName(e.target.value)} className="flex-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500" required />
-          <input type="number" placeholder={t('goals.target') || 'Monto Objetivo'} value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} className="w-full sm:w-40 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500" required />
-        </div>
-        <button type="submit" disabled={isSubmitting} className="w-full bg-violet-600 hover:bg-violet-700 text-white rounded-xl px-5 py-3 font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
-          <Plus size={20}/> {t('module.add') || 'Crear Meta'}
+    <>
+      <header className="sticky top-0 z-50 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 px-4 sm:px-6 py-4 flex items-center gap-4 -mx-4 sm:-mx-6 mb-6">
+        <button onClick={() => navigate(-1)} className="p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm hover:shadow-md hover:scale-105 transition-all text-zinc-700 dark:text-zinc-300">
+          <ArrowLeft size={20}/>
         </button>
-      </form>
+        <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">{t('goals.title') || 'Metas de Ahorro'}</h1>
+      </header>
 
-      <div className="space-y-4">
-        {items.map(item => {
-          const progress = Math.min((item.savedAmount / item.targetAmount) * 100, 100).toFixed(0);
-          return (
-            <div key={item.id} className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-5 rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm transition-all hover:shadow-md">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-lg">{item.name}</h3>
-                  <p className="text-sm text-zinc-500">{t('goals.saved') || 'Ahorrado'}: <span className="font-semibold text-emerald-500">${item.savedAmount.toLocaleString()}</span> /${item.targetAmount.toLocaleString()}</p>
+      <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-24">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-2xl text-amber-600 dark:text-amber-400">
+            <Target size={28}/>
+          </div>
+          <div>
+            <h2 className="text-2xl font-display font-bold text-zinc-900 dark:text-zinc-50">{t('goals.title') || 'Metas de Ahorro'}</h2>
+            <p className="text-sm text-zinc-500">{t('goals.desc') || 'Establece objetivos y ahorra para ellos.'}</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleAdd} className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-4 sm:p-5 rounded-3xl shadow-sm border border-zinc-200/50 dark:border-zinc-800/50 flex flex-col gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input type="text" placeholder={t('module.name') || 'Nombre de la meta'} value={name} onChange={(e) => setName(e.target.value)} className="flex-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-500" required />
+            <input type="number" placeholder={t('goals.target') || 'Monto Objetivo'} value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} className="w-full sm:w-40 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-500" required />
+          </div>
+          <button type="submit" disabled={isSubmitting} className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl px-5 py-3 font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
+            <Plus size={20}/> {t('module.add') || 'Crear Meta'}
+          </button>
+        </form>
+
+        <div className="space-y-4">
+          {items.map(item => {
+            const progress = Math.min((item.savedAmount / item.targetAmount) * 100, 100).toFixed(0);
+            return (
+              <div key={item.id} className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-5 rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm transition-all hover:shadow-md">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-lg">{item.name}</h3>
+                    <p className="text-sm text-zinc-500">{t('goals.saved') || 'Ahorrado'}: <span className="font-semibold text-emerald-500">${item.savedAmount.toLocaleString()}</span> /${item.targetAmount.toLocaleString()}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => handleAddFunds(item)} className="text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-xl transition-colors" title={t('goals.addFunds') || 'Abonar'}>
+                      <ArrowUpCircle size={22}/>
+                    </button>
+                    <button onClick={() => { if(window.confirm("¿Eliminar esta meta?")) deleteDoc(doc(db, `users/${auth.currentUser.uid}/goals`, item.id)) }} className="text-zinc-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 p-2 rounded-xl transition-colors">
+                      <Trash2 size={20}/>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-1">
-                  <button onClick={() => handleAddFunds(item)} className="text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-xl transition-colors" title={t('goals.addFunds') || 'Abonar'}>
-                    <ArrowUpCircle size={22}/>
-                  </button>
-                  <button onClick={() => { if(window.confirm("¿Eliminar esta meta?")) deleteDoc(doc(db, `users/${auth.currentUser.uid}/goals`, item.id)) }} className="text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-xl transition-colors">
-                    <Trash2 size={20}/>
-                  </button>
+                <div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-3 mb-1 overflow-hidden">
+                  <div className="bg-amber-500 h-3 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
                 </div>
+                <div className="text-right text-xs font-bold text-amber-500">{progress}%</div>
               </div>
-              <div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-3 mb-1 overflow-hidden">
-                <div className="bg-violet-500 h-3 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
-              </div>
-              <div className="text-right text-xs font-bold text-violet-500">{progress}%</div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

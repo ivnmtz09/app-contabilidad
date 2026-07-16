@@ -72,7 +72,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
               <Link
                 to="/metas"
                 onClick={onClose}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors font-medium"
+                className="w-full flex items-center gap-3 px-4 py-4 mt-2 rounded-3xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all font-bold shadow-sm"
               >
                 <Target size={22}/>
                 {t('goals.title') || 'Metas de Ahorro'}

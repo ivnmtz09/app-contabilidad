@@ -40,18 +40,13 @@ function ProfilePage({ user }) {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-zinc-50/80 dark:bg-zinc-900/80 border-b border-zinc-200 dark:border-zinc-800">
-        <div className="p-4 flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-          >
-            <ArrowLeft size={22} />
-          </button>
-          <h1 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">
-            {t("profile.title")}
-          </h1>
-        </div>
+      <header className="sticky top-0 z-50 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 px-4 sm:px-6 py-4 flex items-center gap-4 -mx-4 sm:-mx-6 mb-6">
+        <button onClick={() => navigate(-1)} className="p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm hover:shadow-md hover:scale-105 transition-all text-zinc-700 dark:text-zinc-300">
+          <ArrowLeft size={20}/>
+        </button>
+        <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+          {t("profile.title")}
+        </h1>
       </header>
 
       <main className="p-4 max-w-md mx-auto space-y-6">
