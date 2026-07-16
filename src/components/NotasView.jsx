@@ -35,7 +35,8 @@ export function NotasView() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !content.trim() || content === '<p><br></p>') return;
+    if (!title.trim()) { toast.error(t('notes.titleRequired') || 'Ingresa un título para la nota'); return; }
+    if (!content.trim() || content === '<p><br></p>') { toast.error(t('notes.contentRequired') || 'Escribe algo en la nota'); return; }
     setIsSubmitting(true);
     try {
       if (editingId) {

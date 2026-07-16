@@ -23,7 +23,8 @@ export function MetasView() {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!name || !targetAmount) return;
+    if (!name.trim()) { toast.error(t('goals.nameRequired') || 'Ingresa un nombre para la meta'); return; }
+    if (!targetAmount || Number(targetAmount) <= 0) { toast.error(t('goals.amountRequired') || 'Ingresa un monto objetivo válido'); return; }
     setIsSubmitting(true);
     try {
       await addDoc(collection(db, `users/${auth.currentUser.uid}/goals`), {

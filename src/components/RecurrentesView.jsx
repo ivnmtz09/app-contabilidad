@@ -38,7 +38,9 @@ export function RecurrentesView() {
 
   const handleAddOrUpdate = async (e) => {
     e.preventDefault();
-    if (!name || !amount) return;
+    if (!name.trim()) { toast.error(t('recurrent.nameRequired') || 'Ingresa un nombre para la suscripción'); return; }
+    if (!amount || Number(amount) <= 0) { toast.error(t('recurrent.amountRequired') || 'Ingresa un monto válido'); return; }
+    if (!billingDate) { toast.error(t('recurrent.dateRequired') || 'Selecciona una fecha de cobro'); return; }
     setIsSubmitting(true);
     try {
       if (editingId) {

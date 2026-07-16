@@ -25,7 +25,8 @@ export function DeudasView() {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!name.trim() || !amount) return;
+    if (!name.trim()) { toast.error(t('debts.nameRequired') || 'Ingresa el nombre de la persona'); return; }
+    if (!amount || Number(amount) <= 0) { toast.error(t('debts.amountRequired') || 'Ingresa un monto válido'); return; }
     setIsSubmitting(true);
     try {
       await addDoc(collection(db, `users/${auth.currentUser.uid}/debts`), {
