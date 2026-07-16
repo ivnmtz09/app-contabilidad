@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { X, ExternalLink, Code, Info, LogOut, Download } from "lucide-react";
+import { X, ExternalLink, Code, Info, LogOut, Download, Target } from "lucide-react";
+import { Link } from "react-router-dom";
 import AboutModal from "../components/AboutModal";
 import { useTranslation } from "react-i18next";
 import { signOut } from "firebase/auth";
@@ -68,6 +69,14 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
             </div>
 
             <nav className="px-4 grid grid-cols-1 gap-2">
+              <Link
+                to="/metas"
+                onClick={onClose}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors font-medium"
+              >
+                <Target size={22}/>
+                {t('goals.title') || 'Metas de Ahorro'}
+              </Link>
               <button
                 onClick={handleExport}
                 className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"

@@ -23,7 +23,7 @@ import TransactionMenuModal from "./components/TransactionMenuModal";
 import { RecurrentesView } from "./components/RecurrentesView";
 import { NotasView } from "./components/NotasView";
 import { DeudasView } from "./components/PlaceholderViews";
-import HomeMetas from "./components/HomeMetas";
+import { MetasView } from './components/MetasView';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -399,10 +399,6 @@ function App() {
       </div>
 
       <div className="md:col-span-2">
-        <HomeMetas />
-      </div>
-
-      <div className="md:col-span-2">
         <AccountsCard
           accounts={accounts}
           onOpenAdd={() => setIsAddAccountOpen(true)}
@@ -447,6 +443,7 @@ function App() {
           <Route path="/recurrentes" element={<RecurrentesView />} />
           <Route path="/notas" element={<NotasView />} />
           <Route path="/deudas" element={<DeudasView />} />
+          <Route path="/metas" element={<MetasView />} />
           <Route path="/perfil" element={<ProfilePage user={user} />} />
         </Routes>
       </main>
