@@ -21,6 +21,7 @@ import BottomNav from "./layout/BottomNav";
 import { formatCurrency } from "./utils/format";
 import TransactionMenuModal from "./components/TransactionMenuModal";
 import ConfirmModal from "./components/ConfirmModal";
+import TransferModal from "./components/TransferModal";
 import { RecurrentesView } from "./components/RecurrentesView";
 import { NotasView } from "./components/NotasView";
 import { DeudasView } from "./components/DeudasView";
@@ -40,6 +41,7 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, type: 'danger' });
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
 
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -222,9 +224,41 @@ function App() {
       setTransactionType(type);
       setTransactionModalOpen(true);
       setIsMenuOpen(false);
+    } else if (type === "transfer") {
+      setIsTransferOpen(true);
+      setIsMenuOpen(false);
     } else {
       toast("Próximamente disponible");
       setIsMenuOpen(false);
+    }
+  };
+
+  const handleTransfer = async ({ fromAccountId, toAccountId, amount, description }) => {
+    if (!user) return;
+    try {
+      const fromAcc = accounts.find(a => a.id === fromAccountId);
+      const toAcc = accounts.find(a => a.id === toAccountId);
+      if (!fromAcc || !toAcc) return;
+
+      const fromBalance = Number(fromAcc.balance) || 0;
+      const toBalance = Number(toAcc.balance) || 0;
+
+      await updateDoc(doc(db, "users", user.uid, "accounts", fromAccountId), { balance: fromBalance - amount });
+      await updateDoc(doc(db, "users", user.uid, "accounts", toAccountId), { balance: toBalance + amount });
+
+      await addDoc(collection(db, `users/${user.uid}/transactions`), {
+        type: 'egreso', amount, description: `Transferencia → ${toAcc.name}: ${description}`,
+        accountId: fromAccountId, date: new Date().toISOString()
+      });
+      await addDoc(collection(db, `users/${user.uid}/transactions`), {
+        type: 'ingreso', amount, description: `Transferencia ← ${fromAcc.name}: ${description}`,
+        accountId: toAccountId, date: new Date().toISOString()
+      });
+
+      toast.success("Transferencia realizada");
+    } catch (err) {
+      console.error("Error en transferencia:", err);
+      toast.error("Error al transferir");
     }
   };
 
@@ -486,6 +520,13 @@ function App() {
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         onSelectOption={handleSelectAction}
+      />
+
+      <TransferModal
+        isOpen={isTransferOpen}
+        onClose={() => setIsTransferOpen(false)}
+        onConfirm={handleTransfer}
+        accounts={accounts}
       />
 
       <Toaster position="top-center" />

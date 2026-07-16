@@ -35,6 +35,7 @@ const resources = {
       "menu.goal": "Meta",
       "menu.note": "Nueva Nota",
       "menu.recurrent": "Suscripción",
+      "menu.transfer": "Transferir",
       "movements.title": "Todos los Movimientos",
       "movements.today": "Hoy",
       "movements.yesterday": "Ayer",
@@ -129,7 +130,16 @@ const resources = {
       "notes.titleInput": "Título de la nota...",
       "notes.empty": "No tienes notas guardadas.",
       "notes.titleRequired": "Ingresa un título para la nota",
-      "notes.contentRequired": "Escribe algo en la nota"
+      "notes.contentRequired": "Escribe algo en la nota",
+      "transfer.title": "Transferir",
+      "transfer.from": "Desde",
+      "transfer.to": "Hacia",
+      "transfer.next": "Continuar",
+      "transfer.descPlaceholder": "Ej: Paso de Nequi a Daviplata",
+      "transfer.confirmTitle": "Confirmar transferencia",
+      "transfer.confirmMsg": "Transferir",
+      "transfer.confirm": "Transferir",
+      "transfer.sameAccount": "Selecciona cuentas diferentes"
     }
   },
   en: {
@@ -165,6 +175,7 @@ const resources = {
       "menu.goal": "Goal",
       "menu.note": "New Note",
       "menu.recurrent": "Subscription",
+      "menu.transfer": "Transfer",
       "movements.title": "All Movements",
       "movements.today": "Today",
       "movements.yesterday": "Yesterday",
@@ -259,7 +270,16 @@ const resources = {
       "notes.titleInput": "Note title...",
       "notes.empty": "You have no saved notes.",
       "notes.titleRequired": "Enter a title for the note",
-      "notes.contentRequired": "Write something in the note"
+      "notes.contentRequired": "Write something in the note",
+      "transfer.title": "Transfer",
+      "transfer.from": "From",
+      "transfer.to": "To",
+      "transfer.next": "Continue",
+      "transfer.descPlaceholder": "E.g.: Moving from Nequi to Daviplata",
+      "transfer.confirmTitle": "Confirm transfer",
+      "transfer.confirmMsg": "Transfer",
+      "transfer.confirm": "Transfer",
+      "transfer.sameAccount": "Select different accounts"
     }
   }
 };

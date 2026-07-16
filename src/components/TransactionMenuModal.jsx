@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, StickyNote, CalendarClock, X } from 'lucide-react';
+import { TrendingUp, TrendingDown, StickyNote, CalendarClock, ArrowRightLeft, X } from 'lucide-react';
 
 export default function TransactionMenuModal({ isOpen, onClose, onSelectOption }) {
   const { t } = useTranslation();
@@ -43,6 +43,13 @@ export default function TransactionMenuModal({ isOpen, onClose, onSelectOption }
               <CalendarClock size={28}/>
             </div>
             <span className="font-bold text-sm text-zinc-700 dark:text-zinc-300">{t('menu.recurrent')}</span>
+          </button>
+
+          <button onClick={() => { onSelectOption('transfer'); onClose(); }} className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-zinc-800/80 hover:bg-violet-50 dark:hover:bg-violet-900/20 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-700/50 transition-all hover:scale-[1.02] hover:border-violet-200 dark:hover:border-violet-800 group">
+            <div className="bg-violet-100 dark:bg-violet-900/30 p-4 rounded-2xl text-violet-600 dark:text-violet-400 group-hover:scale-110 transition-transform">
+              <ArrowRightLeft size={28}/>
+            </div>
+            <span className="font-bold text-sm text-zinc-700 dark:text-zinc-300">{t('menu.transfer')}</span>
           </button>
 
           <button onClick={() => handleNavigate('/notas')} className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-zinc-800/80 hover:bg-amber-50 dark:hover:bg-amber-900/20 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-700/50 transition-all hover:scale-[1.02] hover:border-amber-200 dark:hover:border-amber-800 group">
