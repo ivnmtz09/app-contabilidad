@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, ExternalLink, Code, Info, LogOut, Download, Target } from "lucide-react";
+import { X, ExternalLink, Code, Info, LogOut, Download, Target, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
 import AboutModal from "../components/AboutModal";
 import { useTranslation } from "react-i18next";
@@ -76,6 +76,14 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
               >
                 <Target size={22}/>
                 {t('goals.title') || 'Metas de Ahorro'}
+              </Link>
+              <Link
+                to="/deudas"
+                onClick={onClose}
+                className="w-full flex items-center gap-3 px-4 py-4 rounded-3xl bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all font-bold shadow-sm"
+              >
+                <CreditCard size={22}/>
+                {t('debts.title') || 'Gestión de Deudas'}
               </Link>
               <button
                 onClick={handleExport}

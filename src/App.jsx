@@ -22,7 +22,7 @@ import { formatCurrency } from "./utils/format";
 import TransactionMenuModal from "./components/TransactionMenuModal";
 import { RecurrentesView } from "./components/RecurrentesView";
 import { NotasView } from "./components/NotasView";
-import { DeudasView } from "./components/PlaceholderViews";
+import { DeudasView } from "./components/DeudasView";
 import { MetasView } from './components/MetasView';
 
 function App() {
