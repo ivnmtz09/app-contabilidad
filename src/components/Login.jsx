@@ -3,16 +3,45 @@ import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import Logo from "./Logo";
 import { Wallet, TrendingUp, ShieldCheck } from "lucide-react";
+import { Toaster, toast } from "react-hot-toast";
 
 function Login() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleGoogleLogin = async () => {
+    setIsLoggingIn(true);
     try {
       await signInWithPopup(auth, provider);
-    } catch {
-      // keep on login screen
+    } catch (err) {
+      console.error("Error en autenticación Google:", err);
+      const code = err?.code || "";
+      const message = err?.message || "";
+
+      if (code === "auth/popup-blocked") {
+        toast.error("El navegador bloqueó la ventana emergente. Por favor, habilita las ventanas emergentes (popups) para iniciar sesión.");
+      } else if (code === "auth/popup-closed-by-user") {
+        toast("Inicio de sesión cancelado al cerrar la ventana.", { icon: "ℹ️" });
+      } else if (code === "auth/cancelled-popup-request") {
+        toast("Se canceló la ventana emergente previa.");
+      } else if (code === "auth/unauthorized-domain") {
+        toast.error("Dominio no autorizado en Firebase. Añade este dominio a los autorizados en Firebase Console.");
+      } else if (code === "auth/operation-not-allowed") {
+        toast.error("El proveedor Google no está habilitado en Firebase Authentication.");
+      } else if (
+        message.includes("Cross-Origin-Opener-Policy") ||
+        message.includes("COOP") ||
+        message.includes("window.closed")
+      ) {
+        toast.error("Conflicto con la política Cross-Origin (COOP) del navegador. Abre en una pestaña limpia o desactiva extensiones restrictivas.");
+      } else if (code === "auth/network-request-failed") {
+        toast.error("Error de conexión de red. Verifica tu acceso a internet.");
+      } else {
+        toast.error(`Error al iniciar sesión: ${err.message || "Intenta nuevamente."}`);
+      }
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -80,14 +109,16 @@ function Login() {
 
           <button
             onClick={handleGoogleLogin}
-            disabled={!acceptedTerms}
+            disabled={!acceptedTerms || isLoggingIn}
             className="w-full max-w-sm mt-6 flex items-center justify-center gap-3 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white px-5 sm:px-6 py-3 sm:py-4 rounded-2xl font-sans font-semibold shadow-sm hover:shadow-md transition-all border border-zinc-200 dark:border-zinc-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Iniciar sesión con Google
+            {isLoggingIn ? "Iniciando sesión..." : "Iniciar sesión con Google"}
           </button>
         </div>
 
       </div>
+
+      <Toaster position="top-center" />
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
