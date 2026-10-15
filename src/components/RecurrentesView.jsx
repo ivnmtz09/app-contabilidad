@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { collection, addDoc, updateDoc, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, onSnapshot, deleteDoc, doc, query, orderBy, increment } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { useTranslation } from 'react-i18next';
 import { CalendarClock, Trash2, Plus, Repeat, Pencil, CreditCard, X, CalendarDays } from 'lucide-react';
@@ -24,15 +25,46 @@ export function RecurrentesView() {
   const [paymentModal, setPaymentModal] = useState({ isOpen: false, item: null, accountId: '' });
 
   useEffect(() => {
-    if (!auth.currentUser) return;
+    let unsubRecurrents = () => {};
+    let unsubAccounts = () => {};
 
-    const qRecurrents = query(collection(db, `users/${auth.currentUser.uid}/recurrents`), orderBy('createdAt', 'desc'));
-    const unsubRecurrents = onSnapshot(qRecurrents, (snap) => setItems(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      unsubRecurrents();
+      unsubAccounts();
 
-    const qAccounts = query(collection(db, `users/${auth.currentUser.uid}/accounts`));
-    const unsubAccounts = onSnapshot(qAccounts, (snap) => setAccounts(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+      if (!user) {
+        setItems([]);
+        setAccounts([]);
+        return;
+      }
+
+      const qRecurrents = query(collection(db, `users/${user.uid}/recurrents`), orderBy('createdAt', 'desc'));
+      unsubRecurrents = onSnapshot(
+        qRecurrents,
+        (snap) => {
+          setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        },
+        (error) => {
+          console.error("Error al cargar suscripciones recurrentes:", error);
+          toast.error("Error de permisos o conexión al cargar suscripciones");
+        }
+      );
+
+      const qAccounts = query(collection(db, `users/${user.uid}/accounts`));
+      unsubAccounts = onSnapshot(
+        qAccounts,
+        (snap) => {
+          setAccounts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        },
+        (error) => {
+          console.error("Error al cargar cuentas:", error);
+          toast.error("Error de permisos o conexión al cargar cuentas");
+        }
+      );
+    });
 
     return () => {
+      unsubAuth();
       unsubRecurrents();
       unsubAccounts();
     };
@@ -40,6 +72,10 @@ export function RecurrentesView() {
 
   const handleAddOrUpdate = async (e) => {
     e.preventDefault();
+    if (!auth.currentUser) {
+      toast.error("Debes iniciar sesión para realizar esta acción");
+      return;
+    }
     if (!name.trim()) { toast.error(t('recurrent.nameRequired') || 'Ingresa un nombre para la suscripción'); return; }
     if (!amount || Number(amount) <= 0) { toast.error(t('recurrent.amountRequired') || 'Ingresa un monto válido'); return; }
     if (!billingDate) { toast.error(t('recurrent.dateRequired') || 'Selecciona una fecha de cobro'); return; }
@@ -47,19 +83,20 @@ export function RecurrentesView() {
     try {
       if (editingId) {
         await updateDoc(doc(db, `users/${auth.currentUser.uid}/recurrents`, editingId), {
-          name, amount: Number(amount), frequency, billingDate
+          name: name.trim(), amount: Number(amount), frequency, billingDate
         });
         setEditingId(null);
         toast.success(t('profile.success') || "Actualizado");
       } else {
         await addDoc(collection(db, `users/${auth.currentUser.uid}/recurrents`), {
-          name, amount: Number(amount), frequency, billingDate, createdAt: new Date().toISOString()
+          name: name.trim(), amount: Number(amount), frequency, billingDate, createdAt: new Date().toISOString()
         });
         toast.success(t('module.saving') || "Guardado");
       }
       setName(''); setAmount(''); setFrequency('Mensual'); setBillingDate('');
     } catch (err) {
-      toast.error("Error");
+      console.error("Error guardando suscripción:", err);
+      toast.error("Error al guardar suscripción");
     } finally {
       setIsSubmitting(false);
     }
@@ -80,22 +117,50 @@ export function RecurrentesView() {
   };
 
   const confirmPayment = async () => {
-    if (!paymentModal.accountId) {
+    if (!auth.currentUser) {
+      toast.error("Debes iniciar sesión para registrar el pago");
+      return;
+    }
+    if (!paymentModal.accountId || !paymentModal.item) {
       toast.error(t('recurrent.selectAccount'));
       return;
     }
+    const payAmount = Number(paymentModal.item.amount);
+    if (!payAmount || payAmount <= 0) {
+      toast.error("El monto de la suscripción es inválido");
+      return;
+    }
     try {
+      // 1. Registrar la transacción de egreso
       await addDoc(collection(db, `users/${auth.currentUser.uid}/transactions`), {
         type: 'egreso',
-        amount: Number(paymentModal.item.amount),
+        amount: payAmount,
         description: `Pago suscripción: ${paymentModal.item.name}`,
         accountId: paymentModal.accountId,
         date: new Date().toISOString()
       });
+
+      // 2. Actualizar atómicamente el saldo de la cuenta descontando el valor
+      await updateDoc(doc(db, `users/${auth.currentUser.uid}/accounts`, paymentModal.accountId), {
+        balance: increment(-payAmount)
+      });
+
       toast.success(t('recurrent.paymentSuccess'));
       setPaymentModal({ isOpen: false, item: null, accountId: '' });
-    } catch(e) {
-      toast.error("Error");
+    } catch(err) {
+      console.error("Error al registrar el pago de la suscripción:", err);
+      toast.error("Error al registrar el pago en la cuenta");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!auth.currentUser || !confirmModal.id) return;
+    try {
+      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/recurrents`, confirmModal.id));
+      toast.success("Suscripción eliminada");
+    } catch (err) {
+      console.error("Error al eliminar suscripción:", err);
+      toast.error("Error al eliminar la suscripción");
     }
   };
 
@@ -214,7 +279,7 @@ export function RecurrentesView() {
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ isOpen: false, id: null })}
-        onConfirm={() => deleteDoc(doc(db, `users/${auth.currentUser.uid}/recurrents`, confirmModal.id))}
+        onConfirm={handleDelete}
         title="Eliminar suscripción"
         message="¿Estás seguro de que deseas eliminar esta suscripción?"
         confirmText="Eliminar"

@@ -1,4 +1,4 @@
-import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Trash2 } from 'lucide-react';
 
 export default function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirmar', type = 'danger' }) {
   if (!isOpen) return null;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -19,14 +20,41 @@ export function DeudasView() {
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-    const q = query(collection(db, `users/${auth.currentUser.uid}/debts`), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snap) => setItems(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
-    return () => unsub();
+    let unsubDebts = () => {};
+
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      unsubDebts();
+
+      if (!user) {
+        setItems([]);
+        return;
+      }
+
+      const q = query(collection(db, `users/${user.uid}/debts`), orderBy('createdAt', 'desc'));
+      unsubDebts = onSnapshot(
+        q,
+        (snap) => {
+          setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        },
+        (error) => {
+          console.error("Error al cargar deudas:", error);
+          toast.error("Error de permisos o conexión al cargar deudas");
+        }
+      );
+    });
+
+    return () => {
+      unsubAuth();
+      unsubDebts();
+    };
   }, []);
 
   const handleAdd = async (e) => {
     e.preventDefault();
+    if (!auth.currentUser) {
+      toast.error("Debes iniciar sesión para registrar deudas");
+      return;
+    }
     if (!name.trim()) { toast.error(t('debts.nameRequired') || 'Ingresa el nombre de la persona'); return; }
     if (!amount || Number(amount) <= 0) { toast.error(t('debts.amountRequired') || 'Ingresa un monto válido'); return; }
     setIsSubmitting(true);
@@ -41,15 +69,37 @@ export function DeudasView() {
       });
       setName(''); setAmount(''); setDescription(''); setType('debo');
       toast.success(t('debts.created') || "Deuda registrada");
-    } catch (err) { toast.error("Error al registrar deuda"); }
-    finally { setIsSubmitting(false); }
+    } catch (err) {
+      console.error("Error al registrar deuda:", err);
+      toast.error("Error al registrar deuda");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleTogglePaid = async (item) => {
+    if (!auth.currentUser) {
+      toast.error("Debes iniciar sesión para actualizar la deuda");
+      return;
+    }
     try {
       await updateDoc(doc(db, `users/${auth.currentUser.uid}/debts`, item.id), { paid: !item.paid });
       toast.success(item.paid ? (t('debts.reopened') || "Reabierta") : (t('debts.paid') || "Marcada como pagada"));
-    } catch (err) { toast.error("Error al actualizar"); }
+    } catch (err) {
+      console.error("Error al actualizar deuda:", err);
+      toast.error("Error al actualizar la deuda");
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!auth.currentUser || !confirmModal.id) return;
+    try {
+      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/debts`, confirmModal.id));
+      toast.success("Deuda eliminada");
+    } catch (err) {
+      console.error("Error al eliminar deuda:", err);
+      toast.error("Error al eliminar la deuda");
+    }
   };
 
   const handleDelete = (id) => {
@@ -178,7 +228,7 @@ export function DeudasView() {
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ isOpen: false, id: null })}
-        onConfirm={() => deleteDoc(doc(db, `users/${auth.currentUser.uid}/debts`, confirmModal.id))}
+        onConfirm={handleDeleteConfirm}
         title={t('debts.confirmDelete') || 'Eliminar deuda'}
         message="¿Estás seguro de que deseas eliminar esta deuda?"
         confirmText="Eliminar"

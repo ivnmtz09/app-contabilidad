@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, updateDoc, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { useTranslation } from 'react-i18next';
 import { StickyNote, Trash2, Plus, Pencil, X } from 'lucide-react';
@@ -29,28 +30,70 @@ export function NotasView() {
   };
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-    const q = query(collection(db, `users/${auth.currentUser.uid}/notes`), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snap) => setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
-    return () => unsub();
+    let unsubNotes = () => {};
+
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      unsubNotes();
+
+      if (!user) {
+        setNotes([]);
+        return;
+      }
+
+      const q = query(collection(db, `users/${user.uid}/notes`), orderBy('createdAt', 'desc'));
+      unsubNotes = onSnapshot(
+        q,
+        (snap) => {
+          setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        },
+        (error) => {
+          console.error("Error al cargar notas:", error);
+          toast.error("Error de permisos o conexión al cargar notas");
+        }
+      );
+    });
+
+    return () => {
+      unsubAuth();
+      unsubNotes();
+    };
   }, []);
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!auth.currentUser) {
+      toast.error("Debes iniciar sesión para guardar notas");
+      return;
+    }
     if (!title.trim()) { toast.error(t('notes.titleRequired') || 'Ingresa un título para la nota'); return; }
     if (!content.trim() || content === '<p><br></p>') { toast.error(t('notes.contentRequired') || 'Escribe algo en la nota'); return; }
     setIsSubmitting(true);
     try {
       if (editingId) {
-        await updateDoc(doc(db, `users/${auth.currentUser.uid}/notes`, editingId), { title, content, updatedAt: new Date().toISOString() });
+        await updateDoc(doc(db, `users/${auth.currentUser.uid}/notes`, editingId), { title: title.trim(), content, updatedAt: new Date().toISOString() });
         toast.success(t('profile.success') || "Nota actualizada");
       } else {
-        await addDoc(collection(db, `users/${auth.currentUser.uid}/notes`), { title, content, createdAt: new Date().toISOString() });
+        await addDoc(collection(db, `users/${auth.currentUser.uid}/notes`), { title: title.trim(), content, createdAt: new Date().toISOString() });
         toast.success("Nota guardada");
       }
       resetForm();
-    } catch (err) { toast.error("Error al guardar"); }
-    finally { setIsSubmitting(false); }
+    } catch (err) {
+      console.error("Error al guardar nota:", err);
+      toast.error("Error al guardar");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!auth.currentUser || !confirmModal.id) return;
+    try {
+      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/notes`, confirmModal.id));
+      toast.success("Nota eliminada");
+    } catch (err) {
+      console.error("Error al eliminar nota:", err);
+      toast.error("Error al eliminar la nota");
+    }
   };
 
   const handleEdit = (note) => {
@@ -130,7 +173,7 @@ export function NotasView() {
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ isOpen: false, id: null })}
-        onConfirm={() => deleteDoc(doc(db, `users/${auth.currentUser.uid}/notes`, confirmModal.id))}
+        onConfirm={handleDeleteConfirm}
         title="Eliminar nota"
         message="¿Estás seguro de que deseas eliminar esta nota?"
         confirmText="Eliminar"

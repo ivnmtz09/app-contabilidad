@@ -19,13 +19,13 @@ function TransactionModal({ isOpen, onClose, onSave, type, accounts, editTransac
       setApplyTax(false);
       setStep(1);
     }
-  }, [editTransaction]);
+  }, [editTransaction, accounts]);
 
   useEffect(() => {
     if (isOpen && accounts.length > 0 && !accountId) {
       setAccountId(accounts[0].id);
     }
-  }, [isOpen, accounts]);
+  }, [isOpen, accounts, accountId]);
 
   const handleClose = () => {
     setAmount('');

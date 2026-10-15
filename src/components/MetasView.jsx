@@ -1,51 +1,105 @@
 import { useState, useEffect } from 'react';
-import { collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, ArrowUpCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
+import AddGoalFundsModal from './AddGoalFundsModal';
 
 export function MetasView() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, item: null });
+  const [fundsModal, setFundsModal] = useState({ isOpen: false, goal: null });
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-    const q = query(collection(db, `users/${auth.currentUser.uid}/goals`), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snap) => setItems(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
-    return () => unsub();
+    let unsubGoals = () => {};
+    let unsubAccounts = () => {};
+
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      unsubGoals();
+      unsubAccounts();
+
+      if (!user) {
+        setItems([]);
+        setAccounts([]);
+        return;
+      }
+
+      const qGoals = query(collection(db, `users/${user.uid}/goals`), orderBy('createdAt', 'desc'));
+      unsubGoals = onSnapshot(
+        qGoals,
+        (snap) => {
+          setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        },
+        (error) => {
+          console.error("Error al cargar metas:", error);
+          toast.error("Error de permisos o conexión al cargar metas");
+        }
+      );
+
+      const qAccounts = query(collection(db, `users/${user.uid}/accounts`));
+      unsubAccounts = onSnapshot(
+        qAccounts,
+        (snap) => {
+          setAccounts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        },
+        (error) => {
+          console.error("Error al cargar cuentas en metas:", error);
+        }
+      );
+    });
+
+    return () => {
+      unsubAuth();
+      unsubGoals();
+      unsubAccounts();
+    };
   }, []);
 
   const handleAdd = async (e) => {
     e.preventDefault();
+    if (!auth.currentUser) {
+      toast.error("Debes iniciar sesión para crear metas");
+      return;
+    }
     if (!name.trim()) { toast.error(t('goals.nameRequired') || 'Ingresa un nombre para la meta'); return; }
     if (!targetAmount || Number(targetAmount) <= 0) { toast.error(t('goals.amountRequired') || 'Ingresa un monto objetivo válido'); return; }
     setIsSubmitting(true);
     try {
       await addDoc(collection(db, `users/${auth.currentUser.uid}/goals`), {
-        name, targetAmount: Number(targetAmount), savedAmount: 0, createdAt: new Date().toISOString()
+        name: name.trim(), targetAmount: Number(targetAmount), savedAmount: 0, createdAt: new Date().toISOString()
       });
       setName(''); setTargetAmount('');
       toast.success("Meta creada exitosamente");
-    } catch (err) { toast.error("Error al crear la meta"); }
+    } catch (err) {
+      console.error("Error al crear la meta:", err);
+      toast.error("Error al crear la meta");
+    }
     finally { setIsSubmitting(false); }
   };
 
-  const handleAddFunds = async (goal) => {
-    const amountToAdd = prompt(`${t('goals.addFunds')} - ${goal.name}:`);
-    if (!amountToAdd || isNaN(amountToAdd)) return;
-    const newSaved = goal.savedAmount + Number(amountToAdd);
+  const handleOpenFundsModal = (goal) => {
+    setFundsModal({ isOpen: true, goal });
+  };
+
+  const handleDeleteGoal = async () => {
+    if (!auth.currentUser || !confirmModal.item?.id) return;
     try {
-      await updateDoc(doc(db, `users/${auth.currentUser.uid}/goals`, goal.id), { savedAmount: newSaved });
-      toast.success("Fondos añadidos");
-    } catch (err) { toast.error("Error al añadir fondos"); }
+      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/goals`, confirmModal.item.id));
+      toast.success("Meta eliminada");
+    } catch (err) {
+      console.error("Error al eliminar meta:", err);
+      toast.error("Error al eliminar la meta");
+    }
   };
 
   return (
@@ -69,7 +123,7 @@ export function MetasView() {
           <input type="text" placeholder={t('module.name') || 'Nombre de la meta'} value={name} onChange={(e) => setName(e.target.value)} className="flex-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-500" required />
           <input type="number" placeholder={t('goals.target') || 'Monto Objetivo'} value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} className="w-full sm:w-40 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-500" required />
         </div>
-        <button type="submit" disabled={isSubmitting} className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl px-5 py-3 font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
+        <button type="submit" disabled={isSubmitting} className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl px-5 py-3 font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer">
           <Plus size={20}/> {t('module.add') || 'Crear Meta'}
         </button>
       </form>
@@ -85,10 +139,10 @@ export function MetasView() {
                   <p className="text-sm text-zinc-500">{t('goals.saved') || 'Ahorrado'}: <span className="font-semibold text-emerald-500">${item.savedAmount.toLocaleString()}</span> /${item.targetAmount.toLocaleString()}</p>
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => handleAddFunds(item)} className="text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-xl transition-colors" title={t('goals.addFunds') || 'Abonar'}>
+                  <button onClick={() => handleOpenFundsModal(item)} className="text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-xl transition-colors cursor-pointer" title={t('goals.addFunds') || 'Abonar'}>
                     <ArrowUpCircle size={22}/>
                   </button>
-                  <button onClick={() => setConfirmModal({ isOpen: true, item })} className="text-zinc-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 p-2 rounded-xl transition-colors">
+                  <button onClick={() => setConfirmModal({ isOpen: true, item })} className="text-zinc-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 p-2 rounded-xl transition-colors cursor-pointer">
                     <Trash2 size={20}/>
                   </button>
                 </div>
@@ -105,10 +159,17 @@ export function MetasView() {
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ isOpen: false, item: null })}
-        onConfirm={() => deleteDoc(doc(db, `users/${auth.currentUser.uid}/goals`, confirmModal.item.id))}
+        onConfirm={handleDeleteGoal}
         title="Eliminar meta"
         message={`¿Eliminar la meta "${confirmModal.item?.name}"?`}
         confirmText="Eliminar"
+      />
+
+      <AddGoalFundsModal
+        isOpen={fundsModal.isOpen}
+        onClose={() => setFundsModal({ isOpen: false, goal: null })}
+        goal={fundsModal.goal}
+        accounts={accounts}
       />
     </div>
   );
