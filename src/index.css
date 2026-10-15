@@ -1,9 +1,250 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap");
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
+
 @theme {
   --font-sans: "Inter", sans-serif;
   --font-display: "Space Grotesk", sans-serif;
+  --color-theme-primary: var(--color-primary);
+  --color-theme-primary-hover: var(--color-primary-hover);
+  --color-theme-primary-light: var(--color-primary-light);
+  --color-theme-secondary: var(--color-secondary);
+  --color-theme-secondary-hover: var(--color-secondary-hover);
+  --color-theme-secondary-light: var(--color-secondary-light);
+}
+
+/* =========================================================
+   SISTEMA DE TEMAS DE COLOR - MISCUENTAZ
+   5 Temas con soporte completo Light y Dark Mode
+   ========================================================= */
+
+/* 1. DEFAULT: Moradito & Verdecito */
+:root,
+[data-theme="default"] {
+  --color-primary: #8b5cf6;
+  --color-primary-hover: #7c3aed;
+  --color-primary-rgb: 139, 92, 246;
+  --color-primary-light: rgba(139, 92, 246, 0.12);
+  --color-primary-border: rgba(139, 92, 246, 0.25);
+  --color-primary-light-text: #7c3aed;
+
+  --color-secondary: #10b981;
+  --color-secondary-hover: #059669;
+  --color-secondary-rgb: 16, 185, 129;
+  --color-secondary-light: rgba(16, 185, 129, 0.12);
+  --color-secondary-border: rgba(16, 185, 129, 0.25);
+  --color-secondary-light-text: #059669;
+}
+
+/* 2. OCEAN: Océano & Lima */
+[data-theme="ocean"] {
+  --color-primary: #0284c7;
+  --color-primary-hover: #0369a1;
+  --color-primary-rgb: 2, 132, 199;
+  --color-primary-light: rgba(2, 132, 199, 0.12);
+  --color-primary-border: rgba(2, 132, 199, 0.25);
+  --color-primary-light-text: #0369a1;
+
+  --color-secondary: #84cc16;
+  --color-secondary-hover: #65a30d;
+  --color-secondary-rgb: 132, 204, 22;
+  --color-secondary-light: rgba(132, 204, 22, 0.12);
+  --color-secondary-border: rgba(132, 204, 22, 0.25);
+  --color-secondary-light-text: #65a30d;
+}
+
+/* 3. SUNSET: Atardecer Neón */
+[data-theme="sunset"] {
+  --color-primary: #ec4899;
+  --color-primary-hover: #db2777;
+  --color-primary-rgb: 236, 72, 153;
+  --color-primary-light: rgba(236, 72, 153, 0.12);
+  --color-primary-border: rgba(236, 72, 153, 0.25);
+  --color-primary-light-text: #db2777;
+
+  --color-secondary: #f59e0b;
+  --color-secondary-hover: #d97706;
+  --color-secondary-rgb: 245, 158, 11;
+  --color-secondary-light: rgba(245, 158, 11, 0.12);
+  --color-secondary-border: rgba(245, 158, 11, 0.25);
+  --color-secondary-light-text: #d97706;
+}
+
+/* 4. CYBER: Cyberpunk Índigo & Menta */
+[data-theme="cyber"] {
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-primary-rgb: 99, 102, 241;
+  --color-primary-light: rgba(99, 102, 241, 0.12);
+  --color-primary-border: rgba(99, 102, 241, 0.25);
+  --color-primary-light-text: #4f46e5;
+
+  --color-secondary: #14b8a6;
+  --color-secondary-hover: #0d9488;
+  --color-secondary-rgb: 20, 184, 166;
+  --color-secondary-light: rgba(20, 184, 166, 0.12);
+  --color-secondary-border: rgba(20, 184, 166, 0.25);
+  --color-secondary-light-text: #0d9488;
+}
+
+/* 5. FOREST: Bosque Imperial & Oro */
+[data-theme="forest"] {
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-primary-rgb: 5, 150, 105;
+  --color-primary-light: rgba(5, 150, 105, 0.12);
+  --color-primary-border: rgba(5, 150, 105, 0.25);
+  --color-primary-light-text: #047857;
+
+  --color-secondary: #eab308;
+  --color-secondary-hover: #ca8a04;
+  --color-secondary-rgb: 234, 179, 8;
+  --color-secondary-light: rgba(234, 179, 8, 0.12);
+  --color-secondary-border: rgba(234, 179, 8, 0.25);
+  --color-secondary-light-text: #ca8a04;
+}
+
+/* =========================================================
+   MODO OSCURO (.dark): Ajustes de contraste y luminosidad
+   ========================================================= */
+.dark,
+:root.dark,
+.dark[data-theme="default"],
+.dark [data-theme="default"] {
+  --color-primary-light: rgba(139, 92, 246, 0.22);
+  --color-primary-border: rgba(139, 92, 246, 0.4);
+  --color-primary-light-text: #c4b5fd;
+  --color-secondary-light: rgba(16, 185, 129, 0.22);
+  --color-secondary-border: rgba(16, 185, 129, 0.4);
+  --color-secondary-light-text: #6ee7b7;
+}
+
+.dark[data-theme="ocean"],
+.dark [data-theme="ocean"] {
+  --color-primary-light: rgba(2, 132, 199, 0.22);
+  --color-primary-border: rgba(2, 132, 199, 0.4);
+  --color-primary-light-text: #7dd3fc;
+  --color-secondary-light: rgba(132, 204, 22, 0.22);
+  --color-secondary-border: rgba(132, 204, 22, 0.4);
+  --color-secondary-light-text: #bef264;
+}
+
+.dark[data-theme="sunset"],
+.dark [data-theme="sunset"] {
+  --color-primary-light: rgba(236, 72, 153, 0.22);
+  --color-primary-border: rgba(236, 72, 153, 0.4);
+  --color-primary-light-text: #f472b6;
+  --color-secondary-light: rgba(245, 158, 11, 0.22);
+  --color-secondary-border: rgba(245, 158, 11, 0.4);
+  --color-secondary-light-text: #fcd34d;
+}
+
+.dark[data-theme="cyber"],
+.dark [data-theme="cyber"] {
+  --color-primary-light: rgba(99, 102, 241, 0.22);
+  --color-primary-border: rgba(99, 102, 241, 0.4);
+  --color-primary-light-text: #a5b4fc;
+  --color-secondary-light: rgba(20, 184, 166, 0.22);
+  --color-secondary-border: rgba(20, 184, 166, 0.4);
+  --color-secondary-light-text: #5eead4;
+}
+
+.dark[data-theme="forest"],
+.dark [data-theme="forest"] {
+  --color-primary-light: rgba(5, 150, 105, 0.22);
+  --color-primary-border: rgba(5, 150, 105, 0.4);
+  --color-primary-light-text: #6ee7b7;
+  --color-secondary-light: rgba(234, 179, 8, 0.22);
+  --color-secondary-border: rgba(234, 179, 8, 0.4);
+  --color-secondary-light-text: #fde047;
+}
+
+/* =========================================================
+   CLASES UTILITARIAS REUTILIZABLES
+   ========================================================= */
+.bg-theme-primary {
+  background-color: var(--color-primary);
+}
+
+.hover\:bg-theme-primary-hover:hover,
+.bg-theme-primary-hover:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.text-theme-primary {
+  color: var(--color-primary);
+}
+
+.border-theme-primary {
+  border-color: var(--color-primary);
+}
+
+.border-theme-primary-subtle {
+  border-color: var(--color-primary-border);
+}
+
+.bg-theme-secondary {
+  background-color: var(--color-secondary);
+}
+
+.hover\:bg-theme-secondary-hover:hover,
+.bg-theme-secondary-hover:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.text-theme-secondary {
+  color: var(--color-secondary);
+}
+
+.border-theme-secondary {
+  border-color: var(--color-secondary);
+}
+
+.border-theme-secondary-subtle {
+  border-color: var(--color-secondary-border);
+}
+
+.bg-theme-primary-light {
+  background-color: var(--color-primary-light);
+}
+
+.text-theme-primary-light {
+  color: var(--color-primary-light-text, var(--color-primary));
+}
+
+.bg-theme-secondary-light {
+  background-color: var(--color-secondary-light);
+}
+
+.text-theme-secondary-light {
+  color: var(--color-secondary-light-text, var(--color-secondary));
+}
+
+.fill-theme-primary {
+  fill: var(--color-primary);
+}
+
+.fill-theme-secondary {
+  fill: var(--color-secondary);
+}
+
+/* Efectos Glow / Resplandor */
+.glow-primary {
+  box-shadow: 0 0 20px -3px rgba(var(--color-primary-rgb), 0.45);
+}
+
+.glow-secondary {
+  box-shadow: 0 0 20px -3px rgba(var(--color-secondary-rgb), 0.45);
+}
+
+.hover\:glow-primary:hover,
+.glow-primary-hover:hover {
+  box-shadow: 0 0 25px -2px rgba(var(--color-primary-rgb), 0.65);
+}
+
+.hover\:glow-secondary:hover,
+.glow-secondary-hover:hover {
+  box-shadow: 0 0 25px -2px rgba(var(--color-secondary-rgb), 0.65);
 }
 
 @keyframes progress {

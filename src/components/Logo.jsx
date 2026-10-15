@@ -33,7 +33,7 @@ export default function Logo({ className = "w-12 h-12" }) {
         width="6"
         height="10"
         rx="1.8"
-        className="fill-violet-600 dark:fill-violet-500"
+        className="fill-theme-primary transition-colors duration-300"
       />
 
       {/* Barra 2: Neutro / Transición */}
@@ -53,7 +53,7 @@ export default function Logo({ className = "w-12 h-12" }) {
         width="6"
         height="20"
         rx="1.8"
-        className="fill-emerald-500"
+        className="fill-theme-secondary transition-colors duration-300"
       />
     </svg>
   );
@@ -70,7 +70,7 @@ export function LogoWithText({ className = "w-10 h-10", showBeta = true }) {
       <div className="flex items-center gap-2">
         <span className="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
           MisCuenta
-          <span className="text-violet-600 dark:text-violet-500">Z</span>
+          <span className="text-theme-primary transition-colors duration-300">Z</span>
         </span>
         {showBeta && (
           <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">

@@ -12,6 +12,9 @@ if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-s
   document.documentElement.classList.remove('dark');
 }
 
+const savedColorTheme = localStorage.getItem('app-theme') || 'default';
+document.documentElement.setAttribute('data-theme', savedColorTheme);
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
