@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, ScrollRestoration } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import './i18n/config'
 import App from './App.jsx'
@@ -21,8 +21,6 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       {/* AuthProvider centraliza el estado de auth; evita condición de carrera con Firestore */}
       <AuthProvider>
-        {/* Restaura la posición del scroll al navegar entre rutas */}
-        <ScrollRestoration getKey={(location) => location.pathname} />
         <App />
       </AuthProvider>
     </BrowserRouter>

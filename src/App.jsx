@@ -25,7 +25,9 @@ import TransactionMenuModal from "./components/TransactionMenuModal";
 import ConfirmModal from "./components/ConfirmModal";
 import TransferModal from "./components/TransferModal";
 import { RouteChangeLoader } from "./components/RouteChangeLoader";
+import ScrollToTop from "./components/ScrollToTop";
 import { useAuth } from "./context/AuthContext";
+
 
 // Lazy-load vistas secundarias para reducir el bundle inicial
 const RecurrentesView = lazy(() => import("./components/RecurrentesView").then(m => ({ default: m.RecurrentesView })));
@@ -570,12 +572,15 @@ function App() {
         <div className="absolute -bottom-40 left-1/3 w-96 sm:w-[450px] h-96 sm:h-[450px] bg-theme-primary/8 dark:bg-theme-primary/12 rounded-full blur-3xl transform-gpu"></div>
       </div>
 
+      <ScrollToTop />
+
       <Drawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         transactions={transactions}
         accounts={accounts}
       />
+
 
       <header className="sticky top-0 z-40 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl border-b border-white/60 dark:border-zinc-800/60 px-4 sm:px-6 py-4 flex justify-between items-center shadow-xs">
         <div className="flex items-center gap-3">
