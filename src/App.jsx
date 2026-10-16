@@ -383,12 +383,13 @@ function App() {
           {/* Ingresos / Egresos del mes */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 mb-6">
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/50 border border-emerald-800/40 text-emerald-400 text-xs sm:text-sm font-bold">
-              <span>↑ +${formatCurrency(monthIncome)}</span>
+              <span>+${formatCurrency(monthIncome)}</span>
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/50 border border-rose-800/40 text-rose-400 text-xs sm:text-sm font-bold">
-              <span>↓ -${formatCurrency(monthExpense)}</span>
+              <span>-${formatCurrency(monthExpense)}</span>
             </div>
           </div>
+
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <button

@@ -1,23 +1,23 @@
-# MisCuentaZ (v1.5.0)
+# MisCuentaZ (v1.6.0)
 
 Un centro de comando financiero personal diseñado para ser rápido, seguro, estéticamente impecable y altamente responsivo. Gestiona tus ingresos, egresos, transferencias, deudas, metas de ahorro, notas y suscripciones — todo en tiempo real con una interfaz moderna basada en **Minimalist-Glassmorphism**, orbes de luz ambiental y personalización multitema.
 
-🌐 **Demo en producción**: [mis-cuentaz.vercel.app](https://mis-cuentaz.vercel.app/)
+**Demo en producción**: [app-contabilidad-ivnmtz.web.app](https://app-contabilidad-ivnmtz.web.app)
 
 ---
 
-## Novedades de la Versión 1.5.0
+## Novedades de la Versión 1.6.0
 
-- 🛡️ **Reactivación y Seguridad de Firebase**:
+- **Reactivación y Seguridad de Firebase**:
   - Incorporación de `firestore.rules` con permisos estrictos por usuario autenticado (`auth.uid == userId`).
   - Listeners de Firestore con manejo resiliente de errores para evitar bloqueos de pantalla (`permission-denied`).
   - Autenticación Google reforzada ante políticas `Cross-Origin-Opener-Policy` (COOP) y popups bloqueados.
-- 🎨 **Rediseño Minimalist-Glassmorphism**:
+- **Rediseño Minimalist-Glassmorphism**:
   - Paleta insignia con **Moradito** (`#8b5cf6`) como primario y **Verdecito** (`#10b981`) como secundario.
   - Tarjetas translúcidas con `backdrop-blur-2xl`, bordes semi-transparentes y orbes de luz ambiental.
-- 👛 **Ilustración SVG de Billetera con Dinero**:
-  - Nuevo componente vectorial `WalletHeroSvg` integrado en el Home, mostrando una billetera moderna con abanico de billetes de alta denominación, tarjetas con chip EMV y monedas doradas.
-- 🎭 **Motor de Personalización con 5 Temas**:
+- **Billetera de Cuero Interactiva SVG**:
+  - Componente vectorial interactivo `LeatherWallet` en el Home, mostrando una billetera de cuero marrón que al tocarse despliega una tarjeta animada con el saldo del usuario.
+- **Motor de Personalización con 5 Temas**:
   - Selector visual interactivo en la página de Perfil con 5 paletas completas:
     1. **Violeta & Esmeralda** *(Original Moradito y Verdecito)*
     2. **Océano & Lima** *(Azul eléctrico y Lima neón)*
@@ -25,13 +25,13 @@ Un centro de comando financiero personal diseñado para ser rápido, seguro, est
     4. **Cyberpunk Índigo & Menta** *(Índigo profundo y Menta fresca)*
     5. **Bosque Imperial & Oro** *(Verde jade y Dorado clásico)*
   - Compatible al 100% tanto con **Modo Claro** como con **Modo Oscuro** y persistencia en `localStorage`.
-- ⚡ **Mejoras Lógicas y Operaciones Atómicas**:
+- **Mejoras Lógicas y Operaciones Atómicas**:
   - Deducción automática y atómica del saldo al registrar pagos de gastos recurrentes.
   - Sincronización de saldos con `increment()` de Firestore para evitar condiciones de carrera.
   - Vinculación de transferencias mediante `transferId` compartido para anulación/eliminación coordinada.
   - Nuevo modal `AddGoalFundsModal` para abonar a metas con vista previa de progreso en tiempo real y selección de cuenta.
   - Edición de nombre y eliminación segura de cuentas vacías en `AccountsCard`.
-- 📱 **Responsividad Multidispositivo**:
+- **Responsividad Multidispositivo**:
   - Margen inferior optimizado (`pb-32`) para evitar solapamiento con la barra de navegación flotante (`BottomNav`).
   - Visualización adaptativa fluida desde 320px hasta pantallas ultra-wide.
 

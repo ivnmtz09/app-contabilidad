@@ -22,7 +22,7 @@ function Login() {
       if (code === "auth/popup-blocked") {
         toast.error("El navegador bloqueó la ventana emergente. Por favor, habilita las ventanas emergentes (popups) para iniciar sesión.");
       } else if (code === "auth/popup-closed-by-user") {
-        toast("Inicio de sesión cancelado al cerrar la ventana.", { icon: "ℹ️" });
+        toast("Inicio de sesión cancelado al cerrar la ventana.");
       } else if (code === "auth/cancelled-popup-request") {
         toast("Se canceló la ventana emergente previa.");
       } else if (code === "auth/unauthorized-domain") {

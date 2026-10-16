@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, LogOut, Check, Palette } from "lucide-react";
+import { ArrowLeft, Save, LogOut, Check, Palette, Sun, Moon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -104,10 +104,10 @@ function ProfilePage({ user }) {
       }`,
       {
         id: "theme-toast",
-        icon: "🎨",
       }
     );
   };
+
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 transition-colors duration-300">
@@ -241,39 +241,107 @@ function ProfilePage({ user }) {
         </div>
 
         {/* Preferencias (Idioma y Modo Claro/Oscuro) */}
-        <div className="bg-white dark:bg-zinc-800 rounded-3xl p-6 shadow-sm">
-          <h2 className="text-sm font-display font-semibold text-zinc-500 dark:text-zinc-400 mb-4 uppercase tracking-wide">
+        <div className="bg-white dark:bg-zinc-800 rounded-3xl p-6 shadow-sm space-y-5">
+          <h2 className="text-sm font-display font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
             {t("profile.preferences")}
           </h2>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-sans font-medium text-zinc-500 dark:text-zinc-400">
-                {t("profile.language")}
-              </label>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-900 dark:text-zinc-50 focus:ring-2 focus:ring-violet-500 outline-none transition-all cursor-pointer"
-              >
-                <option value="es">Español</option>
-                <option value="en">English</option>
-              </select>
-            </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-sans font-medium text-zinc-500 dark:text-zinc-400">
-                {t("profile.theme")} (Modo)
-              </label>
-              <select
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-900 dark:text-zinc-50 focus:ring-2 focus:ring-violet-500 outline-none transition-all cursor-pointer"
-              >
-                <option value="light">{t("profile.light")}</option>
-                <option value="dark">{t("profile.dark")}</option>
-              </select>
+          {/* Selector de Idioma (Radio Buttons) */}
+          <div className="space-y-2">
+            <label className="text-xs font-sans font-medium text-zinc-500 dark:text-zinc-400">
+              {t("profile.language")}
+            </label>
+            <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label={t("profile.language")}>
+              {[
+                { id: "es", label: "Español" },
+                { id: "en", label: "English" },
+              ].map((item) => {
+                const isSelected = language === item.id;
+                return (
+                  <label
+                    key={item.id}
+                    className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? "border-theme-primary bg-theme-primary-light/40 dark:bg-theme-primary/10 text-theme-primary ring-1 ring-theme-primary/50"
+                        : "border-zinc-200 dark:border-zinc-700/80 bg-zinc-50/70 dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600"
+                    }`}
+                  >
+                    <span className="text-sm font-semibold">{item.label}</span>
+                    <input
+                      type="radio"
+                      name="language"
+                      value={item.id}
+                      checked={isSelected}
+                      onChange={() => setLanguage(item.id)}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected
+                          ? "border-theme-primary"
+                          : "border-zinc-300 dark:border-zinc-600"
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-theme-primary" />
+                      )}
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
+
+          {/* Selector de Modo Claro / Oscuro (Radio Buttons) */}
+          <div className="space-y-2">
+            <label className="text-xs font-sans font-medium text-zinc-500 dark:text-zinc-400">
+              {t("profile.theme")} (Modo)
+            </label>
+            <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label={t("profile.theme")}>
+              {[
+                { id: "light", label: t("profile.light"), icon: Sun },
+                { id: "dark", label: t("profile.dark"), icon: Moon },
+              ].map((item) => {
+                const isSelected = theme === item.id;
+                const IconComponent = item.icon;
+                return (
+                  <label
+                    key={item.id}
+                    className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? "border-theme-primary bg-theme-primary-light/40 dark:bg-theme-primary/10 text-theme-primary ring-1 ring-theme-primary/50"
+                        : "border-zinc-200 dark:border-zinc-700/80 bg-zinc-50/70 dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <IconComponent size={17} className={isSelected ? "text-theme-primary" : "text-zinc-400 dark:text-zinc-500"} />
+                      <span className="text-sm font-semibold">{item.label}</span>
+                    </div>
+                    <input
+                      type="radio"
+                      name="themeMode"
+                      value={item.id}
+                      checked={isSelected}
+                      onChange={() => setTheme(item.id)}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected
+                          ? "border-theme-primary"
+                          : "border-zinc-300 dark:border-zinc-600"
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-theme-primary" />
+                      )}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
 
           <button
             onClick={handleSavePreferences}
