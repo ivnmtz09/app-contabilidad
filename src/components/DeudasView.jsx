@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
+import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Trash2, Plus, ArrowLeft, CheckCircle2, CircleDollarSign, HandCoins } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
+import { DeudasSkeleton } from './Loaders';
 
 export function DeudasView() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
@@ -18,40 +20,40 @@ export function DeudasView() {
   const [type, setType] = useState('debo');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    let unsubDebts = () => {};
+    // Guard: esperar a que el usuario esté resuelto
+    if (!user) {
+      setItems([]);
+      return;
+    }
 
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      unsubDebts();
-
-      if (!user) {
-        setItems([]);
-        return;
+    const q = query(collection(db, `users/${user.uid}/debts`), orderBy('createdAt', 'desc'));
+    const unsubDebts = onSnapshot(
+      q,
+      (snap) => {
+        setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setIsLoaded(true);
+      },
+      (error) => {
+        console.error("Error al cargar deudas:", error);
+        toast.error("Error de permisos o conexión al cargar deudas");
+        setIsLoaded(true);
       }
-
-      const q = query(collection(db, `users/${user.uid}/debts`), orderBy('createdAt', 'desc'));
-      unsubDebts = onSnapshot(
-        q,
-        (snap) => {
-          setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-        },
-        (error) => {
-          console.error("Error al cargar deudas:", error);
-          toast.error("Error de permisos o conexión al cargar deudas");
-        }
-      );
-    });
+    );
 
     return () => {
-      unsubAuth();
       unsubDebts();
     };
-  }, []);
+  }, [user]);
+
+  if (!isLoaded) return <DeudasSkeleton />;
+
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!auth.currentUser) {
+    if (!user) {
       toast.error("Debes iniciar sesión para registrar deudas");
       return;
     }
@@ -59,7 +61,7 @@ export function DeudasView() {
     if (!amount || Number(amount) <= 0) { toast.error(t('debts.amountRequired') || 'Ingresa un monto válido'); return; }
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, `users/${auth.currentUser.uid}/debts`), {
+      await addDoc(collection(db, `users/${user.uid}/debts`), {
         name: name.trim(),
         amount: Number(amount),
         description: description.trim(),
@@ -78,12 +80,12 @@ export function DeudasView() {
   };
 
   const handleTogglePaid = async (item) => {
-    if (!auth.currentUser) {
+    if (!user) {
       toast.error("Debes iniciar sesión para actualizar la deuda");
       return;
     }
     try {
-      await updateDoc(doc(db, `users/${auth.currentUser.uid}/debts`, item.id), { paid: !item.paid });
+      await updateDoc(doc(db, `users/${user.uid}/debts`, item.id), { paid: !item.paid });
       toast.success(item.paid ? (t('debts.reopened') || "Reabierta") : (t('debts.paid') || "Marcada como pagada"));
     } catch (err) {
       console.error("Error al actualizar deuda:", err);
@@ -92,9 +94,9 @@ export function DeudasView() {
   };
 
   const handleDeleteConfirm = async () => {
-    if (!auth.currentUser || !confirmModal.id) return;
+    if (!user || !confirmModal.id) return;
     try {
-      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/debts`, confirmModal.id));
+      await deleteDoc(doc(db, `users/${user.uid}/debts`, confirmModal.id));
       toast.success("Deuda eliminada");
     } catch (err) {
       console.error("Error al eliminar deuda:", err);

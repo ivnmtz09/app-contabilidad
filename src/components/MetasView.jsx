@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
+import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, ArrowUpCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
 import AddGoalFundsModal from './AddGoalFundsModal';
+import { MetasSkeleton } from './Loaders';
 
 export function MetasView() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [name, setName] = useState('');
@@ -19,55 +21,52 @@ export function MetasView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, item: null });
   const [fundsModal, setFundsModal] = useState({ isOpen: false, goal: null });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    let unsubGoals = () => {};
-    let unsubAccounts = () => {};
+    // Guard: esperar a que el usuario esté resuelto
+    if (!user) {
+      setItems([]);
+      setAccounts([]);
+      return;
+    }
 
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      unsubGoals();
-      unsubAccounts();
-
-      if (!user) {
-        setItems([]);
-        setAccounts([]);
-        return;
+    const qGoals = query(collection(db, `users/${user.uid}/goals`), orderBy('createdAt', 'desc'));
+    const unsubGoals = onSnapshot(
+      qGoals,
+      (snap) => {
+        setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setIsLoaded(true);
+      },
+      (error) => {
+        console.error("Error al cargar metas:", error);
+        toast.error("Error de permisos o conexión al cargar metas");
+        setIsLoaded(true);
       }
+    );
 
-      const qGoals = query(collection(db, `users/${user.uid}/goals`), orderBy('createdAt', 'desc'));
-      unsubGoals = onSnapshot(
-        qGoals,
-        (snap) => {
-          setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-        },
-        (error) => {
-          console.error("Error al cargar metas:", error);
-          toast.error("Error de permisos o conexión al cargar metas");
-        }
-      );
-
-      const qAccounts = query(collection(db, `users/${user.uid}/accounts`));
-      unsubAccounts = onSnapshot(
-        qAccounts,
-        (snap) => {
-          setAccounts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-        },
-        (error) => {
-          console.error("Error al cargar cuentas en metas:", error);
-        }
-      );
-    });
+    const qAccounts = query(collection(db, `users/${user.uid}/accounts`));
+    const unsubAccounts = onSnapshot(
+      qAccounts,
+      (snap) => {
+        setAccounts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      },
+      (error) => {
+        console.error("Error al cargar cuentas en metas:", error);
+      }
+    );
 
     return () => {
-      unsubAuth();
       unsubGoals();
       unsubAccounts();
     };
-  }, []);
+  }, [user]);
+
+  if (!isLoaded) return <MetasSkeleton />;
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!auth.currentUser) {
+    if (!user) {
       toast.error("Debes iniciar sesión para crear metas");
       return;
     }
@@ -75,7 +74,7 @@ export function MetasView() {
     if (!targetAmount || Number(targetAmount) <= 0) { toast.error(t('goals.amountRequired') || 'Ingresa un monto objetivo válido'); return; }
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, `users/${auth.currentUser.uid}/goals`), {
+      await addDoc(collection(db, `users/${user.uid}/goals`), {
         name: name.trim(), targetAmount: Number(targetAmount), savedAmount: 0, createdAt: new Date().toISOString()
       });
       setName(''); setTargetAmount('');
@@ -92,9 +91,9 @@ export function MetasView() {
   };
 
   const handleDeleteGoal = async () => {
-    if (!auth.currentUser || !confirmModal.item?.id) return;
+    if (!user || !confirmModal.item?.id) return;
     try {
-      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/goals`, confirmModal.item.id));
+      await deleteDoc(doc(db, `users/${user.uid}/goals`, confirmModal.item.id));
       toast.success("Meta eliminada");
     } catch (err) {
       console.error("Error al eliminar meta:", err);

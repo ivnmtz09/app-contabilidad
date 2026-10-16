@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, updateDoc, onSnapshot, deleteDoc, doc, query, orderBy, increment } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
+import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { CalendarClock, Trash2, Plus, Repeat, Pencil, CreditCard, X, CalendarDays } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
+import { RecurrentesSkeleton } from './Loaders';
 
 export function RecurrentesView() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [accounts, setAccounts] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Form states
   const [editingId, setEditingId] = useState(null);
@@ -25,54 +28,50 @@ export function RecurrentesView() {
   const [paymentModal, setPaymentModal] = useState({ isOpen: false, item: null, accountId: '' });
 
   useEffect(() => {
-    let unsubRecurrents = () => {};
-    let unsubAccounts = () => {};
+    // Guard: esperar a que el usuario esté resuelto
+    if (!user) {
+      setItems([]);
+      setAccounts([]);
+      return;
+    }
 
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      unsubRecurrents();
-      unsubAccounts();
-
-      if (!user) {
-        setItems([]);
-        setAccounts([]);
-        return;
+    const qRecurrents = query(collection(db, `users/${user.uid}/recurrents`), orderBy('createdAt', 'desc'));
+    const unsubRecurrents = onSnapshot(
+      qRecurrents,
+      (snap) => {
+        setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setIsLoaded(true);
+      },
+      (error) => {
+        console.error("Error al cargar suscripciones recurrentes:", error);
+        toast.error("Error de permisos o conexión al cargar suscripciones");
+        setIsLoaded(true);
       }
+    );
 
-      const qRecurrents = query(collection(db, `users/${user.uid}/recurrents`), orderBy('createdAt', 'desc'));
-      unsubRecurrents = onSnapshot(
-        qRecurrents,
-        (snap) => {
-          setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-        },
-        (error) => {
-          console.error("Error al cargar suscripciones recurrentes:", error);
-          toast.error("Error de permisos o conexión al cargar suscripciones");
-        }
-      );
-
-      const qAccounts = query(collection(db, `users/${user.uid}/accounts`));
-      unsubAccounts = onSnapshot(
-        qAccounts,
-        (snap) => {
-          setAccounts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-        },
-        (error) => {
-          console.error("Error al cargar cuentas:", error);
-          toast.error("Error de permisos o conexión al cargar cuentas");
-        }
-      );
-    });
+    const qAccounts = query(collection(db, `users/${user.uid}/accounts`));
+    const unsubAccounts = onSnapshot(
+      qAccounts,
+      (snap) => {
+        setAccounts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      },
+      (error) => {
+        console.error("Error al cargar cuentas:", error);
+        toast.error("Error de permisos o conexión al cargar cuentas");
+      }
+    );
 
     return () => {
-      unsubAuth();
       unsubRecurrents();
       unsubAccounts();
     };
-  }, []);
+  }, [user]);
+
+  if (!isLoaded) return <RecurrentesSkeleton />;
 
   const handleAddOrUpdate = async (e) => {
     e.preventDefault();
-    if (!auth.currentUser) {
+    if (!user) {
       toast.error("Debes iniciar sesión para realizar esta acción");
       return;
     }
@@ -82,13 +81,13 @@ export function RecurrentesView() {
     setIsSubmitting(true);
     try {
       if (editingId) {
-        await updateDoc(doc(db, `users/${auth.currentUser.uid}/recurrents`, editingId), {
+        await updateDoc(doc(db, `users/${user.uid}/recurrents`, editingId), {
           name: name.trim(), amount: Number(amount), frequency, billingDate
         });
         setEditingId(null);
         toast.success(t('profile.success') || "Actualizado");
       } else {
-        await addDoc(collection(db, `users/${auth.currentUser.uid}/recurrents`), {
+        await addDoc(collection(db, `users/${user.uid}/recurrents`), {
           name: name.trim(), amount: Number(amount), frequency, billingDate, createdAt: new Date().toISOString()
         });
         toast.success(t('module.saving') || "Guardado");
@@ -117,7 +116,7 @@ export function RecurrentesView() {
   };
 
   const confirmPayment = async () => {
-    if (!auth.currentUser) {
+    if (!user) {
       toast.error("Debes iniciar sesión para registrar el pago");
       return;
     }
@@ -132,7 +131,7 @@ export function RecurrentesView() {
     }
     try {
       // 1. Registrar la transacción de egreso
-      await addDoc(collection(db, `users/${auth.currentUser.uid}/transactions`), {
+      await addDoc(collection(db, `users/${user.uid}/transactions`), {
         type: 'egreso',
         amount: payAmount,
         description: `Pago suscripción: ${paymentModal.item.name}`,
@@ -141,7 +140,7 @@ export function RecurrentesView() {
       });
 
       // 2. Actualizar atómicamente el saldo de la cuenta descontando el valor
-      await updateDoc(doc(db, `users/${auth.currentUser.uid}/accounts`, paymentModal.accountId), {
+      await updateDoc(doc(db, `users/${user.uid}/accounts`, paymentModal.accountId), {
         balance: increment(-payAmount)
       });
 
@@ -154,9 +153,9 @@ export function RecurrentesView() {
   };
 
   const handleDelete = async () => {
-    if (!auth.currentUser || !confirmModal.id) return;
+    if (!user || !confirmModal.id) return;
     try {
-      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/recurrents`, confirmModal.id));
+      await deleteDoc(doc(db, `users/${user.uid}/recurrents`, confirmModal.id));
       toast.success("Suscripción eliminada");
     } catch (err) {
       console.error("Error al eliminar suscripción:", err);

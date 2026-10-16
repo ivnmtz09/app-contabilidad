@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, updateDoc, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
+import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { StickyNote, Trash2, Plus, Pencil, X } from 'lucide-react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
+import { NotasSkeleton } from './Loaders';
 
 export function NotasView() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [notes, setNotes] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [title, setTitle] = useState('');
@@ -19,6 +21,7 @@ export function NotasView() {
   const [viewingNote, setViewingNote] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const modules = {
     toolbar: [
@@ -30,38 +33,37 @@ export function NotasView() {
   };
 
   useEffect(() => {
-    let unsubNotes = () => {};
+    // Guard: esperar a que el usuario esté resuelto
+    if (!user) {
+      setNotes([]);
+      return;
+    }
 
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      unsubNotes();
-
-      if (!user) {
-        setNotes([]);
-        return;
+    const q = query(collection(db, `users/${user.uid}/notes`), orderBy('createdAt', 'desc'));
+    const unsubNotes = onSnapshot(
+      q,
+      (snap) => {
+        setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setIsLoaded(true);
+      },
+      (error) => {
+        console.error("Error al cargar notas:", error);
+        toast.error("Error de permisos o conexión al cargar notas");
+        setIsLoaded(true);
       }
-
-      const q = query(collection(db, `users/${user.uid}/notes`), orderBy('createdAt', 'desc'));
-      unsubNotes = onSnapshot(
-        q,
-        (snap) => {
-          setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-        },
-        (error) => {
-          console.error("Error al cargar notas:", error);
-          toast.error("Error de permisos o conexión al cargar notas");
-        }
-      );
-    });
+    );
 
     return () => {
-      unsubAuth();
       unsubNotes();
     };
-  }, []);
+  }, [user]);
+
+  if (!isLoaded) return <NotasSkeleton />;
+
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!auth.currentUser) {
+    if (!user) {
       toast.error("Debes iniciar sesión para guardar notas");
       return;
     }
@@ -70,10 +72,10 @@ export function NotasView() {
     setIsSubmitting(true);
     try {
       if (editingId) {
-        await updateDoc(doc(db, `users/${auth.currentUser.uid}/notes`, editingId), { title: title.trim(), content, updatedAt: new Date().toISOString() });
+        await updateDoc(doc(db, `users/${user.uid}/notes`, editingId), { title: title.trim(), content, updatedAt: new Date().toISOString() });
         toast.success(t('profile.success') || "Nota actualizada");
       } else {
-        await addDoc(collection(db, `users/${auth.currentUser.uid}/notes`), { title: title.trim(), content, createdAt: new Date().toISOString() });
+        await addDoc(collection(db, `users/${user.uid}/notes`), { title: title.trim(), content, createdAt: new Date().toISOString() });
         toast.success("Nota guardada");
       }
       resetForm();
@@ -86,9 +88,9 @@ export function NotasView() {
   };
 
   const handleDeleteConfirm = async () => {
-    if (!auth.currentUser || !confirmModal.id) return;
+    if (!user || !confirmModal.id) return;
     try {
-      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/notes`, confirmModal.id));
+      await deleteDoc(doc(db, `users/${user.uid}/notes`, confirmModal.id));
       toast.success("Nota eliminada");
     } catch (err) {
       console.error("Error al eliminar nota:", err);

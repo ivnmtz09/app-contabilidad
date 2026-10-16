@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Menu, ArrowUpCircle, ArrowDownCircle, Pencil, Trash2, Ban, ArrowRightLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, Routes, Route } from "react-router-dom";
+import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
-import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, increment } from "firebase/firestore";
 import Login from "./components/Login";
@@ -18,19 +17,25 @@ import ProfilePage from "./pages/ProfilePage";
 import BalanceChart from "./components/BalanceChart";
 import Logo from "./components/Logo";
 import WalletHeroSvg from "./components/WalletHeroSvg";
+import LeatherWallet from "./components/LeatherWallet";
+
 import BottomNav from "./layout/BottomNav";
 import { formatCurrency } from "./utils/format";
 import TransactionMenuModal from "./components/TransactionMenuModal";
 import ConfirmModal from "./components/ConfirmModal";
 import TransferModal from "./components/TransferModal";
-import { RecurrentesView } from "./components/RecurrentesView";
-import { NotasView } from "./components/NotasView";
-import { DeudasView } from "./components/DeudasView";
-import { MetasView } from './components/MetasView';
+import { RouteChangeLoader } from "./components/RouteChangeLoader";
+import { useAuth } from "./context/AuthContext";
+
+// Lazy-load vistas secundarias para reducir el bundle inicial
+const RecurrentesView = lazy(() => import("./components/RecurrentesView").then(m => ({ default: m.RecurrentesView })));
+const NotasView       = lazy(() => import("./components/NotasView").then(m => ({ default: m.NotasView })));
+const DeudasView      = lazy(() => import("./components/DeudasView").then(m => ({ default: m.DeudasView })));
+const MetasView       = lazy(() => import("./components/MetasView").then(m => ({ default: m.MetasView })));
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isAuthLoading } = useAuth();
+  const isLoading = isAuthLoading;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
@@ -46,14 +51,7 @@ function App() {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsLoading(false);
-    });
-    return unsubscribe;
-  }, []);
+  const location = useLocation();
 
   useEffect(() => {
     if (!user) return;
@@ -354,26 +352,39 @@ function App() {
         </header>
       </div>
 
-      {/* Hero Card con SVG de Billetera y Glassmorphism Minimalista */}
-      <div className="md:col-span-2 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-white/60 dark:border-zinc-800/60 rounded-[2rem] shadow-xl shadow-theme-primary/5 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
-        <div className="absolute -right-20 -bottom-20 w-72 h-72 bg-theme-primary/10 rounded-full blur-2xl pointer-events-none"></div>
+      {/* ── HERO CARD — BILLETERA DE CUERO + TARJETA ────────────── */}
+      <div className="md:col-span-2 bg-gradient-to-br from-amber-950/90 via-stone-900/95 to-amber-950/90 dark:from-zinc-950 dark:via-zinc-900 dark:to-amber-950/20 backdrop-blur-2xl border border-amber-800/30 dark:border-amber-900/20 rounded-[2rem] shadow-2xl shadow-amber-950/30 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
 
-        {/* Columna Izquierda: Balance y Acciones */}
+        {/* Fondo textura cuero sutil */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: `repeating-linear-gradient(
+              45deg,
+              transparent,
+              transparent 2px,
+              rgba(139,69,19,0.15) 2px,
+              rgba(139,69,19,0.15) 4px
+            )`,
+          }}
+        />
+        {/* Orbe ambiental */}
+        <div className="absolute -right-16 -bottom-16 w-72 h-72 bg-amber-800/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -left-10 -top-10 w-48 h-48 bg-amber-900/15 rounded-full blur-2xl pointer-events-none" />
+
+        {/* Columna Izquierda: Info y Acciones */}
         <div className="flex-1 z-10 w-full text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-theme-primary-light text-theme-primary text-xs font-semibold uppercase tracking-wider mb-3">
-            <span className="w-2 h-2 rounded-full bg-theme-secondary animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-800/30 border border-amber-700/30 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
             {t('home.totalBalance')}
           </div>
-          <p className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mb-4">
-            ${formatCurrency(totalBalance)}
-          </p>
 
+          {/* Ingresos / Egresos del mes */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 mb-6">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm font-bold">
-              <span>+${formatCurrency(monthIncome)}</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/50 border border-emerald-800/40 text-emerald-400 text-xs sm:text-sm font-bold">
+              <span>↑ +${formatCurrency(monthIncome)}</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/40 text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold">
-              <span>-${formatCurrency(monthExpense)}</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/50 border border-rose-800/40 text-rose-400 text-xs sm:text-sm font-bold">
+              <span>↓ -${formatCurrency(monthExpense)}</span>
             </div>
           </div>
 
@@ -386,19 +397,23 @@ function App() {
             </button>
             <button
               onClick={() => setIsTransferOpen(true)}
-              className="w-full sm:w-auto bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200/80 dark:border-zinc-700/80 font-sans font-semibold px-5 py-3.5 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer hover:border-theme-primary"
+              className="w-full sm:w-auto bg-amber-900/40 hover:bg-amber-800/50 text-amber-200 border border-amber-700/40 font-sans font-semibold px-5 py-3.5 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer hover:border-amber-500/60"
             >
-              <ArrowRightLeft size={18} className="text-theme-primary" />
+              <ArrowRightLeft size={18} className="text-amber-400" />
               <span>Transferir</span>
             </button>
           </div>
         </div>
 
-        {/* Columna Derecha: Ilustración SVG Billetera con Dinero */}
-        <div className="w-full md:w-5/12 max-w-[340px] sm:max-w-[380px] md:max-w-[420px] z-10 flex items-center justify-center pt-2 md:pt-0">
-          <WalletHeroSvg className="w-full h-auto drop-shadow-2xl transform transition-transform duration-500 group-hover:scale-105" />
+        {/* Columna Derecha: Billetera de Cuero Interactiva */}
+        <div className="w-full md:w-auto z-10 flex items-center justify-center pt-4 md:pt-0" style={{ minWidth: 240, minHeight: 280 }}>
+          <LeatherWallet
+            totalBalance={totalBalance}
+            userName={user?.displayName || user?.email?.split('@')[0]}
+          />
         </div>
       </div>
+
 
       {/* Ingresos vs Egresos del Mes */}
       <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/60 dark:border-zinc-800/60 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
@@ -576,20 +591,23 @@ function App() {
             MisCuenta<span className="text-theme-primary">Z</span>
           </span>
         </div>
-        <ProgressBar isLoading={isLoading} />
+        <RouteChangeLoader />
       </header>
 
-      <main className="p-4 md:p-8">
-        <Routes>
-          <Route path="/" element={!isDataLoaded ? <HomeSkeleton /> : renderHomeDashboard()} />
-          <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} handleDeleteTransaction={handleDeleteTransaction} onEdit={openEditModal} onAnnul={handleAnnulTransaction} />} />
-          <Route path="/recurrentes" element={<RecurrentesView />} />
-          <Route path="/notas" element={<NotasView />} />
-          <Route path="/deudas" element={<DeudasView />} />
-          <Route path="/metas" element={<MetasView />} />
-          <Route path="/perfil" element={<ProfilePage user={user} />} />
-        </Routes>
+      <main key={location.pathname} className="page-enter p-4 md:p-8">
+        <Suspense fallback={<ListSkeleton />}>
+          <Routes>
+            <Route path="/" element={!isDataLoaded ? <HomeSkeleton /> : renderHomeDashboard()} />
+            <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} handleDeleteTransaction={handleDeleteTransaction} onEdit={openEditModal} onAnnul={handleAnnulTransaction} />} />
+            <Route path="/recurrentes" element={<RecurrentesView />} />
+            <Route path="/notas" element={<NotasView />} />
+            <Route path="/deudas" element={<DeudasView />} />
+            <Route path="/metas" element={<MetasView />} />
+            <Route path="/perfil" element={<ProfilePage user={user} />} />
+          </Routes>
+        </Suspense>
       </main>
+
 
       <AddAccountModal
         isOpen={isAddAccountOpen}

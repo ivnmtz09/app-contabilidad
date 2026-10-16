@@ -1,9 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, ScrollRestoration } from 'react-router-dom'
 import './index.css'
 import './i18n/config'
 import App from './App.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 
 const savedTheme = localStorage.getItem('theme');
 if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -18,7 +19,12 @@ document.documentElement.setAttribute('data-theme', savedColorTheme);
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      {/* AuthProvider centraliza el estado de auth; evita condición de carrera con Firestore */}
+      <AuthProvider>
+        {/* Restaura la posición del scroll al navegar entre rutas */}
+        <ScrollRestoration getKey={(location) => location.pathname} />
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )

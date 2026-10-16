@@ -256,6 +256,20 @@
   }
 }
 
+/* Billetera — pulso indicador "tap" */
+@keyframes walletPulse {
+  0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.7; }
+  50%       { transform: translateX(-50%) scaleX(1.35); opacity: 0.3; }
+}
+
+/* Billetera — shimmer de cuero */
+@keyframes leatherShimmer {
+  0%   { filter: drop-shadow(0 8px 24px rgba(92,51,23,0.35)); }
+  50%  { filter: drop-shadow(0 12px 32px rgba(139,69,19,0.5)); }
+  100% { filter: drop-shadow(0 8px 24px rgba(92,51,23,0.35)); }
+}
+
+
 .dark .ql-toolbar { border-color: #27272a !important; background-color: #18181b; }
 .dark .ql-container { border-color: #27272a !important; }
 .dark .ql-stroke { stroke: #a1a1aa !important; }
@@ -270,3 +284,57 @@ html, body {
   width: 100%;
   max-width: 100vw;
 }
+
+/* =========================================================
+   TRANSICIONES DE PÁGINA
+   Animación de entrada al cambiar de ruta.
+   Fallback CSS para navegadores sin View Transitions API.
+   ========================================================= */
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-fade-in 220ms ease-out both;
+}
+
+/* View Transitions API (Chrome 111+, Edge 111+) */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (view-transition-name: none) {
+    ::view-transition-old(root) {
+      animation: 180ms ease-in both fade-out;
+    }
+    ::view-transition-new(root) {
+      animation: 240ms ease-out both page-fade-in;
+    }
+
+    @keyframes fade-out {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(-4px); }
+    }
+  }
+}
+
+/* Scrollbar personalizada para áreas de contenido */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--color-primary-rgb), 0.3);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.55);
+}
+
