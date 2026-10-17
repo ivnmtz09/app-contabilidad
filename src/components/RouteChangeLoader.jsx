@@ -40,17 +40,20 @@ export function RouteChangeLoader() {
   return (
     <div
       aria-hidden="true"
-      className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden"
+      className="absolute bottom-0 left-0 right-0 h-[2.5px] overflow-hidden pointer-events-none z-50"
     >
       <div
-        className="h-full bg-theme-primary rounded-full"
+        className="h-full bg-gradient-to-r from-theme-primary via-theme-secondary to-theme-primary rounded-full relative transition-all"
         style={{
           width: `${width}%`,
           transition: width === 85
-            ? 'width 350ms ease-out'
+            ? 'width 350ms cubic-bezier(0.4, 0, 0.2, 1)'
             : 'width 200ms ease-in',
+          boxShadow: '0 0 12px var(--color-primary), 0 0 4px var(--color-primary)',
         }}
-      />
+      >
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-white/50 blur-[2px] rounded-full" />
+      </div>
     </div>
   );
 }
