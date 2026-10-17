@@ -3,22 +3,20 @@ import { Eye, EyeOff } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
 
 /**
- * LeatherWallet — Portatarjetas ejecutivo artesanal interactivo (Luxury Leather Cardholder).
+ * LeatherWallet — Portatarjetas ejecutivo artesanal (Luxury Leather Cardholder).
  *
- * Arquitectura espacial por capas SVG:
- * - Capa 0 (z-0):  Respaldo de cuero artesanal (Backplate) con pespuntes crema.
- * - Capa 1 (z-1):  Tarjeta posterior Titanium Black.
- * - Capa 2 (z-2):  Tarjeta posterior Emerald Fintech.
- * - Capa 3 (z-3):  Separador de ranura intermedia (Mid-tier divider).
- * - Capa 4 (z-4):  Tarjeta Principal Interactiva (MisCuentaZ con saldo protegido).
- * - Capa 10 (z-10): Bolsillo frontal de cuero con corte ergonómico para el pulgar,
- *                  pespuntes dobles y repujado "MISCUENTAZ".
- *
- * Modo Sigilo (Stealth Mode):
- * En reposo, la tarjeta principal descansa profundamente oculta dentro del portatarjetas;
- * el bolsillo frontal opaco cubre y resguarda el saldo total y cifras privadas.
- * Al tocar el portatarjetas, la tarjeta se desliza hacia arriba con física elástica de resorte,
- * revelando el saldo con alta jerarquía visual y contraste impecable.
+ * Características de diseño:
+ * 1. Centrado Geométrico Riguroso:
+ *    - Ancho del contenedor: 250px.
+ *    - Cuerpo del portatarjetas: 222px (márgenes exactos de 14px a cada lado).
+ *    - Tarjeta principal: 208px con `translateX(-50%)` (márgenes interiores exactos de 7px a cada lado).
+ * 2. Ranura Físicamente Integrada (Slot Aperture):
+ *    - La tarjeta emerge directamente desde la hendidura interior del cuero.
+ * 3. Anclaje y Física de Extracción:
+ *    - En reposo: la tarjeta descansa a `bottom: 8px`, con el saldo 100% cubierto tras el bolsillo frontal.
+ *    - Al presionar: la tarjeta se eleva verticalmente a `bottom: 62px`, manteniendo su base inferior
+ *      abrazada dentro del bolsillo frontal de cuero (a la altura de la muesca ergonómica),
+ *      proyectando el saldo total en la parte media-alta con alta jerarquía y contraste impecable.
  */
 export default function LeatherWallet({ totalBalance, userName }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,14 +56,14 @@ export default function LeatherWallet({ totalBalance, userName }) {
           className="relative w-full h-full transition-transform duration-300 ease-out"
           style={{
             transform: isHovered && !isOpen
-              ? 'translateY(-4px) rotateX(4deg) scale(1.02)'
+              ? 'translateY(-3px) scale(1.015)'
               : isOpen
               ? 'translateY(-2px)'
               : 'translateY(0)',
           }}
         >
           {/* ── CAPA 0: RESPALDO DE CUERO ARTESANAL (Base Posterior) ── */}
-          <div className="absolute bottom-0 left-0 w-full z-0 pointer-events-none">
+          <div className="absolute bottom-0 left-0 w-full pointer-events-none" style={{ zIndex: 0 }}>
             <svg
               viewBox="0 0 250 170"
               width="250"
@@ -103,19 +101,24 @@ export default function LeatherWallet({ totalBalance, userName }) {
                 x="20" y="26" width="210" height="130" rx="14"
                 fill="none" stroke="#fed7aa" strokeWidth="1.1" strokeDasharray="4 3" strokeOpacity="0.6"
               />
+
+              {/* Hendidura de ranura interior (profundidad de entrada) */}
+              <rect x="22" y="38" width="206" height="4" rx="2" fill="#180602" opacity="0.85" />
             </svg>
           </div>
 
           {/* ── CAPA 1: TARJETA SECUNDARIA POSTERIOR 1 (Titanium Black) ── */}
           <div
-            className="absolute left-1/2 -translate-x-1/2 rounded-xl border border-zinc-700/60 shadow-md transition-all duration-500"
+            className="absolute left-1/2 rounded-xl border border-zinc-700/60 shadow-sm transition-all duration-500 ease-out"
             style={{
               width: 196,
-              height: 110,
-              bottom: isOpen ? '90px' : '48px',
+              height: 112,
+              bottom: isOpen ? '84px' : '44px',
               zIndex: 1,
               background: 'linear-gradient(135deg, #18181b 0%, #27272a 60%, #09090b 100%)',
-              transform: isOpen ? 'rotate(-3deg) scale(0.96)' : 'rotate(-1.5deg)',
+              transform: isOpen
+                ? 'translateX(-50%) translateY(-4px) scale(0.97)'
+                : 'translateX(-50%) translateY(0)',
               opacity: 0.95,
             }}
           >
@@ -127,14 +130,16 @@ export default function LeatherWallet({ totalBalance, userName }) {
 
           {/* ── CAPA 2: TARJETA SECUNDARIA POSTERIOR 2 (Emerald Fintech) ── */}
           <div
-            className="absolute left-1/2 -translate-x-1/2 rounded-xl border border-emerald-500/30 shadow-md transition-all duration-500"
+            className="absolute left-1/2 rounded-xl border border-emerald-500/30 shadow-sm transition-all duration-500 ease-out"
             style={{
-              width: 200,
-              height: 110,
-              bottom: isOpen ? '106px' : '36px',
+              width: 202,
+              height: 114,
+              bottom: isOpen ? '96px' : '32px',
               zIndex: 2,
               background: 'linear-gradient(135deg, #064e3b 0%, #047857 50%, #065f46 100%)',
-              transform: isOpen ? 'rotate(3deg) scale(0.98)' : 'rotate(1deg)',
+              transform: isOpen
+                ? 'translateX(-50%) translateY(-2px) scale(0.985)'
+                : 'translateX(-50%) translateY(0)',
               opacity: 0.95,
             }}
           >
@@ -145,7 +150,7 @@ export default function LeatherWallet({ totalBalance, userName }) {
           </div>
 
           {/* ── CAPA 3: SEPARADOR DE RANURA INTERMEDIA ── */}
-          <div className="absolute bottom-0 left-0 w-full z-3 pointer-events-none">
+          <div className="absolute bottom-0 left-0 w-full pointer-events-none" style={{ zIndex: 3 }}>
             <svg
               viewBox="0 0 250 170"
               width="250"
@@ -179,17 +184,25 @@ export default function LeatherWallet({ totalBalance, userName }) {
               {/* Bisel superior del nivel medio */}
               <line x1="14" y1="62" x2="236" y2="62" stroke="#fcd34d" strokeWidth="0.8" strokeOpacity="0.3" />
               <line x1="14" y1="63" x2="236" y2="63" stroke="#250903" strokeWidth="1.5" />
+
+              {/* Hendidura donde entra la tarjeta principal */}
+              <rect x="20" y="65" width="210" height="4" rx="2" fill="#180602" opacity="0.9" />
             </svg>
           </div>
 
-          {/* ── CAPA 4: TARJETA PRINCIPAL INTERACTIVA (Saldo Total en Modo Sigilo) ── */}
+          {/* ── CAPA 4: TARJETA PRINCIPAL INTERACTIVA (Saldo Total) ── */}
+          {/*
+            Centrado estricto: left: 50%, transform: translateX(-50%).
+            En reposo (bottom: 8px): el saldo queda sumergido en el bolsillo frontal.
+            Extraída (bottom: 62px): la base queda abrazada en la muesca del bolsillo frontal,
+            evitando que la tarjeta quede flotando en el aire.
+          */}
           <div
-            className="absolute left-1/2 -translate-x-1/2 wallet-card transition-all"
+            className="absolute left-1/2 wallet-card transition-all"
             style={{
-              /* En reposo, descansa a 8px ocultando por completo las cifras tras el bolsillo frontal */
-              bottom: isOpen ? '124px' : '8px',
-              transition: 'bottom 0.55s cubic-bezier(0.34, 1.42, 0.64, 1), transform 0.4s ease',
-              transform: isOpen ? 'translateX(-50%) rotate(-0.5deg)' : 'translateX(-50%) rotate(0deg)',
+              bottom: isOpen ? '62px' : '8px',
+              transition: 'bottom 0.52s cubic-bezier(0.34, 1.38, 0.64, 1)',
+              transform: 'translateX(-50%)',
               width: 208,
               zIndex: 4,
               pointerEvents: isOpen ? 'auto' : 'none',
@@ -203,10 +216,11 @@ export default function LeatherWallet({ totalBalance, userName }) {
             />
           </div>
 
-          {/* ── CAPA 10: BOLSILLO FRONTAL DE CUERO (Cubre y Oculta el Saldo en Reposo) ── */}
+          {/* ── CAPA 10: BOLSILLO FRONTAL DE CUERO (Abraza la Tarjeta y Cubre el Saldo en Reposo) ── */}
           <div
-            className="absolute bottom-0 left-0 w-full z-10 pointer-events-none"
+            className="absolute bottom-0 left-0 w-full pointer-events-none"
             style={{
+              zIndex: 10,
               filter: 'drop-shadow(0 14px 28px rgba(35, 15, 5, 0.42))',
             }}
           >
@@ -242,7 +256,7 @@ export default function LeatherWallet({ totalBalance, userName }) {
                 </pattern>
               </defs>
 
-              {/* Cuerpo del bolsillo frontal con corte ergonómico */}
+              {/* Cuerpo del bolsillo frontal con corte ergonómico centrado (x=80 a 170, centro 125) */}
               <path
                 d="M 14 90
                    L 80 90
@@ -261,7 +275,7 @@ export default function LeatherWallet({ totalBalance, userName }) {
                 fill="url(#cardholderTextureFront)"
               />
 
-              {/* Bisel superior del corte frontal */}
+              {/* Bisel superior del corte frontal con sombra interior */}
               <path
                 d="M 14 90 L 80 90 C 95 90, 102 104, 125 104 C 148 104, 155 90, 170 90 L 236 90"
                 fill="none" stroke="#fed7aa" strokeWidth="0.8" strokeOpacity="0.45"
@@ -355,21 +369,21 @@ export default function LeatherWallet({ totalBalance, userName }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   TARJETA FINANCIERA SVG — ALTA JERARQUÍA Y MODO SIGILO
+   TARJETA FINANCIERA SVG — CENTRADA CON ALTA JERARQUÍA
    ───────────────────────────────────────────────────────── */
 function CreditCard({ balance, visible, userName, isOpen }) {
   return (
     <svg
-      viewBox="0 0 208 122"
+      viewBox="0 0 208 124"
       width="208"
-      height="122"
+      height="124"
       role="img"
       aria-label="Tarjeta financiera con saldo"
       xmlns="http://www.w3.org/2000/svg"
       style={{
         filter: isOpen
-          ? 'drop-shadow(0 18px 34px rgba(0, 0, 0, 0.48))'
-          : 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.3))',
+          ? 'drop-shadow(0 14px 24px rgba(0, 0, 0, 0.42))'
+          : 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25))',
         borderRadius: 14,
         overflow: 'hidden',
       }}
@@ -385,8 +399,8 @@ function CreditCard({ balance, visible, userName, isOpen }) {
         {/* Degradado protector de contraste */}
         <linearGradient id="cardContrastProtection" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#090d16" stopOpacity="0.05" />
-          <stop offset="45%" stopColor="#090d16" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="#090d16" stopOpacity="0.75" />
+          <stop offset="45%" stopColor="#090d16" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#090d16" stopOpacity="0.8" />
         </linearGradient>
 
         {/* Brillo superior */}
@@ -405,10 +419,10 @@ function CreditCard({ balance, visible, userName, isOpen }) {
       </defs>
 
       {/* Fondo con el gradiente del tema */}
-      <rect width="208" height="122" rx="14" fill="url(#cardHolderPrimaryGrad)" />
+      <rect width="208" height="124" rx="14" fill="url(#cardHolderPrimaryGrad)" />
 
       {/* Degradado protector de contraste para garantizar legibilidad */}
-      <rect width="208" height="122" rx="14" fill="url(#cardContrastProtection)" />
+      <rect width="208" height="124" rx="14" fill="url(#cardContrastProtection)" />
 
       {/* Formas geométricas sutiles de fondo */}
       <circle cx="170" cy="-10" r="75" fill="rgba(255,255,255,0.08)" />
@@ -416,12 +430,12 @@ function CreditCard({ balance, visible, userName, isOpen }) {
       <circle cx="-10" cy="85" r="50" fill="rgba(255,255,255,0.06)" />
 
       {/* Capa de brillo superior */}
-      <rect width="208" height="122" rx="14" fill="url(#cardSheen)" />
+      <rect width="208" height="124" rx="14" fill="url(#cardSheen)" />
 
-      {/* ── PARTE SUPERIOR (Visible cuando la tarjeta está insertada) ── */}
+      {/* ── PARTE SUPERIOR (Visible cuando la tarjeta reposa dentro de la ranura) ── */}
       {/* Nombre de la aplicación / Logo de la tarjeta */}
       <text
-        x="20" y="21"
+        x="18" y="20"
         fill="#ffffff"
         fontSize="10"
         fontWeight="800"
@@ -433,37 +447,35 @@ function CreditCard({ balance, visible, userName, isOpen }) {
       </text>
 
       {/* Círculos de franquicia estilo Visa/Mastercard */}
-      <circle cx="178" cy="24" r="9.5" fill="rgba(255,255,255,0.28)" />
-      <circle cx="189" cy="24" r="9.5" fill="rgba(255,255,255,0.18)" />
+      <circle cx="178" cy="22" r="9" fill="rgba(255,255,255,0.28)" />
+      <circle cx="189" cy="22" r="9" fill="rgba(255,255,255,0.18)" />
 
       {/* Chip EMV y señal Contactless */}
-      <rect x="20" y="32" width="32" height="23" rx="5" fill="url(#chipGoldGrad)" stroke="#92400e" strokeWidth="0.8" />
-      <line x1="20" y1="43.5" x2="52" y2="43.5" stroke="#78350f" strokeWidth="0.6" />
-      <line x1="36" y1="32" x2="36" y2="55" stroke="#78350f" strokeWidth="0.6" />
-      <line x1="20" y1="37" x2="52" y2="37" stroke="#78350f" strokeWidth="0.4" strokeOpacity="0.6" />
-      <line x1="20" y1="49" x2="52" y2="49" stroke="#78350f" strokeWidth="0.4" strokeOpacity="0.6" />
+      <rect x="18" y="27" width="28" height="19" rx="4" fill="url(#chipGoldGrad)" stroke="#92400e" strokeWidth="0.7" />
+      <line x1="18" y1="36.5" x2="46" y2="36.5" stroke="#78350f" strokeWidth="0.5" />
+      <line x1="32" y1="27" x2="32" y2="46" stroke="#78350f" strokeWidth="0.5" />
 
       {/* Señal Contactless */}
-      <path d="M58 37 A 6 6 0 0 1 58 49" stroke="#ffffff" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.9" />
-      <path d="M62 33 A 10 10 0 0 1 62 53" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.75" />
-      <path d="M66 29 A 14 14 0 0 1 66 57" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.6" />
+      <path d="M52 31 A 5 5 0 0 1 52 41" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.9" />
+      <path d="M56 28 A 8 8 0 0 1 56 44" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" fill="none" opacity="0.75" />
+      <path d="M60 25 A 11 11 0 0 1 60 47" stroke="#ffffff" strokeWidth="1.1" strokeLinecap="round" fill="none" opacity="0.6" />
 
-      {/* ── PARTE INFERIOR (Oculta tras el portatarjetas en reposo, revelada al presionar) ── */}
+      {/* ── ZONA CENTRAL DE SALDO (Emerge sobre la ranura al presionar) ── */}
       <g
         style={{
           opacity: isOpen ? 1 : 0,
-          transition: 'opacity 0.28s ease 0.12s',
+          transition: 'opacity 0.28s ease 0.1s',
         }}
       >
         {/* Etiqueta Saldo Total */}
         <text
-          x="20" y="87"
+          x="18" y="60"
           fill="#f4f4f5"
-          fontSize="9"
+          fontSize="8.5"
           fontFamily="Space Grotesk, sans-serif"
-          fontWeight="600"
-          letterSpacing="0.8"
-          opacity="0.95"
+          fontWeight="700"
+          letterSpacing="1"
+          opacity="0.9"
         >
           SALDO TOTAL
         </text>
@@ -471,9 +483,9 @@ function CreditCard({ balance, visible, userName, isOpen }) {
         {/* Monto de saldo formateado o asteriscos según visibilidad */}
         {visible ? (
           <text
-            x="20" y="109"
+            x="18" y="82"
             fill="#ffffff"
-            fontSize="22"
+            fontSize="21"
             fontWeight="800"
             fontFamily="Space Grotesk, sans-serif"
             letterSpacing="-0.3"
@@ -482,9 +494,9 @@ function CreditCard({ balance, visible, userName, isOpen }) {
           </text>
         ) : (
           <text
-            x="20" y="109"
+            x="18" y="82"
             fill="#ffffff"
-            fontSize="22"
+            fontSize="21"
             fontWeight="800"
             fontFamily="Space Grotesk, sans-serif"
             letterSpacing="3"
@@ -495,7 +507,7 @@ function CreditCard({ balance, visible, userName, isOpen }) {
 
         {/* Titular de la tarjeta */}
         <text
-          x="188" y="109"
+          x="188" y="106"
           fill="#f4f4f5"
           fontSize="9"
           fontFamily="Space Grotesk, sans-serif"
@@ -508,7 +520,7 @@ function CreditCard({ balance, visible, userName, isOpen }) {
       </g>
 
       {/* Borde exterior de la tarjeta */}
-      <rect width="208" height="122" rx="14" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+      <rect width="208" height="124" rx="14" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
     </svg>
   );
 }

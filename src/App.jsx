@@ -106,14 +106,28 @@ function App() {
 
   const handleAddAccount = async (name) => {
     if (!user) return;
+    const cleanName = (name || "").trim();
+    if (!cleanName) return;
+
+    // Validación para evitar duplicados de cuentas
+    const alreadyExists = accounts.some(
+      (acc) => (acc.name || "").trim().toLowerCase() === cleanName.toLowerCase()
+    );
+    if (alreadyExists) {
+      toast.error(`La cuenta "${cleanName}" ya está registrada.`);
+      return;
+    }
+
     try {
       await addDoc(collection(db, "users", user.uid, "accounts"), {
-        name,
+        name: cleanName,
         balance: 0,
       });
+      toast.success(`Cuenta "${cleanName}" añadida con éxito.`);
       setIsAddAccountOpen(false);
     } catch (err) {
       console.error("Error adding account:", err);
+      toast.error("Error al añadir la cuenta.");
     }
   };
 
@@ -634,6 +648,7 @@ function App() {
         isOpen={isAddAccountOpen}
         onClose={() => setIsAddAccountOpen(false)}
         onAddAccount={handleAddAccount}
+        existingAccounts={accounts}
       />
 
       <TransactionModal
