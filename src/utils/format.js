@@ -8,5 +8,8 @@ const localeMap = {
 export function formatCurrency(amount) {
   const lang = i18n.language || "es";
   const locale = localeMap[lang] || "es-CO";
-  return amount.toLocaleString(locale);
+  const num = typeof amount === "number" ? amount : Number(amount);
+  if (isNaN(num)) return "0";
+  return num.toLocaleString(locale);
 }
+
