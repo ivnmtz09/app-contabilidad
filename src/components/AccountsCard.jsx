@@ -179,6 +179,32 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
     }
   };
 
+  const getSublabel = (acc, meta) => {
+    const isNameSameAsType = acc.name.trim().toLowerCase() === meta.label.trim().toLowerCase();
+
+    if (acc.type === "credito") {
+      const limitStr = acc.creditLimit ? ` • Cupo: $${formatCurrency(acc.creditLimit)}` : "";
+      return isNameSameAsType ? `Línea de crédito rotativa${limitStr}` : `${meta.label}${limitStr}`;
+    }
+
+    if (isNameSameAsType) {
+      switch (acc.type) {
+        case "efectivo":
+          return "Dinero en efectivo disponible";
+        case "banco":
+          return "Cuenta bancaria de ahorros";
+        case "billetera":
+          return "Billetera digital móvil";
+        case "inversion":
+          return "Fondo o portafolio de inversión";
+        default:
+          return "Cuenta activa";
+      }
+    }
+
+    return meta.label;
+  };
+
   const renderAccountItem = (acc) => {
     const meta = getAccountTypeMeta(acc.type);
     const AccIcon = meta.icon;
@@ -187,42 +213,39 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
     return (
       <li
         key={acc.id}
-        className={`group flex justify-between items-center py-2.5 px-3 rounded-2xl border transition-all ${
+        className={`group flex justify-between items-center py-3 px-3.5 rounded-2xl border transition-all duration-200 ${
           acc.isArchived
-            ? "bg-zinc-50/50 dark:bg-zinc-800/30 border-dashed border-zinc-200 dark:border-zinc-700/60 opacity-60"
-            : "hover:bg-zinc-50 dark:hover:bg-zinc-700/40 border-zinc-100 dark:border-zinc-700/50"
+            ? "bg-zinc-100/40 dark:bg-zinc-800/20 border-dashed border-zinc-200 dark:border-zinc-800/80 opacity-60"
+            : "bg-white/60 dark:bg-zinc-800/40 hover:bg-white/90 dark:hover:bg-zinc-800/80 border-zinc-200/70 dark:border-white/10 hover:border-theme-primary/40 dark:hover:border-theme-primary/40 shadow-xs hover:shadow-md"
         }`}
       >
         <div className="flex items-center gap-3 min-w-0">
           <div
-            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${meta.bgClass}`}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-xs ${meta.bgClass}`}
           >
-            <AccIcon size={16} />
+            <AccIcon size={18} />
           </div>
 
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-50 truncate">
                 {acc.name}
               </span>
               {acc.type === "credito" && (
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 font-medium shrink-0">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 font-semibold shrink-0">
                   Crédito
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
-              {meta.label}
-              {acc.type === "credito" && acc.creditLimit
-                ? ` • Cupo: $${formatCurrency(acc.creditLimit)}`
-                : ""}
+            <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+              {getSublabel(acc, meta)}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <span
-            className={`font-mono font-bold text-sm tabular-nums ${
+            className={`font-mono font-bold text-sm sm:text-base tabular-nums ${
               balanceNum < 0
                 ? "text-rose-600 dark:text-rose-400"
                 : "text-zinc-900 dark:text-zinc-50"
@@ -278,24 +301,31 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-850 p-5 sm:p-6 rounded-3xl shadow-xs border border-zinc-200/70 dark:border-zinc-800/70 flex flex-col gap-4">
+    <div className="bg-white/75 dark:bg-zinc-900/65 backdrop-blur-2xl p-5 sm:p-6 rounded-3xl shadow-sm border border-white/80 dark:border-white/10 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-display font-semibold text-zinc-900 dark:text-zinc-50">
+          <h3 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">
             Mis Cuentas
           </h3>
-          <p className="text-xs text-zinc-400">
-            {activeAccounts.length} activa{activeAccounts.length === 1 ? "" : "s"}
-            {archivedAccounts.length > 0 ? ` • ${archivedAccounts.length} archivada(s)` : ""}
-          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              {activeAccounts.length} activa{activeAccounts.length === 1 ? "" : "s"}
+            </span>
+            {archivedAccounts.length > 0 && (
+              <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+                • {archivedAccounts.length} archivada(s)
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {archivedAccounts.length > 0 && (
             <button
               type="button"
               onClick={() => setShowArchived(!showArchived)}
-              className="text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700/80 text-zinc-600 dark:text-zinc-300 bg-white/50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
             >
               {showArchived ? "Ocultar archivadas" : "Ver archivadas"}
             </button>
@@ -304,29 +334,43 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
           <button
             type="button"
             onClick={onOpenAdd}
-            className="p-2 rounded-xl text-theme-primary hover:bg-theme-primary/10 transition-colors cursor-pointer"
-            title="Añadir cuenta"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-theme-primary text-white hover:bg-theme-primary-hover transition-all shadow-xs glow-primary cursor-pointer active:scale-95"
+            title="Añadir nueva cuenta"
           >
-            <Plus size={20} />
+            <Plus size={16} strokeWidth={2.5} />
+            <span className="hidden sm:inline">Nueva cuenta</span>
           </button>
         </div>
       </div>
 
-      <ul className="space-y-2">
+      <ul className="space-y-2.5">
         {activeAccounts.map(renderAccountItem)}
 
         {showArchived && archivedAccounts.length > 0 && (
           <>
-            <li className="pt-2 pb-1 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-              Cuentas Archivadas
+            <li className="pt-3 pb-1 text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+              <span>Cuentas Archivadas</span>
+              <span className="h-px bg-zinc-200 dark:bg-zinc-800 flex-1" />
             </li>
             {archivedAccounts.map(renderAccountItem)}
           </>
         )}
 
         {accounts.length === 0 && (
-          <li className="py-6 text-center text-xs text-zinc-400">
-            No tienes cuentas registradas. Toca el botón + para añadir una.
+          <li className="py-8 text-center rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 p-6 flex flex-col items-center justify-center gap-2">
+            <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+              No tienes cuentas registradas
+            </p>
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 max-w-xs">
+              Crea tu primera cuenta en efectivo, bancaria o billetera digital para organizar tus finanzas.
+            </p>
+            <button
+              type="button"
+              onClick={onOpenAdd}
+              className="mt-2 text-xs font-bold text-theme-primary hover:underline cursor-pointer flex items-center gap-1"
+            >
+              <Plus size={14} /> Crear cuenta ahora
+            </button>
           </li>
         )}
       </ul>
