@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { db } from "./firebase";
-import { collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, increment } from "firebase/firestore";
+import { collection, doc, setDoc, addDoc, updateDoc, onSnapshot, query, orderBy, increment, runTransaction } from "firebase/firestore";
 import Login from "./components/Login";
 import Drawer from "./layout/Drawer";
 import AccountsCard from "./components/AccountsCard";
@@ -70,14 +70,20 @@ function App() {
 
     const unsubAccounts = onSnapshot(accountsQuery, async (snapshot) => {
       const accountsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const hasEfectivo = accountsData.some(acc => acc.id === "efectivo");
+      const hasEfectivo = accountsData.some(acc => acc.id === "efectivo" || (acc.name && acc.name.toLowerCase() === "efectivo"));
       if (!hasEfectivo && accountsData.length === 0) {
         try {
-          await setDoc(doc(db, "users", user.uid, "accounts", "efectivo"), { name: "Efectivo", balance: 0 });
+          await setDoc(doc(db, "users", user.uid, "accounts", "efectivo"), {
+            name: "Efectivo",
+            balance: 0,
+            type: "efectivo",
+            createdAt: new Date().toISOString(),
+          });
         } catch (e) { console.error("Error creando efectivo:", e); }
       } else {
         setAccounts(accountsData);
       }
+
     }, (error) => {
       console.error("Error en cuentas de Firestore:", error);
       if (error.code === 'permission-denied') {
@@ -104,8 +110,9 @@ function App() {
     };
   }, [user]);
 
-  const handleAddAccount = async (name) => {
+  const handleAddAccount = async (accountInput) => {
     if (!user) return;
+    const name = typeof accountInput === "string" ? accountInput : accountInput.name;
     const cleanName = (name || "").trim();
     if (!cleanName) return;
 
@@ -119,10 +126,29 @@ function App() {
     }
 
     try {
-      await addDoc(collection(db, "users", user.uid, "accounts"), {
+      const type = (typeof accountInput === "object" && accountInput.type) || "banco";
+      const initialBal = (typeof accountInput === "object" && Number(accountInput.initialBalance)) || 0;
+      const creditLim = (typeof accountInput === "object" && Number(accountInput.creditLimit)) || 0;
+
+      const accountDocRef = await addDoc(collection(db, "users", user.uid, "accounts"), {
         name: cleanName,
-        balance: 0,
+        balance: initialBal,
+        type,
+        ...(type === "credito" ? { creditLimit: creditLim } : {}),
+        createdAt: new Date().toISOString(),
       });
+
+      if (initialBal > 0) {
+        await addDoc(collection(db, `users/${user.uid}/transactions`), {
+          type: "ingreso",
+          amount: initialBal,
+          description: `Saldo inicial: ${cleanName}`,
+          category: "ajuste",
+          accountId: accountDocRef.id,
+          date: new Date().toISOString(),
+        });
+      }
+
       toast.success(`Cuenta "${cleanName}" añadida con éxito.`);
       setIsAddAccountOpen(false);
     } catch (err) {
@@ -186,25 +212,37 @@ function App() {
       isOpen: true,
       title: 'Eliminar movimiento',
       message: isTransfer
-        ? `Este movimiento es parte de una transferencia. ¿Deseas eliminar la transferencia completa?`
+        ? `Este movimiento es parte de una transferencia. Se eliminarán ambas partes y se revertirán los saldos en ambas cuentas. ¿Deseas continuar?`
         : `¿Eliminar el movimiento "${transaction.description}"?`,
       type: 'danger',
       onConfirm: async () => {
         try {
           if (isTransfer) {
             const related = transactions.filter(t => t.transferId === transaction.transferId);
-            for (const rel of related) {
-              await deleteDoc(doc(db, `users/${user.uid}/transactions`, rel.id));
-              const delta = rel.type === "ingreso" ? -rel.amount : rel.amount;
-              await updateDoc(doc(db, "users", user.uid, "accounts", rel.accountId), {
-                balance: increment(delta)
-              });
-            }
+            await runTransaction(db, async (tx) => {
+              for (const rel of related) {
+                const accRef = doc(db, "users", user.uid, "accounts", rel.accountId);
+                const accSnap = await tx.get(accRef);
+                if (accSnap.exists()) {
+                  const currentBal = Number(accSnap.data().balance) || 0;
+                  const delta = rel.type === "ingreso" ? -rel.amount : rel.amount;
+                  tx.update(accRef, { balance: currentBal + delta });
+                }
+                const txRef = doc(db, `users/${user.uid}/transactions`, rel.id);
+                tx.delete(txRef);
+              }
+            });
           } else {
-            await deleteDoc(doc(db, `users/${user.uid}/transactions`, transaction.id));
-            const delta = transaction.type === "ingreso" ? -transaction.amount : transaction.amount;
-            await updateDoc(doc(db, "users", user.uid, "accounts", transaction.accountId), {
-              balance: increment(delta)
+            await runTransaction(db, async (tx) => {
+              const accRef = doc(db, "users", user.uid, "accounts", transaction.accountId);
+              const accSnap = await tx.get(accRef);
+              if (accSnap.exists()) {
+                const currentBal = Number(accSnap.data().balance) || 0;
+                const delta = transaction.type === "ingreso" ? -transaction.amount : transaction.amount;
+                tx.update(accRef, { balance: currentBal + delta });
+              }
+              const txRef = doc(db, `users/${user.uid}/transactions`, transaction.id);
+              tx.delete(txRef);
             });
           }
           toast.success("Movimiento eliminado correctamente");
@@ -222,25 +260,37 @@ function App() {
       isOpen: true,
       title: 'Anular movimiento',
       message: isTransfer
-        ? `Este movimiento es parte de una transferencia. ¿Deseas anular la transferencia completa?`
+        ? `Este movimiento es parte de una transferencia. Se anularán ambas partes y se revertirán los saldos de ambas cuentas. ¿Deseas anularla?`
         : `¿Anular el movimiento "${transaction.description}"?`,
       type: 'warning',
       onConfirm: async () => {
         try {
           if (isTransfer) {
             const related = transactions.filter(t => t.transferId === transaction.transferId);
-            for (const rel of related) {
-              await deleteDoc(doc(db, `users/${user.uid}/transactions`, rel.id));
-              const delta = rel.type === "ingreso" ? -rel.amount : rel.amount;
-              await updateDoc(doc(db, "users", user.uid, "accounts", rel.accountId), {
-                balance: increment(delta)
-              });
-            }
+            await runTransaction(db, async (tx) => {
+              for (const rel of related) {
+                const accRef = doc(db, "users", user.uid, "accounts", rel.accountId);
+                const accSnap = await tx.get(accRef);
+                if (accSnap.exists()) {
+                  const currentBal = Number(accSnap.data().balance) || 0;
+                  const delta = rel.type === "ingreso" ? -rel.amount : rel.amount;
+                  tx.update(accRef, { balance: currentBal + delta });
+                }
+                const txRef = doc(db, `users/${user.uid}/transactions`, rel.id);
+                tx.delete(txRef);
+              }
+            });
           } else {
-            await deleteDoc(doc(db, `users/${user.uid}/transactions`, transaction.id));
-            const delta = transaction.type === "ingreso" ? -transaction.amount : transaction.amount;
-            await updateDoc(doc(db, "users", user.uid, "accounts", transaction.accountId), {
-              balance: increment(delta)
+            await runTransaction(db, async (tx) => {
+              const accRef = doc(db, "users", user.uid, "accounts", transaction.accountId);
+              const accSnap = await tx.get(accRef);
+              if (accSnap.exists()) {
+                const currentBal = Number(accSnap.data().balance) || 0;
+                const delta = transaction.type === "ingreso" ? -transaction.amount : transaction.amount;
+                tx.update(accRef, { balance: currentBal + delta });
+              }
+              const txRef = doc(db, `users/${user.uid}/transactions`, transaction.id);
+              tx.delete(txRef);
             });
           }
           toast.success("Movimiento anulado correctamente");
@@ -275,39 +325,95 @@ function App() {
   const handleTransfer = async ({ fromAccountId, toAccountId, amount, description }) => {
     if (!user) return;
     try {
-      const fromAcc = accounts.find(a => a.id === fromAccountId);
-      const toAcc = accounts.find(a => a.id === toAccountId);
-      if (!fromAcc || !toAcc) return;
-
       const numAmount = Number(amount);
+      if (!numAmount || numAmount <= 0) {
+        toast.error("El monto debe ser mayor a 0");
+        return;
+      }
+      if (fromAccountId === toAccountId) {
+        toast.error("Las cuentas de origen y destino deben ser distintas");
+        return;
+      }
+
       const transferId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tr-${Date.now()}`;
       const nowIso = new Date().toISOString();
 
-      await updateDoc(doc(db, "users", user.uid, "accounts", fromAccountId), {
-        balance: increment(-numAmount)
-      });
-      await updateDoc(doc(db, "users", user.uid, "accounts", toAccountId), {
-        balance: increment(numAmount)
+      await runTransaction(db, async (tx) => {
+        const fromRef = doc(db, "users", user.uid, "accounts", fromAccountId);
+        const toRef = doc(db, "users", user.uid, "accounts", toAccountId);
+
+        const fromSnap = await tx.get(fromRef);
+        const toSnap = await tx.get(toRef);
+
+        if (!fromSnap.exists() || !toSnap.exists()) {
+          throw new Error("Una de las cuentas seleccionadas no existe");
+        }
+
+        const fromData = fromSnap.data();
+        const toData = toSnap.data();
+        const fromBal = Number(fromData.balance) || 0;
+        const toBal = Number(toData.balance) || 0;
+
+        // Validar saldo estricto para cuentas ordinarias (no tarjeta de crédito)
+        if (fromData.type !== "credito" && fromBal < numAmount) {
+          throw new Error(`Saldo insuficiente en "${fromData.name}". Saldo disponible: $${fromBal.toLocaleString()}`);
+        }
+
+        // Actualizar saldos atómicamente
+        tx.update(fromRef, { balance: fromBal - numAmount });
+        tx.update(toRef, { balance: toBal + numAmount });
+
+        // Crear ambos registros de transacción vinculados con transferId
+        const egresoDocRef = doc(collection(db, `users/${user.uid}/transactions`));
+        const ingresoDocRef = doc(collection(db, `users/${user.uid}/transactions`));
+
+        tx.set(egresoDocRef, {
+          type: 'egreso',
+          amount: numAmount,
+          description: `Transferencia → ${toData.name}: ${description}`,
+          category: 'transferencia',
+          accountId: fromAccountId,
+          relatedAccountId: toAccountId,
+          transferId,
+          date: nowIso,
+        });
+
+        tx.set(ingresoDocRef, {
+          type: 'ingreso',
+          amount: numAmount,
+          description: `Transferencia ← ${fromData.name}: ${description}`,
+          category: 'transferencia',
+          accountId: toAccountId,
+          relatedAccountId: fromAccountId,
+          transferId,
+          date: nowIso,
+        });
       });
 
-      await addDoc(collection(db, `users/${user.uid}/transactions`), {
-        type: 'egreso', amount: numAmount, description: `Transferencia → ${toAcc.name}: ${description}`,
-        accountId: fromAccountId, date: nowIso, transferId
-      });
-      await addDoc(collection(db, `users/${user.uid}/transactions`), {
-        type: 'ingreso', amount: numAmount, description: `Transferencia ← ${fromAcc.name}: ${description}`,
-        accountId: toAccountId, date: nowIso, transferId
-      });
-
-      toast.success("Transferencia realizada");
+      toast.success("Transferencia realizada con éxito");
     } catch (err) {
       console.error("Error en transferencia:", err);
-      toast.error("Error al transferir");
+      toast.error(err.message || "Error al transferir");
     }
+  };
+
+  const handleDuplicateTransaction = (tx) => {
+    setEditTransaction({
+      description: tx.description,
+      amount: tx.amount,
+      category: tx.category,
+      accountId: tx.accountId,
+      type: tx.type,
+      date: new Date().toISOString(),
+    });
+    setTransactionType(tx.type);
+    setTransactionModalOpen(true);
+    toast.success("Movimiento listo para duplicar");
   };
 
   useEffect(() => {
     const handleOpenMenu = () => setIsMenuOpen(true);
+
     window.addEventListener('openMenuModal', handleOpenMenu);
     return () => window.removeEventListener('openMenuModal', handleOpenMenu);
   }, []);
@@ -633,8 +739,9 @@ function App() {
         <Suspense fallback={<ListSkeleton />}>
           <Routes>
             <Route path="/" element={!isDataLoaded ? <HomeSkeleton /> : renderHomeDashboard()} />
-            <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} handleDeleteTransaction={handleDeleteTransaction} onEdit={openEditModal} onAnnul={handleAnnulTransaction} />} />
+            <Route path="/movimientos" element={!isDataLoaded ? <ListSkeleton /> : <MovementsView transactions={transactions} accounts={accounts} handleDeleteTransaction={handleDeleteTransaction} onEdit={openEditModal} onAnnul={handleAnnulTransaction} onDuplicate={handleDuplicateTransaction} />} />
             <Route path="/recurrentes" element={<RecurrentesView />} />
+
             <Route path="/notas" element={<NotasView />} />
             <Route path="/deudas" element={<DeudasView />} />
             <Route path="/metas" element={<MetasView />} />
