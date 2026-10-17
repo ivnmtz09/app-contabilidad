@@ -24,13 +24,13 @@ import { toast } from "react-hot-toast";
 const THEMES = [
   {
     id: "default",
-    name: "Moradito & Verdecito",
+    name: "Nébula Violeta & Jade",
     primary: "#8b5cf6",
     primaryHover: "#7c3aed",
     secondary: "#10b981",
     secondaryHover: "#059669",
-    description: "Equilibrio moderno y frescura digital",
-    tag: "Original",
+    description: "Mística cósmica violeta con destellos jade",
+    tag: "Cósmico",
   },
   {
     id: "ocean",
@@ -189,14 +189,26 @@ function ProfilePage({ user }) {
   };
 
   return (
-    <div className="min-h-screen bg-transparent transition-colors duration-300">
+    <div className="min-h-screen bg-transparent transition-colors duration-300 relative">
+      {/* Orbes de luz ambiental de fondo para realzar el glassmorphism en dark mode */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div
+          className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl opacity-15 dark:opacity-25 transition-all duration-700"
+          style={{ backgroundColor: stagedThemeObj.primary }}
+        />
+        <div
+          className="absolute bottom-20 left-10 w-80 h-80 rounded-full blur-3xl opacity-15 dark:opacity-20 transition-all duration-700"
+          style={{ backgroundColor: stagedThemeObj.secondary }}
+        />
+      </div>
+
       <main className="max-w-3xl mx-auto space-y-6 pb-28 pt-2">
         {/* Header con botón de volver */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <button
               onClick={() => navigate(-1)}
-              className="p-2.5 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-2xl shadow-xs hover:shadow-md hover:border-theme-primary/40 transition-all text-zinc-700 dark:text-zinc-300 cursor-pointer"
+              className="p-2.5 bg-white/70 dark:bg-zinc-800/80 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-2xl shadow-xs hover:shadow-md hover:border-theme-primary/40 transition-all text-zinc-700 dark:text-zinc-200 cursor-pointer"
               title="Volver"
             >
               <ArrowLeft size={20} />
@@ -215,7 +227,7 @@ function ProfilePage({ user }) {
         {/* Tarjeta de Usuario Glassmorphism */}
         <div className="glass-card rounded-[2rem] p-6 sm:p-7 flex flex-col sm:flex-row items-center sm:items-start gap-5 relative overflow-hidden">
           <div
-            className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full blur-3xl pointer-events-none opacity-20"
+            className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full blur-3xl pointer-events-none opacity-20 dark:opacity-30"
             style={{ backgroundColor: activeThemeObj.primary }}
           />
 
@@ -260,10 +272,10 @@ function ProfilePage({ user }) {
             </p>
 
             <div className="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs">
-              <div className="px-3 py-1 rounded-xl bg-zinc-100/70 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-700/60 text-zinc-600 dark:text-zinc-300 font-medium">
+              <div className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-white/10 text-zinc-600 dark:text-zinc-300 font-medium shadow-2xs">
                 Tema activo: <strong className="text-zinc-900 dark:text-zinc-100">{activeThemeObj.name}</strong>
               </div>
-              <div className="px-3 py-1 rounded-xl bg-zinc-100/70 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-700/60 text-zinc-600 dark:text-zinc-300 font-medium">
+              <div className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-white/10 text-zinc-600 dark:text-zinc-300 font-medium shadow-2xs">
                 ID: <span className="font-mono text-[11px]">{user?.uid?.substring(0, 8)}...</span>
               </div>
             </div>
@@ -296,38 +308,37 @@ function ProfilePage({ user }) {
             )}
           </div>
 
-          {/* ── TARJETA INTERACTIVA DE VISTA PREVIA EN VIVO ────────────────────────────── */}
+          {/* ── TARJETA INTERACTIVA DE VISTA PREVIA EN VIVO (OPTIMIZADA PARA MODO OSCURO) ────────────── */}
           <div
-            className="rounded-3xl p-5 border transition-all duration-300 relative overflow-hidden"
+            className="rounded-3xl p-5 sm:p-6 border transition-all duration-300 relative overflow-hidden bg-white/70 dark:bg-zinc-900/85 backdrop-blur-2xl shadow-lg dark:shadow-2xl"
             style={{
-              backgroundColor: "rgba(255, 255, 255, 0.4)",
-              borderColor: stagedThemeObj.primary + "40",
-              boxShadow: `0 8px 30px -4px ${stagedThemeObj.primary}20`,
+              borderColor: stagedThemeObj.primary + "50",
+              boxShadow: `0 10px 32px -4px ${stagedThemeObj.primary}25`,
             }}
           >
             <div
-              className="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-30"
+              className="absolute -right-16 -top-16 w-52 h-52 rounded-full blur-3xl pointer-events-none opacity-30 dark:opacity-40"
               style={{ backgroundColor: stagedThemeObj.primary }}
             />
             <div
-              className="absolute -left-10 -bottom-10 w-44 h-44 rounded-full blur-3xl pointer-events-none opacity-25"
+              className="absolute -left-12 -bottom-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-25 dark:opacity-35"
               style={{ backgroundColor: stagedThemeObj.secondary }}
             />
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                     Vista Previa en Tiempo Real
                   </span>
                   <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                    className="text-[10px] font-bold px-2.5 py-0.5 rounded-full text-white shadow-xs"
                     style={{ backgroundColor: stagedThemeObj.primary }}
                   >
                     {stagedThemeObj.tag}
                   </span>
                 </div>
-                <h3 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-100">
+                <h3 className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">
                   {stagedThemeObj.name}
                 </h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -339,14 +350,14 @@ function ProfilePage({ user }) {
               <div className="flex flex-wrap items-center gap-2.5">
                 {/* Chip con secundario */}
                 <span
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all"
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all"
                   style={{
-                    backgroundColor: stagedThemeObj.secondary + "15",
-                    borderColor: stagedThemeObj.secondary + "40",
+                    backgroundColor: stagedThemeObj.secondary + "20",
+                    borderColor: stagedThemeObj.secondary + "50",
                     color: stagedThemeObj.secondary,
                   }}
                 >
-                  +{stagedThemeObj.name.split("&")[1] || "Secundario"}
+                  +{stagedThemeObj.name.split("&")[1]?.trim() || "Secundario"}
                 </span>
 
                 {/* Botón simulado */}
@@ -355,7 +366,7 @@ function ProfilePage({ user }) {
                   className="px-4 py-2 rounded-xl text-xs font-bold text-white shadow-sm transition-transform active:scale-95 cursor-default"
                   style={{
                     backgroundColor: stagedThemeObj.primary,
-                    boxShadow: `0 4px 14px ${stagedThemeObj.primary}40`,
+                    boxShadow: `0 4px 14px ${stagedThemeObj.primary}45`,
                   }}
                 >
                   Botón Demo
@@ -364,7 +375,7 @@ function ProfilePage({ user }) {
             </div>
 
             {/* Barra de acción de Guardar / Revertir */}
-            <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-zinc-700/50 flex flex-col sm:flex-row items-center justify-between gap-3 relative z-10">
+            <div className="mt-5 pt-4 border-t border-zinc-200/60 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 relative z-10">
               <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center sm:text-left">
                 {isThemeChanged
                   ? "Toca 'Guardar y Aplicar Tema' para fijar esta paleta a toda la aplicación."
@@ -376,7 +387,7 @@ function ProfilePage({ user }) {
                   <button
                     type="button"
                     onClick={handleRevertTheme}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-300 bg-white/70 dark:bg-zinc-800/70 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-white/80 dark:bg-zinc-800/90 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
                   >
                     <RotateCcw size={14} />
                     Revertir
@@ -430,14 +441,14 @@ function ProfilePage({ user }) {
                   onClick={() => handleSelectStagedTheme(item.id)}
                   className={`group relative p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between gap-3 ${
                     isStaged
-                      ? "bg-white dark:bg-zinc-800/90 shadow-md ring-2"
-                      : "bg-white/50 dark:bg-zinc-850/40 hover:bg-white/80 dark:hover:bg-zinc-800/60 border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-zinc-700"
+                      ? "bg-white dark:bg-zinc-800 shadow-md ring-2"
+                      : "bg-white/60 dark:bg-zinc-900/60 hover:bg-white/90 dark:hover:bg-zinc-800/80 border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 shadow-xs"
                   }`}
                   style={
                     isStaged
                       ? {
                           borderColor: item.primary,
-                          boxShadow: `0 4px 20px -2px ${item.primary}30`,
+                          boxShadow: `0 4px 20px -2px ${item.primary}35`,
                         }
                       : {}
                   }
@@ -447,12 +458,12 @@ function ProfilePage({ user }) {
                       {/* Swatches dobles con efecto de capas */}
                       <div className="flex items-center -space-x-2 shrink-0">
                         <span
-                          className="w-7 h-7 rounded-full border-2 border-white dark:border-zinc-900 shadow-sm transition-transform group-hover:scale-105"
+                          className="w-7 h-7 rounded-full border-2 border-white dark:border-zinc-800 shadow-sm transition-transform group-hover:scale-105"
                           style={{ backgroundColor: item.primary }}
                           title={`Primario: ${item.primary}`}
                         />
                         <span
-                          className="w-7 h-7 rounded-full border-2 border-white dark:border-zinc-900 shadow-sm transition-transform group-hover:scale-105"
+                          className="w-7 h-7 rounded-full border-2 border-white dark:border-zinc-800 shadow-sm transition-transform group-hover:scale-105"
                           style={{ backgroundColor: item.secondary }}
                           title={`Secundario: ${item.secondary}`}
                         />
@@ -465,7 +476,7 @@ function ProfilePage({ user }) {
                             {item.name}
                           </p>
                         </div>
-                        <p className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate mt-0.5">
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
                           {item.description}
                         </p>
                       </div>
@@ -536,13 +547,13 @@ function ProfilePage({ user }) {
                       key={item.id}
                       type="button"
                       onClick={() => setLanguage(item.id)}
-                      className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${
+                      className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer ${
                         isSelected
                           ? "border-theme-primary bg-theme-primary-light text-theme-primary ring-1 ring-theme-primary font-bold shadow-xs"
-                          : "border-zinc-200/80 dark:border-zinc-700/80 bg-white/50 dark:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600"
+                          : "border-zinc-200/80 dark:border-white/10 bg-white/60 dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-200 hover:border-zinc-300 dark:hover:border-white/20 hover:bg-white/80 dark:hover:bg-zinc-800/60"
                       }`}
                     >
-                      <span className="text-xs flex items-center gap-1.5">
+                      <span className="text-xs flex items-center gap-1.5 font-semibold">
                         <span>{item.flag}</span>
                         <span>{item.label}</span>
                       </span>
@@ -576,10 +587,10 @@ function ProfilePage({ user }) {
                       key={item.id}
                       type="button"
                       onClick={() => setThemeMode(item.id)}
-                      className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${
+                      className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer ${
                         isSelected
                           ? "border-theme-primary bg-theme-primary-light text-theme-primary ring-1 ring-theme-primary font-bold shadow-xs"
-                          : "border-zinc-200/80 dark:border-zinc-700/80 bg-white/50 dark:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600"
+                          : "border-zinc-200/80 dark:border-white/10 bg-white/60 dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-200 hover:border-zinc-300 dark:hover:border-white/20 hover:bg-white/80 dark:hover:bg-zinc-800/60"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -606,7 +617,7 @@ function ProfilePage({ user }) {
             className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm transition-all mt-4 ${
               hasPrefChanges
                 ? "bg-theme-primary hover:bg-theme-primary-hover text-white shadow-md glow-primary cursor-pointer active:scale-[0.99]"
-                : "bg-zinc-200/70 dark:bg-zinc-800/70 text-zinc-400 dark:text-zinc-500 cursor-not-allowed"
+                : "bg-zinc-200/80 dark:bg-zinc-800/80 text-zinc-400 dark:text-zinc-500 cursor-not-allowed"
             }`}
           >
             <Save size={16} />
@@ -615,7 +626,7 @@ function ProfilePage({ user }) {
         </div>
 
         {/* Zona de Seguridad / Cerrar Sesión */}
-        <div className="glass-card rounded-[2rem] p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-rose-200/50 dark:border-rose-900/30">
+        <div className="glass-card rounded-[2rem] p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-rose-200/60 dark:border-rose-900/40 bg-rose-50/20 dark:bg-rose-950/20">
           <div>
             <h3 className="font-display font-bold text-sm text-zinc-900 dark:text-zinc-50">
               Cerrar Sesión Activa
@@ -637,7 +648,7 @@ function ProfilePage({ user }) {
         {/* Modal de confirmación de Logout */}
         {showLogoutConfirm && (
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-150"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-150"
             onClick={() => setShowLogoutConfirm(false)}
           >
             <div
