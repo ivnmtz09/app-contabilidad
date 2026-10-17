@@ -459,54 +459,29 @@ function App() {
               Control inteligente de tus finanzas personales
             </p>
           </div>
-          <button
-            onClick={() => navigate('/perfil')}
-            className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-white/60 dark:border-zinc-700 hover:border-theme-primary transition-all shadow-sm hover:scale-105 cursor-pointer"
-            title="Ir a Perfil"
-          >
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="Perfil" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-theme-primary flex items-center justify-center text-white font-bold text-sm">
-                {user?.displayName?.charAt(0) || 'U'}
-              </div>
-            )}
-          </button>
         </header>
       </div>
 
-      {/* ── HERO CARD — PORTATARJETAS DE CUERO + SALDO TOTAL ────────────── */}
-      <div className="md:col-span-2 bg-gradient-to-br from-amber-50/90 via-white/95 to-orange-50/70 dark:from-zinc-950 dark:via-zinc-900/95 dark:to-amber-950/30 backdrop-blur-2xl border border-amber-200/80 dark:border-amber-800/25 rounded-[2rem] shadow-xl shadow-amber-950/5 dark:shadow-2xl dark:shadow-black/60 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-visible">
+      {/* ── HERO CARD — PORTATARJETAS DE CUERO + SALDO TOTAL (GLASSMORPHISM) ────────────── */}
+      <div className="md:col-span-2 glass-hero rounded-[2.25rem] p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
 
-        {/* Fondo textura cuero sutil */}
-        <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none rounded-[2rem] overflow-hidden"
-          style={{
-            backgroundImage: `repeating-linear-gradient(
-              45deg,
-              transparent,
-              transparent 2px,
-              rgba(139,69,19,0.15) 2px,
-              rgba(139,69,19,0.15) 4px
-            )`,
-          }}
-        />
-        {/* Orbes ambientales adaptativos */}
-        <div className="absolute -right-16 -bottom-16 w-72 h-72 bg-amber-300/25 dark:bg-amber-800/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -left-10 -top-10 w-48 h-48 bg-orange-300/20 dark:bg-amber-900/15 rounded-full blur-2xl pointer-events-none" />
+        {/* Orbes ambientales adaptativos con el color del tema actual */}
+        <div className="absolute -right-16 -bottom-16 w-72 h-72 bg-theme-primary/15 dark:bg-theme-primary/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -left-10 -top-10 w-52 h-52 bg-theme-secondary/15 dark:bg-theme-secondary/20 rounded-full blur-2xl pointer-events-none" />
 
         {/* Columna Izquierda: Info y Acciones */}
         <div className="flex-1 z-10 w-full text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100/90 dark:bg-amber-950/60 border border-amber-300/70 dark:border-amber-700/40 text-amber-900 dark:text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4 shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-theme-primary-light border border-theme-primary-subtle text-theme-primary text-xs font-semibold uppercase tracking-wider mb-4 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-theme-primary animate-pulse" />
             {t('home.totalBalance')}
           </div>
 
           {/* Ingresos / Egresos del mes */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 mb-6">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/90 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-bold shadow-2xs">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm font-bold shadow-2xs">
               <span>+${formatCurrency(monthIncome)}</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200/90 dark:border-rose-800/40 text-rose-700 dark:text-rose-400 text-xs sm:text-sm font-bold shadow-2xs">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold shadow-2xs">
               <span>-${formatCurrency(monthExpense)}</span>
             </div>
           </div>
@@ -520,9 +495,9 @@ function App() {
             </button>
             <button
               onClick={() => setIsTransferOpen(true)}
-              className="w-full sm:w-auto bg-amber-100/80 hover:bg-amber-200/90 text-amber-950 border border-amber-300/80 dark:bg-zinc-800/80 dark:hover:bg-zinc-700 dark:text-amber-200 dark:border-zinc-700/70 font-sans font-semibold px-5 py-3.5 rounded-2xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full sm:w-auto bg-white/80 hover:bg-white text-zinc-800 border border-zinc-200/90 dark:bg-zinc-800/80 dark:hover:bg-zinc-750 dark:text-zinc-200 dark:border-zinc-700/80 font-sans font-semibold px-5 py-3.5 rounded-2xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
-              <ArrowRightLeft size={18} className="text-amber-800 dark:text-amber-400" />
+              <ArrowRightLeft size={18} className="text-theme-primary" />
               <span>Transferir</span>
             </button>
           </div>
@@ -715,6 +690,7 @@ function App() {
         onClose={() => setIsDrawerOpen(false)}
         transactions={transactions}
         accounts={accounts}
+        user={user}
       />
 
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, ExternalLink, Code, Info, LogOut, Download, Target, CreditCard } from "lucide-react";
+import { X, ExternalLink, Code, Info, LogOut, Download, Target, CreditCard, ChevronRight, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import AboutModal from "../components/AboutModal";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,7 @@ import { auth } from "../firebase";
 import { toast } from "react-hot-toast";
 import { exportToExcel } from "../utils/exportExcel";
 
-function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
+function Drawer({ isOpen, onClose, transactions = [], accounts = [], user = null }) {
   const { t } = useTranslation();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [showExportConfirm, setShowExportConfirm] = useState(false);
@@ -59,13 +59,49 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [] }) {
       >
         <div className="flex flex-col h-full justify-between">
           <div>
-            <div className="flex items-center justify-end p-4">
+            <div className="flex items-center justify-between p-4 pb-2 border-b border-zinc-100 dark:border-zinc-800/60">
+              <span className="font-display font-bold text-xs uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                Menú & Navegación
+              </span>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+                className="p-2 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                title="Cerrar menú"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
+            </div>
+
+            {/* Tarjeta Destacada de Perfil */}
+            <div className="p-4 pb-2">
+              <Link
+                to="/perfil"
+                onClick={onClose}
+                className="group flex items-center justify-between p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/60 hover:border-theme-primary/50 dark:hover:border-theme-primary/50 transition-all shadow-xs hover:shadow-md cursor-pointer"
+                title="Ir a Mi Perfil y Preferencias"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-11 h-11 rounded-2xl overflow-hidden ring-2 ring-theme-primary/30 shrink-0 bg-theme-primary flex items-center justify-center text-white font-bold text-sm shadow-inner">
+                    {user?.photoURL ? (
+                      <img src={user.photoURL} alt="Foto de perfil" className="w-full h-full object-cover" />
+                    ) : (
+                      user?.displayName?.charAt(0)?.toUpperCase() || <User size={20} />
+                    )}
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <p className="font-semibold text-sm text-zinc-900 dark:text-zinc-50 truncate group-hover:text-theme-primary transition-colors">
+                      {user?.displayName || "Mi Cuenta"}
+                    </p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                      {user?.email || "Configurar perfil"}
+                    </p>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-theme-primary mt-0.5">
+                      Mi Perfil & Ajustes
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight size={18} className="text-zinc-400 group-hover:text-theme-primary group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+              </Link>
             </div>
 
             <nav className="px-4 grid grid-cols-1 gap-2">
