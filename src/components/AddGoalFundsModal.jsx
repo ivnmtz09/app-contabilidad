@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { X, Target, ArrowUpCircle } from "lucide-react";
-import { doc, updateDoc, increment, collection, addDoc } from "firebase/firestore";
+import { doc, updateDoc, increment, collection, runTransaction } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import toast from "react-hot-toast";
+import { formatCurrency } from "../utils/format";
+import AccountSelector from "./ui/AccountSelector";
+import AlertBanner from "./ui/AlertBanner";
 
 export default function AddGoalFundsModal({ isOpen, onClose, goal, accounts = [] }) {
   const [amount, setAmount] = useState("");
-  const [selectedAccountId, setSelectedAccountId] = useState("");
+  const [selectedAccountId, setSelectedAccountId] = useState("virtual");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen || !goal) return null;
@@ -18,6 +21,12 @@ export default function AddGoalFundsModal({ isOpen, onClose, goal, accounts = []
   const parsedAmount = Number(amount) || 0;
   const projectedSaved = currentSaved + parsedAmount;
   const projectedProgress = Math.min((projectedSaved / target) * 100, 100).toFixed(0);
+
+  const selectedAcc = accounts.find((a) => a.id === selectedAccountId);
+  const isRealAccount = selectedAccountId && selectedAccountId !== "virtual";
+  const accBalance = Number(selectedAcc?.balance) || 0;
+  const isCredit = selectedAcc?.type === "credito";
+  const hasInsufficientFunds = isRealAccount && !isCredit && parsedAmount > accBalance;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,43 +41,66 @@ export default function AddGoalFundsModal({ isOpen, onClose, goal, accounts = []
       return;
     }
 
+    if (hasInsufficientFunds) {
+      toast.error(`Saldo insuficiente en "${selectedAcc?.name}"`);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // 1. Atomically increment the goal's savedAmount
-      await updateDoc(doc(db, `users/${auth.currentUser.uid}/goals`, goal.id), {
-        savedAmount: increment(numAmount),
-      });
+      const uid = auth.currentUser.uid;
 
-      // 2. If a real account is selected, deduct funds and record expense
-      if (selectedAccountId && selectedAccountId !== "virtual") {
-        const selectedAcc = accounts.find((a) => a.id === selectedAccountId);
-        const accountName = selectedAcc ? selectedAcc.name : "Cuenta";
+      if (isRealAccount) {
+        // Ejecución atómica: verificar saldo, decrementar cuenta, incrementar meta, registrar transacción
+        await runTransaction(db, async (tx) => {
+          const accRef = doc(db, "users", uid, "accounts", selectedAccountId);
+          const goalRef = doc(db, `users/${uid}/goals`, goal.id);
 
-        // Atomically decrement account balance
-        await updateDoc(doc(db, `users/${auth.currentUser.uid}/accounts`, selectedAccountId), {
-          balance: increment(-numAmount),
+          const accSnap = await tx.get(accRef);
+          if (!accSnap.exists()) {
+            throw new Error("La cuenta seleccionada no existe");
+          }
+
+          const currentAccBal = Number(accSnap.data().balance) || 0;
+          if (accSnap.data().type !== "credito" && currentAccBal < numAmount) {
+            throw new Error(`Saldo insuficiente en "${accSnap.data().name}". Disponible: $${currentAccBal}`);
+          }
+
+          // Actualizar cuenta
+          tx.update(accRef, { balance: currentAccBal - numAmount });
+
+          // Actualizar meta
+          const goalSnap = await tx.get(goalRef);
+          const currentGoalSaved = Number(goalSnap.data().savedAmount) || 0;
+          tx.update(goalRef, { savedAmount: currentGoalSaved + numAmount });
+
+          // Registrar egreso
+          const txRef = doc(collection(db, `users/${uid}/transactions`));
+          tx.set(txRef, {
+            type: "egreso",
+            amount: numAmount,
+            description: `Abono a meta: ${goal.name}`,
+            category: "metas",
+            accountId: selectedAccountId,
+            date: new Date().toISOString(),
+          });
         });
 
-        // Record expense transaction
-        await addDoc(collection(db, `users/${auth.currentUser.uid}/transactions`), {
-          type: "egreso",
-          amount: numAmount,
-          description: `Abono a meta: ${goal.name}`,
-          accountId: selectedAccountId,
-          date: new Date().toISOString(),
-        });
-
-        toast.success(`Abonados $${numAmount.toLocaleString()} descontados de ${accountName}`);
+        toast.success(`Abonados $${formatCurrency(numAmount)} descontados de ${selectedAcc.name}`);
       } else {
-        toast.success(`Abono virtual de $${numAmount.toLocaleString()} registrado`);
+        // Abono virtual sin cuenta
+        await updateDoc(doc(db, `users/${uid}/goals`, goal.id), {
+          savedAmount: increment(numAmount),
+        });
+        toast.success(`Abono virtual de $${formatCurrency(numAmount)} registrado`);
       }
 
       setAmount("");
-      setSelectedAccountId("");
+      setSelectedAccountId("virtual");
       onClose();
     } catch (err) {
       console.error("Error al abonar fondos a la meta:", err);
-      toast.error("Error al registrar el abono");
+      toast.error(err.message || "Error al registrar el abono");
     } finally {
       setIsSubmitting(false);
     }
@@ -80,136 +112,137 @@ export default function AddGoalFundsModal({ isOpen, onClose, goal, accounts = []
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden"
+        className="w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden p-6 flex flex-col gap-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-950/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl">
-              <Target size={22} />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+              <Target size={20} />
             </div>
             <div>
-              <h2 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
-                Abonar a Meta
-              </h2>
-              <p className="text-xs text-zinc-500 font-sans">{goal.name}</p>
+              <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
+                Abonar Fondos
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Meta: <strong>{goal.name}</strong>
+              </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1.5 rounded-xl transition-colors cursor-pointer"
+            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
-          {/* Progress preview card */}
-          <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-2xl p-4">
-            <div className="flex justify-between items-baseline mb-2">
-              <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
-                Ahorrado actualmente
-              </span>
-              <span className="text-sm font-bold text-amber-900 dark:text-amber-200">
-                ${currentSaved.toLocaleString()} / ${target.toLocaleString()}
-              </span>
-            </div>
-            <div className="w-full bg-amber-200/50 dark:bg-amber-900/40 rounded-full h-2.5 overflow-hidden">
-              <div
-                className="bg-amber-500 h-2.5 rounded-full transition-all duration-300"
-                style={{ width: `${currentProgress}%` }}
-              />
-            </div>
-            {parsedAmount > 0 && (
-              <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-2 text-right">
-                Con este abono alcanzarás: <strong className="font-bold">${projectedSaved.toLocaleString()} ({projectedProgress}%)</strong>
-              </p>
-            )}
+        {/* Progress Preview */}
+        <div className="bg-zinc-50 dark:bg-zinc-800/60 rounded-2xl p-4 border border-zinc-200/60 dark:border-zinc-700/60 flex flex-col gap-2">
+          <div className="flex justify-between text-xs">
+            <span className="text-zinc-500">Ahorrado actual:</span>
+            <span className="font-mono font-semibold text-zinc-800 dark:text-zinc-200">
+              ${formatCurrency(currentSaved)} / ${formatCurrency(target)} ({currentProgress}%)
+            </span>
           </div>
 
-          {/* Amount input */}
-          <div>
-            <label className="block text-xs font-display font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">
-              Monto a abonar
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-lg">
-                $
+          <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-2.5 rounded-full overflow-hidden">
+            <div
+              className="bg-amber-500 h-full rounded-full transition-all duration-300"
+              style={{ width: `${currentProgress}%` }}
+            />
+          </div>
+
+          {parsedAmount > 0 && (
+            <div className="flex justify-between items-center text-xs pt-1 border-t border-zinc-200/60 dark:border-zinc-700/60 text-amber-600 dark:text-amber-400 font-medium">
+              <span>Proyección:</span>
+              <span className="font-mono font-bold">
+                ${formatCurrency(projectedSaved)} ({projectedProgress}%)
               </span>
-              <input
-                type="number"
-                min="1"
-                step="any"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl pl-9 pr-4 py-3.5 text-lg font-bold text-zinc-900 dark:text-zinc-50 outline-none focus:ring-2 focus:ring-amber-500 transition-all"
-                autoFocus
-                required
-              />
             </div>
+          )}
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-1.5">
+              Monto a Abonar ($ COP)
+            </label>
+            <input
+              type="number"
+              step="any"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0"
+              className={`w-full px-4 py-3 rounded-2xl border font-mono text-lg font-bold tabular-nums outline-none transition-all ${
+                hasInsufficientFunds
+                  ? "border-rose-500 ring-2 ring-rose-500/20 bg-white dark:bg-zinc-800"
+                  : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-amber-500 text-zinc-900 dark:text-zinc-50"
+              }`}
+              autoFocus
+              required
+            />
+
             {/* Quick buttons */}
-            <div className="flex gap-2 mt-2">
-              {[10000, 50000, 100000].map((val) => (
+            <div className="flex gap-1.5 mt-2">
+              {[20000, 50000, 100000, 200000].map((val) => (
                 <button
                   type="button"
                   key={val}
                   onClick={() => handleQuickAdd(val)}
-                  className="text-xs py-1 px-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
+                  className="text-xs py-1 px-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 font-mono transition-colors cursor-pointer"
                 >
-                  +${val.toLocaleString()}
+                  +${formatCurrency(val)}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Account selector (optional) */}
+          {/* Account selector using custom AccountSelector */}
           <div>
-            <label className="block text-xs font-display font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">
-              Origen de los fondos
-            </label>
-            <div className="relative">
-              <select
-                value={selectedAccountId}
-                onChange={(e) => setSelectedAccountId(e.target.value)}
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-4 py-3.5 text-sm text-zinc-900 dark:text-zinc-50 outline-none focus:ring-2 focus:ring-amber-500 transition-all cursor-pointer"
-              >
-                <option value="">
-                  Solo abono virtual (no descontar de ninguna cuenta)
-                </option>
-                {accounts.map((acc) => (
-                  <option key={acc.id} value={acc.id}>
-                    Descontar de {acc.name} (${Number(acc.balance || 0).toLocaleString()})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1.5">
-              {selectedAccountId
-                ? "Se descontará el monto del saldo de la cuenta y se creará un movimiento de egreso."
-                : "Aumentará el monto ahorrado en la meta sin afectar tus cuentas bancarias."}
-            </p>
+            <AccountSelector
+              accounts={accounts}
+              selectedAccountId={selectedAccountId}
+              onChange={setSelectedAccountId}
+              allowAll
+              allLabel="Abono virtual (no descontar de cuenta)"
+              requiredAmount={parsedAmount}
+              label="Origen de los Fondos"
+              placeholder="Seleccionar cuenta origen"
+            />
           </div>
 
-          {/* Action buttons */}
-          <div className="flex gap-3 pt-2">
+          {/* Alerta si no alcanza el saldo */}
+          {hasInsufficientFunds && selectedAcc && (
+            <AlertBanner
+              type="danger"
+              title="Saldo insuficiente en cuenta origen"
+              message={`"${selectedAcc.name}" tiene un saldo de $${formatCurrency(
+                accBalance
+              )} y quieres abonar $${formatCurrency(parsedAmount)}. Selecciona otra cuenta o ajusta el monto.`}
+            />
+          )}
+
+          {/* Buttons */}
+          <div className="flex gap-2.5 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-2xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+              className="flex-1 py-3 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !amount || Number(amount) <= 0}
-              className="flex-1 py-3 rounded-2xl text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              disabled={isSubmitting || !amount || Number(amount) <= 0 || hasInsufficientFunds}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
             >
               <ArrowUpCircle size={18} />
               {isSubmitting ? "Abonando..." : "Confirmar Abono"}

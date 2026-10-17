@@ -1,12 +1,26 @@
-import { useState, useEffect } from 'react';
-import { collection, addDoc, updateDoc, onSnapshot, deleteDoc, doc, query, orderBy, increment } from 'firebase/firestore';
-import { db } from '../firebase';
-import { useAuth } from '../context/AuthContext';
-import { useTranslation } from 'react-i18next';
-import { CalendarClock, Trash2, Plus, Repeat, Pencil, CreditCard, X, CalendarDays } from 'lucide-react';
-import toast from 'react-hot-toast';
-import ConfirmModal from './ConfirmModal';
-import { RecurrentesSkeleton } from './Loaders';
+import { useState, useEffect } from "react";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  onSnapshot,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+  runTransaction,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "react-i18next";
+import { CalendarClock, Trash2, Plus, Repeat, Pencil, CreditCard, X, CalendarDays } from "lucide-react";
+import toast from "react-hot-toast";
+import ConfirmModal from "./ConfirmModal";
+import { RecurrentesSkeleton } from "./Loaders";
+import { formatCurrency } from "../utils/format";
+import AccountSelector from "./ui/AccountSelector";
+import CustomSelect from "./ui/CustomSelect";
+import AlertBanner from "./ui/AlertBanner";
 
 export function RecurrentesView() {
   const { t } = useTranslation();
@@ -17,34 +31,36 @@ export function RecurrentesView() {
 
   // Form states
   const [editingId, setEditingId] = useState(null);
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [frequency, setFrequency] = useState('Mensual');
-  const [billingDate, setBillingDate] = useState('');
+  const [name, setName] = useState("");
+  const [amount, setAmount] = useState("");
+  const [frequency, setFrequency] = useState("Mensual");
+  const [billingDate, setBillingDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
 
   // Payment Modal states
-  const [paymentModal, setPaymentModal] = useState({ isOpen: false, item: null, accountId: '' });
+  const [paymentModal, setPaymentModal] = useState({ isOpen: false, item: null, accountId: "" });
 
   useEffect(() => {
-    // Guard: esperar a que el usuario esté resuelto
     if (!user) {
       setItems([]);
       setAccounts([]);
       return;
     }
 
-    const qRecurrents = query(collection(db, `users/${user.uid}/recurrents`), orderBy('createdAt', 'desc'));
+    const qRecurrents = query(
+      collection(db, `users/${user.uid}/recurrents`),
+      orderBy("createdAt", "desc")
+    );
     const unsubRecurrents = onSnapshot(
       qRecurrents,
       (snap) => {
-        setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
         setIsLoaded(true);
       },
       (error) => {
         console.error("Error al cargar suscripciones recurrentes:", error);
-        toast.error("Error de permisos o conexión al cargar suscripciones");
+        toast.error("Error al cargar suscripciones");
         setIsLoaded(true);
       }
     );
@@ -53,11 +69,10 @@ export function RecurrentesView() {
     const unsubAccounts = onSnapshot(
       qAccounts,
       (snap) => {
-        setAccounts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setAccounts(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
       },
       (error) => {
         console.error("Error al cargar cuentas:", error);
-        toast.error("Error de permisos o conexión al cargar cuentas");
       }
     );
 
@@ -75,24 +90,43 @@ export function RecurrentesView() {
       toast.error("Debes iniciar sesión para realizar esta acción");
       return;
     }
-    if (!name.trim()) { toast.error(t('recurrent.nameRequired') || 'Ingresa un nombre para la suscripción'); return; }
-    if (!amount || Number(amount) <= 0) { toast.error(t('recurrent.amountRequired') || 'Ingresa un monto válido'); return; }
-    if (!billingDate) { toast.error(t('recurrent.dateRequired') || 'Selecciona una fecha de cobro'); return; }
+    if (!name.trim()) {
+      toast.error(t("recurrent.nameRequired") || "Ingresa un nombre para la suscripción");
+      return;
+    }
+    if (!amount || Number(amount) <= 0) {
+      toast.error(t("recurrent.amountRequired") || "Ingresa un monto válido");
+      return;
+    }
+    if (!billingDate) {
+      toast.error(t("recurrent.dateRequired") || "Selecciona una fecha de cobro");
+      return;
+    }
     setIsSubmitting(true);
     try {
       if (editingId) {
         await updateDoc(doc(db, `users/${user.uid}/recurrents`, editingId), {
-          name: name.trim(), amount: Number(amount), frequency, billingDate
+          name: name.trim(),
+          amount: Number(amount),
+          frequency,
+          billingDate,
         });
         setEditingId(null);
-        toast.success(t('profile.success') || "Actualizado");
+        toast.success("Suscripción actualizada");
       } else {
         await addDoc(collection(db, `users/${user.uid}/recurrents`), {
-          name: name.trim(), amount: Number(amount), frequency, billingDate, createdAt: new Date().toISOString()
+          name: name.trim(),
+          amount: Number(amount),
+          frequency,
+          billingDate,
+          createdAt: new Date().toISOString(),
         });
-        toast.success(t('module.saving') || "Guardado");
+        toast.success("Suscripción guardada");
       }
-      setName(''); setAmount(''); setFrequency('Mensual'); setBillingDate('');
+      setName("");
+      setAmount("");
+      setFrequency("Mensual");
+      setBillingDate("");
     } catch (err) {
       console.error("Error guardando suscripción:", err);
       toast.error("Error al guardar suscripción");
@@ -105,23 +139,23 @@ export function RecurrentesView() {
     setEditingId(item.id);
     setName(item.name);
     setAmount(item.amount);
-    setFrequency(item.frequency);
-    setBillingDate(item.billingDate || '');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setFrequency(item.frequency || "Mensual");
+    setBillingDate(item.billingDate || "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setName(''); setAmount(''); setFrequency('Mensual'); setBillingDate('');
+    setName("");
+    setAmount("");
+    setFrequency("Mensual");
+    setBillingDate("");
   };
 
   const confirmPayment = async () => {
-    if (!user) {
-      toast.error("Debes iniciar sesión para registrar el pago");
-      return;
-    }
+    if (!user) return;
     if (!paymentModal.accountId || !paymentModal.item) {
-      toast.error(t('recurrent.selectAccount'));
+      toast.error(t("recurrent.selectAccount") || "Selecciona una cuenta");
       return;
     }
     const payAmount = Number(paymentModal.item.amount);
@@ -129,26 +163,42 @@ export function RecurrentesView() {
       toast.error("El monto de la suscripción es inválido");
       return;
     }
+
     try {
-      // 1. Registrar la transacción de egreso
-      await addDoc(collection(db, `users/${user.uid}/transactions`), {
-        type: 'egreso',
-        amount: payAmount,
-        description: `Pago suscripción: ${paymentModal.item.name}`,
-        accountId: paymentModal.accountId,
-        date: new Date().toISOString()
+      await runTransaction(db, async (tx) => {
+        const accRef = doc(db, "users", user.uid, "accounts", paymentModal.accountId);
+        const accSnap = await tx.get(accRef);
+        if (!accSnap.exists()) {
+          throw new Error("La cuenta no existe");
+        }
+
+        const currentBal = Number(accSnap.data().balance) || 0;
+        if (accSnap.data().type !== "credito" && currentBal < payAmount) {
+          throw new Error(
+            `Saldo insuficiente en "${accSnap.data().name}". Disponible: $${formatCurrency(
+              currentBal
+            )}`
+          );
+        }
+
+        tx.update(accRef, { balance: currentBal - payAmount });
+
+        const txRef = doc(collection(db, `users/${user.uid}/transactions`));
+        tx.set(txRef, {
+          type: "egreso",
+          amount: payAmount,
+          description: `Pago suscripción: ${paymentModal.item.name}`,
+          category: "suscripciones",
+          accountId: paymentModal.accountId,
+          date: new Date().toISOString(),
+        });
       });
 
-      // 2. Actualizar atómicamente el saldo de la cuenta descontando el valor
-      await updateDoc(doc(db, `users/${user.uid}/accounts`, paymentModal.accountId), {
-        balance: increment(-payAmount)
-      });
-
-      toast.success(t('recurrent.paymentSuccess'));
-      setPaymentModal({ isOpen: false, item: null, accountId: '' });
-    } catch(err) {
-      console.error("Error al registrar el pago de la suscripción:", err);
-      toast.error("Error al registrar el pago en la cuenta");
+      toast.success(t("recurrent.paidSuccess") || "Pago registrado y debitado de tu cuenta");
+      setPaymentModal({ isOpen: false, item: null, accountId: "" });
+    } catch (err) {
+      console.error("Error en pago recurrente:", err);
+      toast.error(err.message || "Error al registrar el pago");
     }
   };
 
@@ -158,116 +208,242 @@ export function RecurrentesView() {
       await deleteDoc(doc(db, `users/${user.uid}/recurrents`, confirmModal.id));
       toast.success("Suscripción eliminada");
     } catch (err) {
-      console.error("Error al eliminar suscripción:", err);
-      toast.error("Error al eliminar la suscripción");
+      console.error("Error eliminando suscripción:", err);
+      toast.error("Error al eliminar");
+    } finally {
+      setConfirmModal({ isOpen: false, id: null });
     }
   };
 
+  const selectedPaymentAccount = accounts.find((a) => a.id === paymentModal.accountId);
+  const paymentAmountNum = Number(paymentModal.item?.amount) || 0;
+  const payAccountBalance = Number(selectedPaymentAccount?.balance) || 0;
+  const paymentHasInsufficient =
+    selectedPaymentAccount &&
+    selectedPaymentAccount.type !== "credito" &&
+    paymentAmountNum > payAccountBalance;
+
   return (
-    <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-24 relative">
-      <div className="flex items-center gap-4 mb-6">
-        <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-2xl text-blue-600 dark:text-blue-400">
-          <CalendarClock size={28}/>
+    <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-theme-primary/10 rounded-2xl text-theme-primary">
+          <CalendarClock size={28} />
         </div>
         <div>
-          <h2 className="text-2xl font-display font-bold text-zinc-900 dark:text-zinc-50">{t('recurrent.title')}</h2>
-          <p className="text-sm text-zinc-500">{t('recurrent.desc')}</p>
+          <h2 className="text-xl sm:text-2xl font-display font-bold text-zinc-900 dark:text-zinc-50">
+            {t("recurrent.title") || "Suscripciones y Pagos Recurrentes"}
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-400">
+            {t("recurrent.desc") || "Administra servicios, seguros y pagos fijos periódicos"}
+          </p>
         </div>
       </div>
 
-      <form onSubmit={handleAddOrUpdate} className="bg-white dark:bg-zinc-900 p-4 sm:p-5 rounded-3xl shadow-sm border border-zinc-200 dark:border-zinc-800 flex flex-col gap-4 mb-8">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input type="text" placeholder={t('module.name')} value={name} onChange={(e) => setName(e.target.value)} className="flex-1 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500" required />
-          <input type="number" placeholder={t('module.amount')} value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full sm:w-32 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500" required />
-          <select value={frequency} onChange={(e) => setFrequency(e.target.value)} className="bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500">
-            <option value="Mensual">{t('recurrent.monthly')}</option>
-            <option value="Anual">{t('recurrent.yearly')}</option>
-          </select>
+      {/* Formulario */}
+      <form
+        onSubmit={handleAddOrUpdate}
+        className="bg-white dark:bg-zinc-850 p-5 rounded-3xl shadow-xs border border-zinc-200/80 dark:border-zinc-800/80 flex flex-col gap-4"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <input
+            type="text"
+            placeholder={t("module.name") || "Nombre (Netflix, Gym, etc.)"}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-50 outline-none focus:ring-2 focus:ring-theme-primary"
+            required
+          />
+          <input
+            type="number"
+            step="any"
+            placeholder={t("module.amount") || "Monto ($ COP)"}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 font-mono text-sm tabular-nums text-zinc-900 dark:text-zinc-50 outline-none focus:ring-2 focus:ring-theme-primary"
+            required
+          />
+          <CustomSelect
+            value={frequency}
+            onChange={setFrequency}
+            options={[
+              { value: "Mensual", label: "Mensual" },
+              { value: "Quincenal", label: "Quincenal" },
+              { value: "Semanal", label: "Semanal" },
+              { value: "Anual", label: "Anual" },
+            ]}
+          />
         </div>
+
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3">
-            <CalendarDays size={16} className="text-zinc-400 shrink-0"/>
-            <input type="date" value={billingDate} onChange={(e) => setBillingDate(e.target.value)} className="flex-1 bg-transparent outline-none text-sm text-zinc-900 dark:text-zinc-50"/>
+          <div className="flex-1 flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5">
+            <CalendarDays size={16} className="text-zinc-400 shrink-0" />
+            <input
+              type="date"
+              value={billingDate}
+              onChange={(e) => setBillingDate(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-xs sm:text-sm text-zinc-900 dark:text-zinc-50"
+            />
           </div>
-        </div>
-        <div className="flex gap-2">
-          {editingId && (
-            <button type="button" onClick={handleCancelEdit} className="w-1/3 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl px-5 py-3 font-semibold transition-colors">
-              {t('recurrent.cancelEdit')}
+
+          <div className="flex gap-2 w-full sm:w-auto">
+            {editingId && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="px-4 py-2.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-semibold text-xs transition-colors"
+              >
+                Cancelar
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 sm:flex-initial px-6 py-2.5 bg-theme-primary hover:bg-theme-primary-hover text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow-sm glow-primary disabled:opacity-50"
+            >
+              {editingId ? <Pencil size={16} /> : <Plus size={16} />}
+              {editingId ? "Actualizar" : "Añadir Suscripción"}
             </button>
-          )}
-          <button type="submit" disabled={isSubmitting} className={`${editingId ? 'w-2/3' : 'w-full'} bg-violet-600 hover:bg-violet-700 text-white rounded-xl px-5 py-3 font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50`}>
-            {editingId ? <Pencil size={20}/> : <Plus size={20}/>}
-            {editingId ? t('recurrent.update') : t('module.add')}
-          </button>
+          </div>
         </div>
       </form>
 
+      {/* Lista */}
       <div className="space-y-3">
-        {items.map(item => (
-          <div key={item.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-white dark:bg-zinc-850 p-4 rounded-2xl border border-zinc-200/70 dark:border-zinc-800/70 shadow-2xs hover:shadow-xs transition-all"
+          >
             <div>
-              <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-lg">{item.name}</h3>
+              <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-base">{item.name}</h3>
               <div className="flex flex-wrap items-center gap-2 mt-1">
-                <span className="text-sm text-zinc-500 flex items-center gap-1">
-                  <Repeat size={14}/> {item.frequency === 'Mensual' ? t('recurrent.monthly') : t('recurrent.yearly')}
+                <span className="text-xs text-zinc-400 flex items-center gap-1">
+                  <Repeat size={12} /> {item.frequency || "Mensual"}
                 </span>
                 {item.billingDate && (
-                  <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <CalendarDays size={12}/> {new Date(item.billingDate + 'T00:00:00').toLocaleDateString()}
+                  <span className="text-xs bg-theme-primary/10 text-theme-primary px-2 py-0.5 rounded-full flex items-center gap-1 font-medium">
+                    <CalendarDays size={11} />
+                    {new Date(item.billingDate + "T00:00:00").toLocaleDateString()}
                   </span>
                 )}
               </div>
             </div>
-            <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
-              <span className="font-bold text-zinc-900 dark:text-zinc-50 text-lg">${item.amount.toLocaleString()}</span>
+
+            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+              <span className="font-mono font-bold text-zinc-900 dark:text-zinc-50 text-base tabular-nums">
+                ${formatCurrency(item.amount)}
+              </span>
+
               <div className="flex items-center gap-1">
-                <button onClick={() => setPaymentModal({ isOpen: true, item, accountId: accounts[0]?.id || '' })} className="text-emerald-600 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 dark:text-emerald-400 p-2 rounded-lg transition-colors" title={t('recurrent.pay')}>
-                  <CreditCard size={18}/>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPaymentModal({
+                      isOpen: true,
+                      item,
+                      accountId: accounts[0]?.id || "",
+                    })
+                  }
+                  className="text-emerald-600 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 p-2 rounded-xl transition-colors cursor-pointer"
+                  title="Pagar / Registrar egreso"
+                >
+                  <CreditCard size={16} />
                 </button>
-                <button onClick={() => handleEdit(item)} className="text-zinc-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 p-2 rounded-lg transition-colors">
-                  <Pencil size={18}/>
+                <button
+                  type="button"
+                  onClick={() => handleEdit(item)}
+                  className="text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 p-2 rounded-xl transition-colors cursor-pointer"
+                  title="Editar"
+                >
+                  <Pencil size={16} />
                 </button>
-                <button onClick={() => setConfirmModal({ isOpen: true, id: item.id })} className="text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-lg transition-colors">
-                  <Trash2 size={18}/>
+                <button
+                  type="button"
+                  onClick={() => setConfirmModal({ isOpen: true, id: item.id })}
+                  className="text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-xl transition-colors cursor-pointer"
+                  title="Eliminar"
+                >
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>
           </div>
         ))}
+
+        {items.length === 0 && (
+          <div className="py-12 text-center text-xs text-zinc-400 bg-white/40 dark:bg-zinc-850/40 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800">
+            No tienes pagos recurrentes registrados.
+          </div>
+        )}
       </div>
 
+      {/* Modal de Pago / Débito de Suscripción */}
       {paymentModal.isOpen && (
-        <div className="fixed inset-0 z-[60] flex justify-center items-start sm:items-center pt-2 sm:pt-0 bg-black/40 backdrop-blur-sm px-2 sm:px-0">
-          <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden mt-2 sm:mt-0">
-            <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950">
-              <h2 className="font-bold text-lg text-zinc-900 dark:text-zinc-50">{t('recurrent.payConfirmTitle')}</h2>
-              <button onClick={() => setPaymentModal({ isOpen: false, item: null, accountId: '' })} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
-                <X size={20}/>
+        <div className="fixed inset-0 z-[60] flex justify-center items-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden p-6 flex flex-col gap-4">
+            <div className="flex justify-between items-center pb-2 border-b border-zinc-100 dark:border-zinc-800">
+              <h2 className="font-bold text-base text-zinc-900 dark:text-zinc-50">
+                Pagar Suscripción
+              </h2>
+              <button
+                type="button"
+                onClick={() => setPaymentModal({ isOpen: false, item: null, accountId: "" })}
+                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1"
+              >
+                <X size={18} />
               </button>
             </div>
-            <div className="p-5">
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4">{t('recurrent.payConfirmDesc')}</p>
-              <div className="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-xl mb-4 border border-zinc-200 dark:border-zinc-700">
-                <p className="font-semibold text-zinc-900 dark:text-zinc-50">{paymentModal.item?.name}</p>
-                <p className="text-rose-600 font-bold">${paymentModal.item?.amount.toLocaleString()}</p>
+
+            <div className="space-y-3">
+              <p className="text-zinc-500 text-xs">
+                Selecciona la cuenta de la cual se debitará este pago de suscripción:
+              </p>
+
+              <div className="bg-zinc-50 dark:bg-zinc-800/60 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-700/60 flex justify-between items-center">
+                <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+                  {paymentModal.item?.name}
+                </span>
+                <span className="text-rose-600 font-mono font-bold text-base tabular-nums">
+                  ${formatCurrency(paymentAmountNum)}
+                </span>
               </div>
-              <select
-                value={paymentModal.accountId}
-                onChange={(e) => setPaymentModal({...paymentModal, accountId: e.target.value})}
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 mb-6 outline-none focus:ring-2 focus:ring-violet-500"
-              >
-                <option value="" disabled>{t('recurrent.selectAccount')}</option>
-                {accounts.map(acc => (
-                  <option key={acc.id} value={acc.id}>{acc.name} (${acc.balance.toLocaleString()})</option>
-                ))}
-              </select>
-              <div className="flex gap-3">
-                <button onClick={() => setPaymentModal({ isOpen: false, item: null, accountId: '' })} className="flex-1 py-3 rounded-xl font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
-                  {t('recurrent.cancel')}
+
+              {/* Selector de cuenta personalizado */}
+              <AccountSelector
+                accounts={accounts}
+                selectedAccountId={paymentModal.accountId}
+                onChange={(id) => setPaymentModal({ ...paymentModal, accountId: id })}
+                requiredAmount={paymentAmountNum}
+                label="Cuenta de Débito"
+                placeholder="Selecciona la cuenta"
+              />
+
+              {paymentHasInsufficient && (
+                <AlertBanner
+                  type="danger"
+                  title="Saldo insuficiente"
+                  message={`La cuenta no tiene suficientes fondos para pagar $${formatCurrency(
+                    paymentAmountNum
+                  )}.`}
+                />
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentModal({ isOpen: false, item: null, accountId: "" })}
+                  className="flex-1 py-2.5 rounded-xl font-semibold text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                >
+                  Cancelar
                 </button>
-                <button onClick={confirmPayment} className="flex-1 py-3 rounded-xl font-semibold bg-violet-600 hover:bg-violet-700 text-white transition-colors">
-                  {t('recurrent.confirm')}
+                <button
+                  type="button"
+                  onClick={confirmPayment}
+                  disabled={paymentHasInsufficient || !paymentModal.accountId}
+                  className="flex-1 py-2.5 rounded-xl font-semibold text-xs bg-theme-primary hover:bg-theme-primary-hover text-white transition-colors shadow-md disabled:opacity-40"
+                >
+                  Confirmar Pago
                 </button>
               </div>
             </div>
@@ -275,14 +451,18 @@ export function RecurrentesView() {
         </div>
       )}
 
+      {/* Confirm Delete */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ isOpen: false, id: null })}
         onConfirm={handleDelete}
         title="Eliminar suscripción"
-        message="¿Estás seguro de que deseas eliminar esta suscripción?"
+        message="¿Estás seguro de que deseas eliminar esta suscripción recurrente?"
         confirmText="Eliminar"
+        type="danger"
       />
     </div>
   );
 }
+
+export default RecurrentesView;
