@@ -3,7 +3,7 @@ import { Menu, ArrowUpCircle, ArrowDownCircle, Pencil, Trash2, Ban, ArrowRightLe
 import { useTranslation } from "react-i18next";
 import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
-import { auth, db } from "./firebase";
+import { db } from "./firebase";
 import { collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, increment } from "firebase/firestore";
 import Login from "./components/Login";
 import Drawer from "./layout/Drawer";
@@ -11,13 +11,13 @@ import AccountsCard from "./components/AccountsCard";
 import AddAccountModal from "./components/AddAccountModal";
 import TransactionModal from "./components/TransactionModal";
 import MovementsView from "./components/MovementsView";
-import { ProgressBar, HomeSkeleton, ListSkeleton } from "./components/Loaders";
+import { HomeSkeleton, ListSkeleton } from "./components/Loaders";
 import SplashScreen from "./layout/SplashScreen";
 import ProfilePage from "./pages/ProfilePage";
 import BalanceChart from "./components/BalanceChart";
 import Logo from "./components/Logo";
-import WalletHeroSvg from "./components/WalletHeroSvg";
 import LeatherWallet from "./components/LeatherWallet";
+import { getCategoryMeta } from "./utils/categories";
 
 import BottomNav from "./layout/BottomNav";
 import { formatCurrency } from "./utils/format";
@@ -127,6 +127,7 @@ function App() {
         amount: finalAmount,
         description: data.description || "Sin descripción",
         accountId: data.accountId,
+        category: data.category || (data.type === "ingreso" ? "salario" : "comida"),
         type: data.type,
         date: data.date || new Date().toISOString(),
       };
@@ -354,11 +355,11 @@ function App() {
         </header>
       </div>
 
-      {/* ── HERO CARD — BILLETERA DE CUERO + TARJETA ────────────── */}
-      <div className="md:col-span-2 bg-gradient-to-br from-amber-950/90 via-stone-900/95 to-amber-950/90 dark:from-zinc-950 dark:via-zinc-900 dark:to-amber-950/20 backdrop-blur-2xl border border-amber-800/30 dark:border-amber-900/20 rounded-[2rem] shadow-2xl shadow-amber-950/30 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+      {/* ── HERO CARD — PORTATARJETAS DE CUERO + SALDO TOTAL ────────────── */}
+      <div className="md:col-span-2 bg-gradient-to-br from-amber-50/90 via-white/95 to-orange-50/70 dark:from-zinc-950 dark:via-zinc-900/95 dark:to-amber-950/30 backdrop-blur-2xl border border-amber-200/80 dark:border-amber-800/25 rounded-[2rem] shadow-xl shadow-amber-950/5 dark:shadow-2xl dark:shadow-black/60 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-visible">
 
         {/* Fondo textura cuero sutil */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none"
+        <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none rounded-[2rem] overflow-hidden"
           style={{
             backgroundImage: `repeating-linear-gradient(
               45deg,
@@ -369,27 +370,26 @@ function App() {
             )`,
           }}
         />
-        {/* Orbe ambiental */}
-        <div className="absolute -right-16 -bottom-16 w-72 h-72 bg-amber-800/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -left-10 -top-10 w-48 h-48 bg-amber-900/15 rounded-full blur-2xl pointer-events-none" />
+        {/* Orbes ambientales adaptativos */}
+        <div className="absolute -right-16 -bottom-16 w-72 h-72 bg-amber-300/25 dark:bg-amber-800/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -left-10 -top-10 w-48 h-48 bg-orange-300/20 dark:bg-amber-900/15 rounded-full blur-2xl pointer-events-none" />
 
         {/* Columna Izquierda: Info y Acciones */}
         <div className="flex-1 z-10 w-full text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-800/30 border border-amber-700/30 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100/90 dark:bg-amber-950/60 border border-amber-300/70 dark:border-amber-700/40 text-amber-900 dark:text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse" />
             {t('home.totalBalance')}
           </div>
 
           {/* Ingresos / Egresos del mes */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 mb-6">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/50 border border-emerald-800/40 text-emerald-400 text-xs sm:text-sm font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/90 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-bold shadow-2xs">
               <span>+${formatCurrency(monthIncome)}</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/50 border border-rose-800/40 text-rose-400 text-xs sm:text-sm font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200/90 dark:border-rose-800/40 text-rose-700 dark:text-rose-400 text-xs sm:text-sm font-bold shadow-2xs">
               <span>-${formatCurrency(monthExpense)}</span>
             </div>
           </div>
-
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <button
@@ -400,16 +400,16 @@ function App() {
             </button>
             <button
               onClick={() => setIsTransferOpen(true)}
-              className="w-full sm:w-auto bg-amber-900/40 hover:bg-amber-800/50 text-amber-200 border border-amber-700/40 font-sans font-semibold px-5 py-3.5 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer hover:border-amber-500/60"
+              className="w-full sm:w-auto bg-amber-100/80 hover:bg-amber-200/90 text-amber-950 border border-amber-300/80 dark:bg-zinc-800/80 dark:hover:bg-zinc-700 dark:text-amber-200 dark:border-zinc-700/70 font-sans font-semibold px-5 py-3.5 rounded-2xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
-              <ArrowRightLeft size={18} className="text-amber-400" />
+              <ArrowRightLeft size={18} className="text-amber-800 dark:text-amber-400" />
               <span>Transferir</span>
             </button>
           </div>
         </div>
 
-        {/* Columna Derecha: Billetera de Cuero Interactiva */}
-        <div className="w-full md:w-auto z-10 flex items-center justify-center pt-4 md:pt-0" style={{ minWidth: 240, minHeight: 280 }}>
+        {/* Columna Derecha: Portatarjetas de Cuero Ejecutivo Interactivo */}
+        <div className="w-full md:w-auto z-10 flex items-center justify-center pt-2 md:pt-0 overflow-visible" style={{ minWidth: 260, minHeight: 285 }}>
           <LeatherWallet
             totalBalance={totalBalance}
             userName={user?.displayName || user?.email?.split('@')[0]}
@@ -505,47 +505,62 @@ function App() {
           </p>
         ) : (
           <ul className="space-y-3">
-            {transactions.slice(0, 5).map((tx) => (
-              <li key={tx.id} className="group flex items-center justify-between p-3.5 bg-white/80 dark:bg-zinc-800/50 rounded-2xl hover:bg-white dark:hover:bg-zinc-800 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 shadow-sm">
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-50 text-sm sm:text-base">{tx.description}</span>
-                    <span className={`font-bold ${tx.type === 'ingreso' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                      {tx.type === 'ingreso' ? '+' : '-'}${Number(tx.amount).toLocaleString('es-CO')}
-                    </span>
+            {transactions.slice(0, 5).map((tx) => {
+              const meta = getCategoryMeta(tx);
+              const CatIcon = meta.icon;
+              return (
+                <li key={tx.id} className="group flex items-center justify-between p-3.5 bg-white/85 dark:bg-zinc-800/60 rounded-2xl hover:bg-white dark:hover:bg-zinc-800 transition-all border border-zinc-200/50 dark:border-zinc-700/50 hover:border-zinc-300 dark:hover:border-zinc-600 shadow-xs gap-3">
+                  {/* Icono de Categoría */}
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${meta.colorClass}`}>
+                    <CatIcon size={18} />
                   </div>
-                  <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
-                    <span className="font-medium text-theme-primary">{accounts.find(a => a.id === tx.accountId)?.name || 'Cuenta'}</span>
-                    <span>•</span>
-                    <span>{new Date(tx.date).toLocaleDateString()}</span>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-3">
-                  <button
-                    onClick={() => openEditModal(tx)}
-                    className="p-2 rounded-xl text-zinc-400 hover:bg-theme-primary-light hover:text-theme-primary transition-colors"
-                    title={t('crud.edit')}
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteTransaction(tx)}
-                    className="p-2 rounded-xl text-zinc-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 transition-colors"
-                    title={t('crud.delete')}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleAnnulTransaction(tx)}
-                    className="p-2 rounded-xl text-zinc-400 hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/30 dark:hover:text-amber-400 transition-colors"
-                    title={t('crud.annul')}
-                  >
-                    <Ban size={16} />
-                  </button>
-                </div>
-              </li>
-            ))}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-50 text-sm sm:text-base truncate pr-2">
+                        {tx.description}
+                      </span>
+                      <span className={`font-bold shrink-0 text-sm sm:text-base ${tx.type === 'ingreso' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                        {tx.type === 'ingreso' ? '+' : '-'}${Number(tx.amount).toLocaleString('es-CO')}
+                      </span>
+                    </div>
+                    <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 flex-wrap">
+                      <span className="inline-block px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-700/60 text-[11px] font-medium text-zinc-600 dark:text-zinc-300">
+                        {meta.label}
+                      </span>
+                      <span>•</span>
+                      <span className="font-medium text-theme-primary">{accounts.find(a => a.id === tx.accountId)?.name || 'Cuenta'}</span>
+                      <span>•</span>
+                      <span>{new Date(tx.date).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-2 shrink-0">
+                    <button
+                      onClick={() => openEditModal(tx)}
+                      className="p-2 rounded-xl text-zinc-400 hover:bg-theme-primary-light hover:text-theme-primary transition-colors cursor-pointer"
+                      title={t('crud.edit')}
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTransaction(tx)}
+                      className="p-2 rounded-xl text-zinc-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                      title={t('crud.delete')}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleAnnulTransaction(tx)}
+                      className="p-2 rounded-xl text-zinc-400 hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/30 dark:hover:text-amber-400 transition-colors cursor-pointer"
+                      title={t('crud.annul')}
+                    >
+                      <Ban size={16} />
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
