@@ -33,3 +33,9 @@ dist-ssr
 # Repomix & dumps
 repomix-output.md
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
+

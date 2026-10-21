@@ -35,6 +35,87 @@ const NotasView       = lazy(() => import("./components/NotasView").then(m => ({
 const DeudasView      = lazy(() => import("./components/DeudasView").then(m => ({ default: m.DeudasView })));
 const MetasView       = lazy(() => import("./components/MetasView").then(m => ({ default: m.MetasView })));
 
+const DEMO_ACCOUNTS = [
+  { id: 'bancolombia', name: 'Bancolombia', balance: 3450000, type: 'banco' },
+  { id: 'nequi', name: 'Nequi', balance: 820000, type: 'banco' },
+  { id: 'efectivo', name: 'Efectivo', balance: 450000, type: 'efectivo' },
+  { id: 'nu', name: 'Tarjeta Nu', balance: -580000, type: 'credito', creditLimit: 2500000 }
+];
+
+const nowDemo = new Date();
+const DEMO_TRANSACTIONS = [
+  {
+    id: 'tx-1',
+    concept: 'Pago Nómina Quincenal',
+    description: 'Pago Nómina Quincenal',
+    amount: 3200000,
+    type: 'ingreso',
+    category: 'salario',
+    accountId: 'bancolombia',
+    date: new Date(nowDemo.getFullYear(), nowDemo.getMonth(), nowDemo.getDate(), 9, 30).toISOString()
+  },
+  {
+    id: 'tx-2',
+    concept: 'Almuerzo Restaurante',
+    description: 'Almuerzo Restaurante',
+    amount: 48000,
+    type: 'egreso',
+    category: 'comida',
+    accountId: 'bancolombia',
+    date: new Date(nowDemo.getFullYear(), nowDemo.getMonth(), nowDemo.getDate(), 13, 15).toISOString()
+  },
+  {
+    id: 'tx-3',
+    concept: 'Tanqueada Gasolina Terpel',
+    description: 'Tanqueada Gasolina Terpel',
+    amount: 110000,
+    type: 'egreso',
+    category: 'combustible',
+    accountId: 'bancolombia',
+    date: new Date(nowDemo.getFullYear(), nowDemo.getMonth(), nowDemo.getDate() - 1, 18, 40).toISOString()
+  },
+  {
+    id: 'tx-4',
+    concept: 'Zapatos Deportivos',
+    description: 'Zapatos Deportivos',
+    amount: 220000,
+    type: 'egreso',
+    category: 'ropa',
+    accountId: 'nu',
+    date: new Date(nowDemo.getFullYear(), nowDemo.getMonth(), nowDemo.getDate() - 2, 16, 20).toISOString()
+  },
+  {
+    id: 'tx-5',
+    concept: 'Supermercado Semanal',
+    description: 'Supermercado Semanal',
+    amount: 195000,
+    type: 'egreso',
+    category: 'mercado',
+    accountId: 'efectivo',
+    date: new Date(nowDemo.getFullYear(), nowDemo.getMonth(), nowDemo.getDate() - 3, 11, 0).toISOString()
+  },
+  {
+    id: 'tx-6',
+    concept: 'Farmatodo Medicamentos',
+    description: 'Farmatodo Medicamentos',
+    amount: 38500,
+    type: 'egreso',
+    category: 'farmacia',
+    accountId: 'nequi',
+    date: new Date(nowDemo.getFullYear(), nowDemo.getMonth(), nowDemo.getDate() - 4, 19, 10).toISOString()
+  },
+  {
+    id: 'tx-7',
+    concept: 'Rendimientos Inversión',
+    description: 'Rendimientos Inversión',
+    amount: 72000,
+    type: 'ingreso',
+    category: 'inversiones',
+    accountId: 'bancolombia',
+    date: new Date(nowDemo.getFullYear(), nowDemo.getMonth(), nowDemo.getDate() - 5, 8, 0).toISOString()
+  }
+];
+
 function App() {
   const { user, isAuthLoading } = useAuth();
   const isLoading = isAuthLoading;
@@ -57,6 +138,13 @@ function App() {
 
   useEffect(() => {
     if (!user) return;
+
+    if (user.isDemo) {
+      setAccounts(DEMO_ACCOUNTS);
+      setTransactions(DEMO_TRANSACTIONS);
+      setIsDataLoaded(true);
+      return;
+    }
 
     const accountsQuery = query(
       collection(db, `users/${user.uid}/accounts`),

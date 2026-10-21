@@ -19,7 +19,12 @@ import { formatCurrency } from '../utils/format';
  *      proyectando el saldo total en la parte media-alta con alta jerarquía y contraste impecable.
  */
 export default function LeatherWallet({ totalBalance, userName }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('wallet') === 'open';
+    }
+    return false;
+  });
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
 

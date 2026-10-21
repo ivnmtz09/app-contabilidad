@@ -10,15 +10,26 @@ const AuthContext = createContext(null);
  * evitando la condición de carrera con Firestore.
  */
 export function AuthProvider({ children }) {
+  const isDemo = typeof window !== 'undefined' && (
+    new URLSearchParams(window.location.search).get('demo') === 'true' ||
+    localStorage.getItem('demo_mode') === 'true'
+  );
+
   // undefined = cargando, null = no autenticado, objeto = autenticado
-  const [user, setUser] = useState(undefined);
+  const [user, setUser] = useState(isDemo ? {
+    uid: 'demo-user',
+    displayName: 'Ivan Martinez',
+    email: 'ivan@miscuentaz.app',
+    isDemo: true
+  } : undefined);
 
   useEffect(() => {
+    if (isDemo) return;
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
     return unsubscribe;
-  }, []);
+  }, [isDemo]);
 
   return (
     <AuthContext.Provider value={{ user, isAuthLoading: user === undefined }}>
