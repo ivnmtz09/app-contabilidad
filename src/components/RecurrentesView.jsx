@@ -82,6 +82,15 @@ export function RecurrentesView() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!paymentModal.isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setPaymentModal({ isOpen: false, item: null, accountId: "" });
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [paymentModal.isOpen]);
+
   if (!isLoaded) return <RecurrentesSkeleton />;
 
   const handleAddOrUpdate = async (e) => {
@@ -291,18 +300,18 @@ export function RecurrentesView() {
               <button
                 type="button"
                 onClick={handleCancelEdit}
-                className="px-4 py-2.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-semibold text-xs transition-colors"
+                className="px-4 py-2.5 min-h-[44px] bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
             )}
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 sm:flex-initial px-6 py-2.5 bg-theme-primary hover:bg-theme-primary-hover text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow-sm glow-primary disabled:opacity-50"
+              disabled={isSubmitting || !name.trim() || !amount || Number(amount) <= 0 || !billingDate}
+              className="flex-1 sm:flex-initial min-h-[44px] px-6 py-2.5 bg-theme-primary hover:bg-theme-primary-hover text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow-sm glow-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
             >
               {editingId ? <Pencil size={16} /> : <Plus size={16} />}
-              {editingId ? "Actualizar" : "Añadir Suscripción"}
+              {isSubmitting ? (editingId ? "Actualizando…" : "Guardando…") : (editingId ? "Actualizar" : "Añadir Suscripción")}
             </button>
           </div>
         </div>
@@ -345,24 +354,27 @@ export function RecurrentesView() {
                       accountId: accounts[0]?.id || "",
                     })
                   }
-                  className="text-emerald-600 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 p-2 rounded-xl transition-colors cursor-pointer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-emerald-600 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 rounded-xl transition-colors cursor-pointer"
                   title="Pagar / Registrar egreso"
+                  aria-label={`Pagar suscripción ${item.name}`}
                 >
                   <CreditCard size={16} />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleEdit(item)}
-                  className="text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 p-2 rounded-xl transition-colors cursor-pointer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 rounded-xl transition-colors cursor-pointer"
                   title="Editar"
+                  aria-label={`Editar suscripción ${item.name}`}
                 >
                   <Pencil size={16} />
                 </button>
                 <button
                   type="button"
                   onClick={() => setConfirmModal({ isOpen: true, id: item.id })}
-                  className="text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-xl transition-colors cursor-pointer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors cursor-pointer"
                   title="Eliminar"
+                  aria-label={`Eliminar suscripción ${item.name}`}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -380,16 +392,26 @@ export function RecurrentesView() {
 
       {/* Modal de Pago / Débito de Suscripción */}
       {paymentModal.isOpen && (
-        <div className="fixed inset-0 z-[60] flex justify-center items-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden p-6 flex flex-col gap-4">
+        <div
+          className="fixed inset-0 z-[60] flex justify-center items-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-150"
+          onClick={() => setPaymentModal({ isOpen: false, item: null, accountId: "" })}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pay-recurrent-title"
+        >
+          <div
+            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden p-6 flex flex-col gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center pb-2 border-b border-zinc-100 dark:border-zinc-800">
-              <h2 className="font-bold text-base text-zinc-900 dark:text-zinc-50">
+              <h2 id="pay-recurrent-title" className="font-bold text-base text-zinc-900 dark:text-zinc-50">
                 Pagar Suscripción
               </h2>
               <button
                 type="button"
                 onClick={() => setPaymentModal({ isOpen: false, item: null, accountId: "" })}
-                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1"
+                aria-label="Cerrar modal"
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-theme-primary outline-none cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -433,15 +455,15 @@ export function RecurrentesView() {
                 <button
                   type="button"
                   onClick={() => setPaymentModal({ isOpen: false, item: null, accountId: "" })}
-                  className="flex-1 py-2.5 rounded-xl font-semibold text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                  className="flex-1 py-2.5 min-h-[44px] rounded-xl font-semibold text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={confirmPayment}
-                  disabled={paymentHasInsufficient || !paymentModal.accountId}
-                  className="flex-1 py-2.5 rounded-xl font-semibold text-xs bg-theme-primary hover:bg-theme-primary-hover text-white transition-colors shadow-md disabled:opacity-40"
+                  disabled={paymentHasInsufficient || !paymentModal.accountId || !paymentModal.item || paymentAmountNum <= 0}
+                  className="flex-1 py-2.5 min-h-[44px] rounded-xl font-semibold text-xs bg-theme-primary hover:bg-theme-primary-hover text-white transition-colors shadow-md disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
                 >
                   Confirmar Pago
                 </button>

@@ -101,6 +101,18 @@ export function MetasView() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!editModal.isOpen && !withdrawModal.isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        if (editModal.isOpen) setEditModal({ isOpen: false, goal: null, name: "", targetAmount: "" });
+        if (withdrawModal.isOpen) setWithdrawModal({ isOpen: false, goal: null, amount: "", destinationAccountId: "" });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [editModal.isOpen, withdrawModal.isOpen]);
+
   if (!isLoaded) return <MetasSkeleton />;
 
   const handleAdd = async (e) => {
@@ -297,10 +309,10 @@ export function MetasView() {
         </div>
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl px-5 py-3 font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow-md disabled:opacity-50 cursor-pointer"
+          disabled={isSubmitting || !name.trim() || !targetAmount || Number(targetAmount) <= 0}
+          className="w-full min-h-[44px] bg-amber-600 hover:bg-amber-700 text-white rounded-xl px-5 py-3 font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow-md disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
         >
-          <Plus size={18} /> {t("module.add") || "Crear Meta"}
+          <Plus size={18} /> {isSubmitting ? "Guardando…" : (t("module.add") || "Crear Meta")}
         </button>
       </form>
 
@@ -335,8 +347,9 @@ export function MetasView() {
                   {/* Abonar */}
                   <button
                     onClick={() => setFundsModal({ isOpen: true, goal: item })}
-                    className="text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 p-2 rounded-xl transition-colors cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl transition-colors cursor-pointer"
                     title="Abonar fondos"
+                    aria-label={`Abonar fondos a ${item.name}`}
                   >
                     <ArrowUpCircle size={20} />
                   </button>
@@ -345,8 +358,9 @@ export function MetasView() {
                   {saved > 0 && (
                     <button
                       onClick={() => handleOpenWithdraw(item)}
-                      className="text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 p-2 rounded-xl transition-colors cursor-pointer"
+                      className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl transition-colors cursor-pointer"
                       title="Retirar fondos ahorrados a una cuenta"
+                      aria-label={`Retirar fondos de ${item.name}`}
                     >
                       <ArrowDownCircle size={20} />
                     </button>
@@ -355,8 +369,9 @@ export function MetasView() {
                   {/* Editar */}
                   <button
                     onClick={() => handleOpenEdit(item)}
-                    className="text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 p-2 rounded-xl transition-colors cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 rounded-xl transition-colors cursor-pointer"
                     title="Editar meta"
+                    aria-label={`Editar meta ${item.name}`}
                   >
                     <Pencil size={18} />
                   </button>
@@ -364,8 +379,9 @@ export function MetasView() {
                   {/* Eliminar */}
                   <button
                     onClick={() => setConfirmModal({ isOpen: true, item })}
-                    className="text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-xl transition-colors cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors cursor-pointer"
                     title="Eliminar meta"
+                    aria-label={`Eliminar meta ${item.name}`}
                   >
                     <Trash2 size={18} />
                   </button>
@@ -399,13 +415,16 @@ export function MetasView() {
         <div
           className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-150"
           onClick={() => setEditModal({ isOpen: false, goal: null, name: "", targetAmount: "" })}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-goal-title"
         >
           <div
             className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 flex flex-col gap-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center">
-              <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
+              <h3 id="edit-goal-title" className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
                 Editar Meta
               </h3>
               <button
@@ -413,7 +432,8 @@ export function MetasView() {
                 onClick={() =>
                   setEditModal({ isOpen: false, goal: null, name: "", targetAmount: "" })
                 }
-                className="text-zinc-400 hover:text-zinc-600 p-1"
+                aria-label="Cerrar modal"
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 outline-none cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -453,13 +473,14 @@ export function MetasView() {
                   onClick={() =>
                     setEditModal({ isOpen: false, goal: null, name: "", targetAmount: "" })
                   }
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 transition-colors"
+                  className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-md"
+                  disabled={!editModal.name.trim() || !editModal.targetAmount || Number(editModal.targetAmount) <= 0}
+                  className="px-5 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-md disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
                 >
                   Guardar Cambios
                 </button>
@@ -481,6 +502,9 @@ export function MetasView() {
               destinationAccountId: "",
             })
           }
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="withdraw-goal-title"
         >
           <div
             className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 flex flex-col gap-4"
@@ -488,7 +512,7 @@ export function MetasView() {
           >
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
+                <h3 id="withdraw-goal-title" className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
                   Retirar Fondos
                 </h3>
                 <p className="text-xs text-zinc-500">
@@ -505,7 +529,8 @@ export function MetasView() {
                     destinationAccountId: "",
                   })
                 }
-                className="text-zinc-400 hover:text-zinc-600 p-1"
+                aria-label="Cerrar modal"
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 outline-none cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -555,13 +580,14 @@ export function MetasView() {
                       destinationAccountId: "",
                     })
                   }
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 transition-colors"
+                  className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-md"
+                  disabled={!withdrawModal.amount || Number(withdrawModal.amount) <= 0 || Number(withdrawModal.amount) > (withdrawModal.goal?.savedAmount || 0)}
+                  className="px-5 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-md disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
                 >
                   Confirmar Retiro
                 </button>

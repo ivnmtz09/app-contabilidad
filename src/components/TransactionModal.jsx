@@ -37,6 +37,15 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, accoun
     }
   }, [isOpen, accounts, accountId]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   const handleClose = () => {
     setAmount("");
     setDescription("");
@@ -86,6 +95,9 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, accoun
     <div
       className="fixed inset-0 z-[60] flex justify-center items-start sm:items-center pt-2 sm:pt-0 bg-black/50 backdrop-blur-sm px-2 sm:px-0 animate-in fade-in duration-200"
       onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="transaction-modal-title"
     >
       <div
         className="w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl shadow-2xl flex flex-col max-h-[92vh] mt-2 sm:mt-0 overflow-hidden"
@@ -100,6 +112,7 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, accoun
               </span>
             )}
             <h2
+              id="transaction-modal-title"
               className={`text-lg font-display font-bold ${
                 isIngreso ? "text-emerald-500" : "text-rose-500"
               }`}
@@ -110,7 +123,8 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, accoun
           <button
             type="button"
             onClick={handleClose}
-            className="p-1.5 rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            aria-label="Cerrar modal"
+            className="w-10 h-10 flex items-center justify-center rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-theme-primary outline-none cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -243,8 +257,8 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, accoun
 
               <button
                 type="submit"
-                disabled={!amount || Number(amount) <= 0}
-                className="w-full font-sans font-semibold px-4 py-3.5 rounded-2xl transition-all cursor-pointer text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md glow-primary disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={!amount || Number(amount) <= 0 || !accountId}
+                className="w-full min-h-[48px] font-sans font-semibold px-4 py-3.5 rounded-2xl transition-colors cursor-pointer text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md glow-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
               >
                 {t("modal.next") || "Continuar"}
               </button>
@@ -295,14 +309,15 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, accoun
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="flex-1 py-3 rounded-xl font-semibold bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors"
+                  className="flex-1 min-h-[44px] py-3 rounded-xl font-semibold bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors"
                 >
                   Volver
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirm}
-                  className={`flex-1 py-3 rounded-xl font-semibold text-white shadow-md transition-colors ${
+                  disabled={!amount || Number(amount) <= 0 || !accountId}
+                  className={`flex-1 min-h-[44px] py-3 rounded-xl font-semibold text-white shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none ${
                     isIngreso ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"
                   }`}
                 >

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import Logo from "./Logo";
@@ -9,6 +9,15 @@ function Login() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  useEffect(() => {
+    if (!showModal) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setShowModal(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showModal]);
 
   const handleGoogleLogin = async () => {
     setIsLoggingIn(true);
@@ -108,11 +117,12 @@ function Login() {
           </label>
 
           <button
+            type="button"
             onClick={handleGoogleLogin}
             disabled={!acceptedTerms || isLoggingIn}
-            className="w-full max-w-sm mt-6 flex items-center justify-center gap-3 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white px-5 sm:px-6 py-3 sm:py-4 rounded-2xl font-sans font-semibold shadow-sm hover:shadow-md transition-all border border-zinc-200 dark:border-zinc-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full max-w-sm mt-6 min-h-[48px] flex items-center justify-center gap-3 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white px-5 sm:px-6 py-3 sm:py-4 rounded-2xl font-sans font-semibold shadow-sm hover:shadow-md transition-colors border border-zinc-200 dark:border-zinc-700 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
           >
-            {isLoggingIn ? "Iniciando sesión..." : "Iniciar sesión con Google"}
+            {isLoggingIn ? "Iniciando sesión…" : "Iniciar sesión con Google"}
           </button>
         </div>
 
@@ -121,9 +131,18 @@ function Login() {
       <Toaster position="top-center" />
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-zinc-800 rounded-3xl shadow-xl max-w-md w-full p-6 flex flex-col gap-4">
-            <h2 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-150"
+          onClick={() => setShowModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="terms-modal-title"
+        >
+          <div
+            className="bg-white dark:bg-zinc-850 rounded-3xl shadow-xl max-w-md w-full p-6 flex flex-col gap-4 border border-zinc-200 dark:border-zinc-750"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="terms-modal-title" className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">
               Términos y Condiciones de Uso
             </h2>
             <p className="text-sm font-sans text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -136,17 +155,19 @@ function Login() {
             </p>
             <div className="flex gap-3 justify-end">
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-xl text-sm font-sans font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+                className="px-4 py-2 min-h-[44px] rounded-xl text-sm font-sans font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
               >
                 Cerrar
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setAcceptedTerms(true);
                   setShowModal(false);
                 }}
-                className="px-4 py-2 rounded-xl text-sm font-sans font-medium bg-violet-600 hover:bg-violet-700 text-white transition-colors cursor-pointer"
+                className="px-4 py-2 min-h-[44px] rounded-xl text-sm font-sans font-medium bg-violet-600 hover:bg-violet-700 text-white transition-colors cursor-pointer shadow-md"
               >
                 Aceptar
               </button>

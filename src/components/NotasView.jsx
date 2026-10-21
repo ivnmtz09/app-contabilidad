@@ -58,6 +58,15 @@ export function NotasView() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!viewingNote) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setViewingNote(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [viewingNote]);
+
   if (!isLoaded) return <NotasSkeleton />;
 
 
@@ -136,9 +145,14 @@ export function NotasView() {
             <ReactQuill className="text-zinc-900 dark:text-zinc-50 min-h-[150px]" modules={modules} onChange={setContent} theme="snow" value={content}/>
           </div>
           <div className="flex gap-2 justify-end">
-            <button type="button" onClick={resetForm} className="px-5 py-2.5 rounded-xl font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 transition-colors">{t('notes.cancel')}</button>
-            <button type="submit" disabled={isSubmitting} className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl px-6 py-2.5 font-semibold flex items-center justify-center gap-2 transition-colors">
-              {editingId ? <Pencil size={18}/> : <Plus size={18}/>} {editingId ? t('notes.update') : t('notes.add')}
+            <button type="button" onClick={resetForm} className="px-5 py-2.5 min-h-[44px] rounded-xl font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 transition-colors cursor-pointer">{t('notes.cancel')}</button>
+            <button
+              type="submit"
+              disabled={isSubmitting || !title.trim() || !content.replace(/<[^>]*>/g, '').trim()}
+              className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl px-6 py-2.5 min-h-[44px] font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
+            >
+              {editingId ? <Pencil size={18}/> : <Plus size={18}/>}
+              {isSubmitting ? (editingId ? "Actualizando…" : "Guardando…") : (editingId ? t('notes.update') : t('notes.add'))}
             </button>
           </div>
         </form>
@@ -151,8 +165,24 @@ export function NotasView() {
             <div className="flex justify-between items-start mb-3">
               <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-lg line-clamp-1">{note.title}</h3>
               <div className="flex gap-1 shrink-0">
-                <button onClick={(e) => { e.stopPropagation(); handleEdit(note); }} className="text-zinc-400 hover:text-amber-500 p-1.5 rounded-lg transition-colors"><Pencil size={18}/></button>
-                <button onClick={(e) => { e.stopPropagation(); handleDelete(note.id); }} className="text-zinc-400 hover:text-rose-500 p-1.5 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleEdit(note); }}
+                  className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-zinc-400 hover:text-amber-500 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  title="Editar nota"
+                  aria-label={`Editar nota ${note.title}`}
+                >
+                  <Pencil size={18}/>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleDelete(note.id); }}
+                  className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-zinc-400 hover:text-rose-500 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  title="Eliminar nota"
+                  aria-label={`Eliminar nota ${note.title}`}
+                >
+                  <Trash2 size={18}/>
+                </button>
               </div>
             </div>
             <div className="text-sm text-zinc-600 dark:text-zinc-400 overflow-hidden line-clamp-5 quill-content" dangerouslySetInnerHTML={{ __html: note.content }} />
@@ -161,11 +191,27 @@ export function NotasView() {
       </div>
 
       {viewingNote && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={() => setViewingNote(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="view-note-title"
+        >
+          <div
+            className="w-full max-w-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-4 border-b border-zinc-200/50 dark:border-zinc-800/50 flex justify-between items-center bg-white/50 dark:bg-zinc-900/50">
-              <h2 className="font-bold text-xl text-zinc-900 dark:text-zinc-50">{viewingNote.title}</h2>
-              <button onClick={() => setViewingNote(null)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1"><X size={24}/></button>
+              <h2 id="view-note-title" className="font-bold text-xl text-zinc-900 dark:text-zinc-50">{viewingNote.title}</h2>
+              <button
+                type="button"
+                onClick={() => setViewingNote(null)}
+                aria-label="Cerrar modal"
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <X size={20}/>
+              </button>
             </div>
             <div className="p-6 overflow-y-auto custom-scrollbar quill-content text-zinc-700 dark:text-zinc-300" dangerouslySetInnerHTML={{ __html: viewingNote.content }} />
           </div>

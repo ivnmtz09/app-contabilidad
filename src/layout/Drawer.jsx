@@ -17,13 +17,25 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [], user = null
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") {
+          if (showExportConfirm) setShowExportConfirm(false);
+          else if (showLogoutConfirm) setShowLogoutConfirm(false);
+          else onClose();
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = 'unset';
+        window.removeEventListener("keydown", handleKeyDown);
+      };
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, showExportConfirm, showLogoutConfirm, onClose]);
 
   const handleExport = () => setShowExportConfirm(true);
 
@@ -64,8 +76,10 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [], user = null
                 Menú & Navegación
               </span>
               <button
+                type="button"
                 onClick={onClose}
-                className="p-2 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                aria-label="Cerrar menú"
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-theme-primary outline-none"
                 title="Cerrar menú"
               >
                 <X size={18} />
@@ -166,7 +180,7 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [], user = null
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500 font-mono">
               <Code size={12} strokeWidth={2} />
-              v 1.5.0
+              v 1.7.1
             </span>
           </div>
         </div>
@@ -175,24 +189,32 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [], user = null
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
 
       {showExportConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setShowExportConfirm(false)}>
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => setShowExportConfirm(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="export-modal-title"
+        >
           <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
-              <h3 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50 mb-2">Exportar movimientos</h3>
+              <h3 id="export-modal-title" className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50 mb-2">Exportar movimientos</h3>
               <p className="text-sm font-sans text-zinc-500 dark:text-zinc-400">
                 ¿Estás seguro de que deseas exportar todos tus movimientos a un archivo Excel?
               </p>
             </div>
             <div className="flex gap-3 px-6 pb-6">
               <button
+                type="button"
                 onClick={() => setShowExportConfirm(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-sans font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="flex-1 min-h-[44px] py-2.5 rounded-xl text-sm font-sans font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
+                type="button"
                 onClick={handleExportConfirm}
-                className="flex-1 py-2.5 rounded-xl text-sm font-sans font-medium bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
+                className="flex-1 min-h-[44px] py-2.5 rounded-xl text-sm font-sans font-medium bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
               >
                 Exportar
               </button>
@@ -202,24 +224,32 @@ function Drawer({ isOpen, onClose, transactions = [], accounts = [], user = null
       )}
 
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setShowLogoutConfirm(false)}>
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => setShowLogoutConfirm(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="drawer-logout-modal-title"
+        >
           <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
-              <h3 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50 mb-2">{t('profile.logout')}</h3>
+              <h3 id="drawer-logout-modal-title" className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50 mb-2">{t('profile.logout')}</h3>
               <p className="text-sm font-sans text-zinc-500 dark:text-zinc-400">
                 ¿Estás seguro de que deseas cerrar sesión? Deberás volver a iniciar sesión con Google para acceder a tus datos.
               </p>
             </div>
             <div className="flex gap-3 px-6 pb-6">
               <button
+                type="button"
                 onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-sans font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="flex-1 min-h-[44px] py-2.5 rounded-xl text-sm font-sans font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
+                type="button"
                 onClick={handleLogoutConfirm}
-                className="flex-1 py-2.5 rounded-xl text-sm font-sans font-medium bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer"
+                className="flex-1 min-h-[44px] py-2.5 rounded-xl text-sm font-sans font-medium bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer"
               >
                 Cerrar sesión
               </button>

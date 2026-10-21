@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, X, SlidersHorizontal, Archive, ArchiveRestore } from "lucide-react";
 import { doc, updateDoc, deleteDoc, addDoc, collection } from "firebase/firestore";
 import { auth, db } from "../firebase";
@@ -31,6 +31,18 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
 
   const activeAccounts = accounts.filter((a) => !a.isArchived);
   const archivedAccounts = accounts.filter((a) => a.isArchived);
+
+  useEffect(() => {
+    if (!editModal.isOpen && !adjustModal.isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        if (editModal.isOpen) setEditModal({ isOpen: false, account: null, name: "", type: "banco", creditLimit: "" });
+        if (adjustModal.isOpen) setAdjustModal({ isOpen: false, account: null, newBalance: "", reason: "" });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [editModal.isOpen, adjustModal.isOpen]);
 
   const handleOpenEdit = (acc) => {
     setEditModal({
@@ -259,8 +271,9 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
             <button
               type="button"
               onClick={() => handleOpenAdjust(acc)}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 transition-colors cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 transition-colors cursor-pointer"
               title="Ajustar / Reconciliar saldo"
+              aria-label={`Ajustar saldo de ${acc.name}`}
             >
               <SlidersHorizontal size={14} />
             </button>
@@ -269,8 +282,9 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
             <button
               type="button"
               onClick={() => handleOpenEdit(acc)}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 transition-colors cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 transition-colors cursor-pointer"
               title="Editar cuenta"
+              aria-label={`Editar cuenta ${acc.name}`}
             >
               <Pencil size={14} />
             </button>
@@ -279,8 +293,9 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
             <button
               type="button"
               onClick={() => handleToggleArchive(acc)}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors cursor-pointer"
               title={acc.isArchived ? "Restaurar cuenta" : "Archivar cuenta"}
+              aria-label={acc.isArchived ? `Restaurar cuenta ${acc.name}` : `Archivar cuenta ${acc.name}`}
             >
               {acc.isArchived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
             </button>
@@ -289,8 +304,9 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
             <button
               type="button"
               onClick={() => handleOpenDelete(acc)}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors cursor-pointer"
               title="Eliminar cuenta"
+              aria-label={`Eliminar cuenta ${acc.name}`}
             >
               <Trash2 size={14} />
             </button>
@@ -382,13 +398,16 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
           onClick={() =>
             setEditModal({ isOpen: false, account: null, name: "", type: "banco", creditLimit: "" })
           }
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-account-modal-title"
         >
           <div
             className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden p-6 flex flex-col gap-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
+              <h3 id="edit-account-modal-title" className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
                 Editar Cuenta
               </h3>
               <button
@@ -402,7 +421,8 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
                     creditLimit: "",
                   })
                 }
-                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 cursor-pointer"
+                aria-label="Cerrar modal"
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-theme-primary outline-none cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -484,16 +504,16 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
                       creditLimit: "",
                     })
                   }
-                  className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                  className="px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !editModal.name.trim()}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors disabled:opacity-50"
+                  disabled={isSubmitting || !editModal.name.trim() || (editModal.type === "credito" && (editModal.creditLimit === "" || Number(editModal.creditLimit) < 0))}
+                  className="px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
                 >
-                  {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+                  {isSubmitting ? "Guardando…" : "Guardar Cambios"}
                 </button>
               </div>
             </form>
@@ -508,13 +528,16 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
           onClick={() =>
             setAdjustModal({ isOpen: false, account: null, newBalance: "", reason: "" })
           }
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="adjust-account-modal-title"
         >
           <div
             className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden p-6 flex flex-col gap-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
+              <h3 id="adjust-account-modal-title" className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
                 Ajustar Saldo Real
               </h3>
               <button
@@ -522,7 +545,8 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
                 onClick={() =>
                   setAdjustModal({ isOpen: false, account: null, newBalance: "", reason: "" })
                 }
-                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 cursor-pointer"
+                aria-label="Cerrar modal"
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-theme-primary outline-none cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -567,16 +591,16 @@ export default function AccountsCard({ accounts = [], transactions = [], onOpenA
                   onClick={() =>
                     setAdjustModal({ isOpen: false, account: null, newBalance: "", reason: "" })
                   }
-                  className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                  className="px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors disabled:opacity-50"
+                  disabled={isSubmitting || adjustModal.newBalance === "" || isNaN(Number(adjustModal.newBalance))}
+                  className="px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
                 >
-                  {isSubmitting ? "Ajustando..." : "Confirmar Ajuste"}
+                  {isSubmitting ? "Ajustando…" : "Confirmar Ajuste"}
                 </button>
               </div>
             </form>

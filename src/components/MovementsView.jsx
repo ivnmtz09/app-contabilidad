@@ -158,9 +158,10 @@ export default function MovementsView({
             <button
               type="button"
               onClick={() => setSearch("")}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+              aria-label="Limpiar búsqueda"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
             >
-              <X size={14} />
+              <X size={15} />
             </button>
           )}
         </div>
@@ -305,10 +306,11 @@ export default function MovementsView({
                         <button
                           type="button"
                           onClick={() => onDuplicate(tx)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                          className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-zinc-400/30"
                           title="Duplicar movimiento"
+                          aria-label={`Duplicar movimiento: ${tx.description}`}
                         >
-                          <Copy size={15} />
+                          <Copy size={16} />
                         </button>
                       )}
 
@@ -317,10 +319,11 @@ export default function MovementsView({
                         <button
                           type="button"
                           onClick={() => onEdit(tx)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:bg-theme-primary/10 hover:text-theme-primary transition-colors cursor-pointer"
+                          className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl text-zinc-400 hover:bg-theme-primary/10 hover:text-theme-primary transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-theme-primary/30"
                           title={t("crud.edit") || "Editar"}
+                          aria-label={`${t("crud.edit") || "Editar"}: ${tx.description}`}
                         >
-                          <Pencil size={15} />
+                          <Pencil size={16} />
                         </button>
                       )}
 
@@ -328,20 +331,22 @@ export default function MovementsView({
                       <button
                         type="button"
                         onClick={() => onAnnul(tx)}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer"
+                        className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl text-zinc-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500/30"
                         title={t("crud.annul") || "Anular"}
+                        aria-label={`${t("crud.annul") || "Anular"}: ${tx.description}`}
                       >
-                        <Ban size={15} />
+                        <Ban size={16} />
                       </button>
 
                       {/* Eliminar */}
                       <button
                         type="button"
                         onClick={() => handleDeleteTransaction(tx)}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                        className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl text-zinc-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500/30"
                         title={t("crud.delete") || "Eliminar"}
+                        aria-label={`${t("crud.delete") || "Eliminar"}: ${tx.description}`}
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>

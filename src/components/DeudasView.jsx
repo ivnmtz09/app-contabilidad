@@ -96,6 +96,18 @@ export function DeudasView() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!editModal.isOpen && !paymentModal.isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        if (editModal.isOpen) setEditModal({ isOpen: false, item: null, name: "", amount: "", description: "", type: "debo" });
+        if (paymentModal.isOpen) setPaymentModal({ isOpen: false, item: null, amount: "", accountId: "" });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [editModal.isOpen, paymentModal.isOpen]);
+
   if (!isLoaded) return <DeudasSkeleton />;
 
   const handleAdd = async (e) => {
@@ -379,10 +391,10 @@ export function DeudasView() {
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-theme-primary hover:bg-theme-primary-hover text-white rounded-xl px-5 py-3 font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow-md glow-primary disabled:opacity-50 cursor-pointer"
+          disabled={isSubmitting || !name.trim() || !amount || Number(amount) <= 0}
+          className="w-full min-h-[44px] bg-theme-primary hover:bg-theme-primary-hover text-white rounded-xl px-5 py-3 font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow-md glow-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
         >
-          <Plus size={18} /> Registrar Deuda
+          <Plus size={18} /> {isSubmitting ? "Registrando…" : "Registrar Deuda"}
         </button>
       </form>
 
@@ -426,8 +438,9 @@ export function DeudasView() {
                   {/* Abonar */}
                   <button
                     onClick={() => handleOpenPayment(item)}
-                    className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors cursor-pointer"
                     title="Abonar a deuda"
+                    aria-label={`Abonar a deuda de ${item.name}`}
                   >
                     <Coins size={16} />
                   </button>
@@ -435,8 +448,9 @@ export function DeudasView() {
                   {/* Editar */}
                   <button
                     onClick={() => handleOpenEdit(item)}
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 transition-colors cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-zinc-400 hover:text-theme-primary hover:bg-theme-primary/10 transition-colors cursor-pointer"
                     title="Editar deuda"
+                    aria-label={`Editar deuda de ${item.name}`}
                   >
                     <Pencil size={16} />
                   </button>
@@ -444,8 +458,9 @@ export function DeudasView() {
                   {/* Marcar pagada */}
                   <button
                     onClick={() => handleTogglePaid(item)}
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-500 transition-colors cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-zinc-400 hover:text-emerald-500 transition-colors cursor-pointer"
                     title="Marcar totalmente pagada"
+                    aria-label={`Marcar totalmente pagada la deuda de ${item.name}`}
                   >
                     <CheckCircle2 size={18} />
                   </button>
@@ -453,8 +468,9 @@ export function DeudasView() {
                   {/* Eliminar */}
                   <button
                     onClick={() => setConfirmModal({ isOpen: true, id: item.id })}
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-500 transition-colors cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-zinc-400 hover:text-rose-500 transition-colors cursor-pointer"
                     title="Eliminar deuda"
+                    aria-label={`Eliminar deuda de ${item.name}`}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -542,13 +558,16 @@ export function DeudasView() {
               type: "debo",
             })
           }
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-debt-title"
         >
           <div
             className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 flex flex-col gap-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center">
-              <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
+              <h3 id="edit-debt-title" className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
                 Editar Deuda
               </h3>
               <button
@@ -563,7 +582,8 @@ export function DeudasView() {
                     type: "debo",
                   })
                 }
-                className="text-zinc-400 hover:text-zinc-600 p-1"
+                aria-label="Cerrar modal"
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-theme-primary outline-none cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -647,13 +667,14 @@ export function DeudasView() {
                       type: "debo",
                     })
                   }
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 transition-colors"
+                  className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors"
+                  disabled={!editModal.name.trim() || !editModal.amount || Number(editModal.amount) <= 0}
+                  className="px-5 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
                 >
                   Guardar
                 </button>
@@ -670,6 +691,9 @@ export function DeudasView() {
           onClick={() =>
             setPaymentModal({ isOpen: false, item: null, amount: "", accountId: "" })
           }
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="payment-debt-title"
         >
           <div
             className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 flex flex-col gap-4"
@@ -677,7 +701,7 @@ export function DeudasView() {
           >
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
+                <h3 id="payment-debt-title" className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
                   {paymentModal.item?.type === "debo" ? "Abonar a Deuda" : "Registrar Cobro"}
                 </h3>
                 <p className="text-xs text-zinc-400">
@@ -689,7 +713,8 @@ export function DeudasView() {
                 onClick={() =>
                   setPaymentModal({ isOpen: false, item: null, amount: "", accountId: "" })
                 }
-                className="text-zinc-400 hover:text-zinc-600 p-1"
+                aria-label="Cerrar modal"
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-theme-primary outline-none cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -734,13 +759,14 @@ export function DeudasView() {
                   onClick={() =>
                     setPaymentModal({ isOpen: false, item: null, amount: "", accountId: "" })
                   }
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 transition-colors"
+                  className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors"
+                  disabled={!paymentModal.amount || Number(paymentModal.amount) <= 0 || Number(paymentModal.amount) > (paymentModal.item?.amount || 0)}
+                  className="px-5 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
                 >
                   Confirmar Abono
                 </button>

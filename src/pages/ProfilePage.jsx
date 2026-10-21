@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -146,6 +146,15 @@ function ProfilePage({ user }) {
   const [stagedTheme, setStagedTheme] = useState(activeTheme);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
+  useEffect(() => {
+    if (!showLogoutConfirm) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setShowLogoutConfirm(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showLogoutConfirm]);
+
   const activeThemeObj = THEMES.find((th) => th.id === activeTheme) || THEMES[0];
   const stagedThemeObj = THEMES.find((th) => th.id === stagedTheme) || THEMES[0];
   const isThemeChanged = stagedTheme !== activeTheme;
@@ -207,8 +216,10 @@ function ProfilePage({ user }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <button
+              type="button"
               onClick={() => navigate(-1)}
-              className="p-2.5 bg-white/70 dark:bg-zinc-800/80 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-2xl shadow-xs hover:shadow-md hover:border-theme-primary/40 transition-all text-zinc-700 dark:text-zinc-200 cursor-pointer"
+              aria-label="Volver atrás"
+              className="w-10 h-10 flex items-center justify-center bg-white/70 dark:bg-zinc-800/80 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-2xl shadow-xs hover:shadow-md hover:border-theme-primary/40 transition-colors text-zinc-700 dark:text-zinc-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-theme-primary outline-none"
               title="Volver"
             >
               <ArrowLeft size={20} />
@@ -652,10 +663,13 @@ function ProfilePage({ user }) {
             onClick={() => setShowLogoutConfirm(false)}
           >
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="profile-logout-title"
               className="w-full max-w-sm glass-card bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden p-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+              <h3 id="profile-logout-title" className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50 mb-2">
                 {t("profile.logout") || "Cerrar Sesión"}
               </h3>
               <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mb-6">
@@ -666,7 +680,7 @@ function ProfilePage({ user }) {
                 <button
                   type="button"
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  className="flex-1 min-h-[44px] py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -676,7 +690,7 @@ function ProfilePage({ user }) {
                     setShowLogoutConfirm(false);
                     signOut(auth);
                   }}
-                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer shadow-sm"
+                  className="flex-1 min-h-[44px] py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer shadow-sm"
                 >
                   Confirmar Salida
                 </button>

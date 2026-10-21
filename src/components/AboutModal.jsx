@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wallet, TrendingUp, Target, CreditCard, StickyNote, CalendarClock, X } from 'lucide-react';
 
@@ -12,6 +13,16 @@ const colorMap = {
 
 export default function AboutModal({ isOpen, onClose }) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const features = [
@@ -26,11 +37,25 @@ export default function AboutModal({ isOpen, onClose }) {
   const comingSoon = [];
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="about-modal-title"
+    >
+      <div
+        className="w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-4 border-b border-zinc-200/50 dark:border-zinc-800/50 flex justify-between items-center bg-white/50 dark:bg-zinc-900/50">
-          <h2 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">{t('drawer.about')}</h2>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 transition-colors">
+          <h2 id="about-modal-title" className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">{t('drawer.about')}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar modal"
+            className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 transition-colors cursor-pointer"
+          >
             <X size={20} />
           </button>
         </div>
@@ -72,7 +97,11 @@ export default function AboutModal({ isOpen, onClose }) {
           )}
         </div>
         <div className="p-4 border-t border-zinc-200/50 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-900/50">
-          <button onClick={onClose} className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold transition-colors">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full min-h-[44px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold transition-colors cursor-pointer"
+          >
             {t('about.close')}
           </button>
         </div>

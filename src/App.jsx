@@ -488,14 +488,16 @@ function App() {
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <button
+              type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="w-full sm:w-auto bg-theme-primary hover:bg-theme-primary-hover text-white font-sans font-semibold px-6 py-3.5 rounded-2xl transition-all shadow-md glow-primary flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full sm:w-auto min-h-[48px] bg-theme-primary hover:bg-theme-primary-hover text-white font-sans font-semibold px-6 py-3.5 rounded-2xl transition-all shadow-md glow-primary flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
               <span>{t('home.addMovement')}</span>
             </button>
             <button
+              type="button"
               onClick={() => setIsTransferOpen(true)}
-              className="w-full sm:w-auto bg-white/80 hover:bg-white text-zinc-800 border border-zinc-200/90 dark:bg-zinc-800/80 dark:hover:bg-zinc-750 dark:text-zinc-200 dark:border-zinc-700/80 font-sans font-semibold px-5 py-3.5 rounded-2xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full sm:w-auto min-h-[48px] bg-white/80 hover:bg-white text-zinc-800 border border-zinc-200/90 dark:bg-zinc-800/80 dark:hover:bg-zinc-750 dark:text-zinc-200 dark:border-zinc-700/80 font-sans font-semibold px-5 py-3.5 rounded-2xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
               <ArrowRightLeft size={18} className="text-theme-primary" />
               <span>Transferir</span>
@@ -632,23 +634,29 @@ function App() {
 
                   <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-2 shrink-0">
                     <button
+                      type="button"
                       onClick={() => openEditModal(tx)}
-                      className="p-2 rounded-xl text-zinc-400 hover:bg-theme-primary-light hover:text-theme-primary transition-colors cursor-pointer"
+                      className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl text-zinc-400 hover:bg-theme-primary-light hover:text-theme-primary transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-theme-primary/30"
                       title={t('crud.edit')}
+                      aria-label={`${t('crud.edit')}: ${tx.concept || meta.label}`}
                     >
                       <Pencil size={16} />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDeleteTransaction(tx)}
-                      className="p-2 rounded-xl text-zinc-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                      className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl text-zinc-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500/30"
                       title={t('crud.delete')}
+                      aria-label={`${t('crud.delete')}: ${tx.concept || meta.label}`}
                     >
                       <Trash2 size={16} />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleAnnulTransaction(tx)}
-                      className="p-2 rounded-xl text-zinc-400 hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/30 dark:hover:text-amber-400 transition-colors cursor-pointer"
+                      className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl text-zinc-400 hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/30 dark:hover:text-amber-400 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500/30"
                       title={t('crud.annul')}
+                      aria-label={`${t('crud.annul')}: ${tx.concept || meta.label}`}
                     >
                       <Ban size={16} />
                     </button>
@@ -697,8 +705,9 @@ function App() {
       <header className="sticky top-0 z-40 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl border-b border-white/60 dark:border-zinc-800/60 px-4 sm:px-6 py-4 flex justify-between items-center shadow-xs">
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => setIsDrawerOpen(true)}
-            className="p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-zinc-800 transition-colors cursor-pointer border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
+            className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-zinc-800 transition-colors cursor-pointer border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-theme-primary/30"
             aria-label="Abrir menú"
           >
             <Menu size={22} />

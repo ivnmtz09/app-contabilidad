@@ -33,6 +33,15 @@ export default function TransferModal({ isOpen, onClose, onConfirm, accounts = [
     }
   }, [isOpen, activeAccounts]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   const handleClose = () => {
     setAmount("");
     setDescription("");
@@ -80,6 +89,9 @@ export default function TransferModal({ isOpen, onClose, onConfirm, accounts = [
       <div
         className="fixed inset-0 z-[60] flex justify-center items-start sm:items-center pt-2 sm:pt-0 bg-black/50 backdrop-blur-sm px-2 sm:px-0 animate-in fade-in duration-200"
         onClick={handleClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="transfer-modal-title"
       >
         <div
           className="w-full max-w-lg bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl shadow-2xl flex flex-col max-h-[92vh] mt-2 sm:mt-0 overflow-hidden"
@@ -92,7 +104,7 @@ export default function TransferModal({ isOpen, onClose, onConfirm, accounts = [
                 <ArrowRightLeft size={20} />
               </div>
               <div>
-                <h2 className="text-base sm:text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">
+                <h2 id="transfer-modal-title" className="text-base sm:text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">
                   {t("transfer.title") || "Transferencia entre Cuentas"}
                 </h2>
                 <p className="text-xs text-zinc-400">
@@ -103,7 +115,8 @@ export default function TransferModal({ isOpen, onClose, onConfirm, accounts = [
             <button
               type="button"
               onClick={handleClose}
-              className="p-1.5 rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              aria-label="Cerrar modal"
+              className="w-10 h-10 flex items-center justify-center rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-theme-primary outline-none cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -132,7 +145,8 @@ export default function TransferModal({ isOpen, onClose, onConfirm, accounts = [
                 <button
                   type="button"
                   onClick={handleSwap}
-                  className={`p-2 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-theme-primary hover:border-theme-primary shadow-xs transition-all cursor-pointer ${
+                  aria-label="Intercambiar cuentas origen y destino"
+                  className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-theme-primary hover:border-theme-primary shadow-xs transition-all cursor-pointer ${
                     isSwapping ? "rotate-180 duration-300" : ""
                   }`}
                   title="Intercambiar cuentas origen y destino"
@@ -294,12 +308,14 @@ export default function TransferModal({ isOpen, onClose, onConfirm, accounts = [
               type="button"
               onClick={() => isValid && setShowConfirm(true)}
               disabled={!isValid}
-              className="w-full font-sans font-semibold px-4 py-3.5 rounded-2xl transition-all cursor-pointer text-white bg-theme-primary hover:bg-theme-primary-hover disabled:opacity-40 disabled:cursor-not-allowed shadow-md glow-primary"
+              className="w-full min-h-[48px] font-sans font-semibold px-4 py-3.5 rounded-2xl transition-colors cursor-pointer text-white bg-theme-primary hover:bg-theme-primary-hover disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none shadow-md glow-primary"
             >
               {hasInsufficientFunds
                 ? "Fondos Insuficientes"
                 : isSameAccount
                 ? "Selecciona cuentas distintas"
+                : !numAmount || numAmount <= 0
+                ? "Ingresa un monto a transferir"
                 : "Continuar a Confirmación"}
             </button>
           </div>

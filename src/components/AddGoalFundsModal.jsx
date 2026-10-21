@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Target, ArrowUpCircle } from "lucide-react";
 import { doc, updateDoc, increment, collection, runTransaction } from "firebase/firestore";
 import { auth, db } from "../firebase";
@@ -11,6 +11,15 @@ export default function AddGoalFundsModal({ isOpen, onClose, goal, accounts = []
   const [amount, setAmount] = useState("");
   const [selectedAccountId, setSelectedAccountId] = useState("virtual");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !goal) return null;
 
@@ -114,6 +123,9 @@ export default function AddGoalFundsModal({ isOpen, onClose, goal, accounts = []
     <div
       className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="goal-funds-modal-title"
     >
       <div
         className="w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden p-6 flex flex-col gap-5"
@@ -126,7 +138,7 @@ export default function AddGoalFundsModal({ isOpen, onClose, goal, accounts = []
               <Target size={20} />
             </div>
             <div>
-              <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
+              <h3 id="goal-funds-modal-title" className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50">
                 Abonar Fondos
               </h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -137,7 +149,8 @@ export default function AddGoalFundsModal({ isOpen, onClose, goal, accounts = []
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            aria-label="Cerrar modal"
+            className="w-10 h-10 flex items-center justify-center rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 outline-none cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -235,17 +248,17 @@ export default function AddGoalFundsModal({ isOpen, onClose, goal, accounts = []
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+              className="flex-1 min-h-[44px] py-3 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !amount || Number(amount) <= 0 || hasInsufficientFunds}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
+              className="flex-1 min-h-[44px] py-3 rounded-xl text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none shadow-md"
             >
               <ArrowUpCircle size={18} />
-              {isSubmitting ? "Abonando..." : "Confirmar Abono"}
+              {isSubmitting ? "Abonando…" : "Confirmar Abono"}
             </button>
           </div>
         </form>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Search, PlusCircle, CheckCircle2, Info } from "lucide-react";
 import { ACCOUNT_TYPES } from "../utils/accountTypes";
 
@@ -36,6 +36,15 @@ export default function AddAccountModal({ isOpen, onClose, onAddAccount, existin
   const [initialBalance, setInitialBalance] = useState("");
   const [creditLimit, setCreditLimit] = useState("");
   const [step, setStep] = useState("select"); // "select" | "configure"
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -91,6 +100,9 @@ export default function AddAccountModal({ isOpen, onClose, onAddAccount, existin
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
       onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-account-modal-title"
     >
       <div
         className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-5 sm:p-6 rounded-3xl w-full max-w-md flex flex-col gap-4 shadow-2xl transition-all"
@@ -99,7 +111,7 @@ export default function AddAccountModal({ isOpen, onClose, onAddAccount, existin
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">
+            <h2 id="add-account-modal-title" className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-50">
               {step === "select" ? "Añadir Cuenta" : "Configurar Cuenta"}
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -111,7 +123,8 @@ export default function AddAccountModal({ isOpen, onClose, onAddAccount, existin
           <button
             type="button"
             onClick={handleClose}
-            className="p-1.5 rounded-xl text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            aria-label="Cerrar modal"
+            className="w-10 h-10 flex items-center justify-center rounded-xl text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-theme-primary outline-none"
           >
             <X size={18} />
           </button>
@@ -291,13 +304,14 @@ export default function AddAccountModal({ isOpen, onClose, onAddAccount, existin
               <button
                 type="button"
                 onClick={() => setStep("select")}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="flex-1 min-h-[44px] py-2.5 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 Volver
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors"
+                disabled={!selectedName.trim() || (selectedType === "credito" && (creditLimit === "" || Number(creditLimit) < 0))}
+                className="flex-1 min-h-[44px] py-2.5 rounded-xl text-sm font-semibold text-white bg-theme-primary hover:bg-theme-primary-hover shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
               >
                 Guardar Cuenta
               </button>
