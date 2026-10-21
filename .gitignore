@@ -33,6 +33,9 @@ dist-ssr
 # Repomix & dumps
 repomix-output.md
 
+# Firebase
+.firebase/
+
 # Playwright
 test-results/
 playwright-report/
