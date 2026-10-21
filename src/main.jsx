@@ -6,14 +6,25 @@ import './i18n/config'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 
-const savedTheme = localStorage.getItem('theme');
+import i18n from 'i18next'
+
+const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+const queryTheme = searchParams?.get('theme');
+const queryColorTheme = searchParams?.get('color');
+const queryLang = searchParams?.get('lang');
+
+if (queryLang) {
+  i18n.changeLanguage(queryLang);
+}
+
+const savedTheme = queryTheme || localStorage.getItem('theme');
 if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
   document.documentElement.classList.add('dark');
 } else {
   document.documentElement.classList.remove('dark');
 }
 
-const savedColorTheme = localStorage.getItem('app-theme') || 'default';
+const savedColorTheme = queryColorTheme || localStorage.getItem('app-theme') || 'default';
 document.documentElement.setAttribute('data-theme', savedColorTheme);
 
 createRoot(document.getElementById('root')).render(

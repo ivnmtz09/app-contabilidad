@@ -10,17 +10,69 @@ Desarrollada con arquitectura reactiva, componentes vectoriales con física háp
 
 ## Interfaz de Usuario
 
-### Modo Escritorio
+### Tablero Principal (Modo Claro & Modo Oscuro)
 
 <p align="center">
-  <img src="screenshots/desktop.png" alt="MisCuentaZ - Vista de Escritorio" width="100%">
+  <img src="screenshots/desktop.png" alt="MisCuentaZ - Vista de Escritorio (Modo Claro)" width="100%">
 </p>
-
-### Modo Móvil
 
 <p align="center">
-  <img src="screenshots/mobile.png" alt="MisCuentaZ - Vista Móvil" width="360">
+  <img src="screenshots/desktop-dark.png" alt="MisCuentaZ - Vista de Escritorio (Modo Oscuro)" width="100%">
 </p>
+
+### Experiencia Móvil
+
+<p align="center">
+  <img src="screenshots/mobile.png" alt="MisCuentaZ - Vista Móvil (Modo Claro)" width="48%">
+  &nbsp;
+  <img src="screenshots/mobile-dark.png" alt="MisCuentaZ - Vista Móvil (Modo Oscuro)" width="48%">
+</p>
+
+---
+
+## Personalización, Temas e Idiomas
+
+MisCuentaZ integra un motor de personalización visual con 10 paletas temáticas calibradas, selector de modo claro/oscuro y soporte bilingüe con persistencia local.
+
+### Catálogo de 10 Paletas del Sistema y Previsualización
+
+<p align="center">
+  <img src="screenshots/customization.png" alt="Personalización - Paletas de color del sistema y vista previa" width="100%">
+</p>
+
+- **Previsualización en tiempo real**: Permite evaluar el balance cromático, botones y acentos antes de persistir los cambios.
+- **Armonía cromática**: 10 temas ajustados para máxima legibilidad tanto en fondos claros como oscuros.
+
+### Ejemplo de Tema Aplicado (Océano & Lima)
+
+<p align="center">
+  <img src="screenshots/theme-ocean.png" alt="Tema Océano y Lima aplicado en el Tablero" width="100%">
+</p>
+
+### Preferencias de Interfaz (Modo Oscuro e Idiomas)
+
+<p align="center">
+  <img src="screenshots/profile-dark.png" alt="Preferencias de Interfaz - Idiomas y Modo Visual en Modo Oscuro" width="100%">
+</p>
+
+- **Modo visual**: Alternancia entre Modo Claro y Modo Oscuro con orbes lumínicos ambientales adaptativos.
+- **Internacionalización**: Localización completa en Español e Inglés con conmutación dinámica sin recarga de página.
+- **Exportación segura**: Descarga de movimientos en formatos estructurados (Excel / JSON).
+
+### Interfaz en Idioma Inglés
+
+<p align="center">
+  <img src="screenshots/desktop-english.png" alt="Tablero Principal en Idioma Inglés" width="100%">
+</p>
+
+### Historial de Movimientos y Categorías Prioritarias
+
+<p align="center">
+  <img src="screenshots/movements.png" alt="Historial de Movimientos - Categorías y filtros" width="100%">
+</p>
+
+- **Auto-detección semántica**: Inferencia inteligente de conceptos cotidianos (comida, combustible, compras, farmacia, ropa).
+- **Filtros avanzados**: Búsqueda por rango de fechas, tipo de operación y cuenta bancaria.
 
 ---
 
@@ -43,10 +95,6 @@ Desarrollada con arquitectura reactiva, componentes vectoriales con física háp
 - Cumplimiento de estándares de accesibilidad WCAG 2.2 AA con áreas táctiles mínimas de 44x44px.
 - Navegación completa por teclado con soporte para tecla Escape en modales y retroalimentación de foco visible.
 - Bloqueo preventivo de envíos dobles y deshabilitación contextual en formularios incompletos.
-
-### Personalización y Motor de Temas
-- Paletas de color adaptativas con persistencia local.
-- Soporte nativo para modo claro y modo oscuro de alto contraste.
 
 ---
 
